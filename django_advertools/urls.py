@@ -23,10 +23,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 
 def index(request):
-    return render(request,"landing.html")
-
+    return render(request,"base.html")
 
 urlpatterns = [
-    path('generate/', include('genra')),
+    path('',index),
+    # path('generate/',include('generateAds.urls')),
     path('admin/', admin.site.urls),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL,
+                            document_root = settings.MEDIA_ROOT)
