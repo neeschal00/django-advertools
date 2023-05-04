@@ -33,8 +33,11 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'corsheaders',
     'crispy_forms',
-    'django_filters',
     'crispy_bootstrap5',
+    'django_filters',
+    'generateAds.apps.GenerateadsConfig',
+    'analyse.apps.AnalyseConfig',
+    'seo.apps.SeoConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
