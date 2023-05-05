@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'generateAds.apps.GenerateadsConfig',
     'analyse.apps.AnalyseConfig',
     'seo.apps.SeoConfig',
+    'django_plotly_dash.apps.DjangoPlotlyDashConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -146,3 +147,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'media/')
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'

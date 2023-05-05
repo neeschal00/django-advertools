@@ -31,6 +31,7 @@ urlpatterns = [
     path('analyse/',include('analyse.urls')),
     path('seo/',include('seo.urls')),
     path('admin/', admin.site.urls),
+    path('django_plotly_dash/', include('django_plotly_dash.urls')),
 ]
 
 if settings.DEBUG:
