@@ -4,8 +4,10 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
-from advertools import robotstxt_to_df, sitemap_to_df
-from .forms import RobotsTxt,Sitemap
+from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_graph, crawl
+from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
+from decouple import config
+
 
 import pandas as pd
 pd.set_option('display.max_colwidth', 30)
@@ -43,4 +45,57 @@ def sitemapToDf(request):
         return render(request,'seo/sitemap.html',{'form': form})
 
 
+
+def searchEngineResults(request):
+    if request.method == 'POST':
+        form = SerpGoogle(request.POST)
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            query = list(map(str.strip,query.split(",")))
+            gl = form.cleaned_data['geolocation']
+            print(gl)
+            # gl = list(map(str.strip,gl.split(",")))
+            country = form.cleaned_data['country']
+            country = list(map(str.strip,country.split(","))) if country else None
+            serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'),gl=gl,cr=country)
+            return render(request,'seo/serpGoog.html',{'form': form,'serpDf':serpDf.to_html(classes='table table-striped text-center', justify='center')})
+
+    else:
+        form = SerpGoogle()
+        return render(request, 'seo/serpGoog.html',{'form': form})
+    
+
+
+def knowledgeGraph(request):
+    if request.method == 'POST':
+        form = KnowledgeG(request.POST)
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            query = list(map(str.strip,query.split(",")))
+            languages = form.cleaned_data['languages']
+            
+            languages = list(map(str.strip,languages.split(",")))if languages else None
+            
+            knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
+            return render(request,'seo/knowledgeG.html',{'form': form,'knowDf':knowDf.to_html(classes='table table-striped text-center', justify='center')})
+
+    else:
+        form = KnowledgeG()
+        return render(request, 'seo/knowledgeG.html',{'form': form})
+
+
+def carwlLinks(request):
+    if request.method == 'POST':
+        form = Crawl(request.POST)
+        if form.is_valid():
+            links = form.cleaned_data['links']
+            links = list(map(str.strip,links.split("\n")))
+            follow_links = form.cleaned_data['follow_links']
+            
+            crawlDf = crawl(url_list=links,follow_links=follow_links)
+            return render(request,'seo/crawl.html',{'form': form,'crawlDf':crawlDf.to_html(classes='table table-striped text-center', justify='center')})
+
+    else:
+        form = Crawl()
+        return render(request, 'seo/crawl.html',{'form': form})
 

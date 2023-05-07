@@ -83,9 +83,9 @@ def analyzeText(request):
             valid_text = list(map(str.strip,valid_text.split("\n")))
             phrase_len = form.cleaned_data['phrase_len']
             if phrase_len:
-                df = word_frequency(valid_text,phrase_len=phrase_len)
+                df = word_frequency(valid_text,phrase_len=phrase_len,extra_info=True)
             else:
-                df = word_frequency(valid_text)
+                df = word_frequency(valid_text,extra_info=True)
             # print(df)
             # df = pd.DataFrame.from_dict(df,orient='index')
             # df = df.transpose()

@@ -108,7 +108,7 @@ def generateKeywords(request):
             word = form.cleaned_data['word']
             products = list(map(str.strip,product.split(",")))
             words = list(map(str.strip,word.split(",")))
-
+            
             keywordDf = kw_generate(products,words)
 
             return render(request,'generateAds/keywords.html',{'form': form,'keywordDf': keywordDf.to_html(classes='table table-striped text-center', justify='center')})

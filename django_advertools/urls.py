@@ -27,11 +27,11 @@ def index(request):
 
 urlpatterns = [
     path('',index),
+    path("select2/", include("django_select2.urls")),
     path('generate/',include('generateAds.urls')),
     path('analyse/',include('analyse.urls')),
     path('seo/',include('seo.urls')),
     path('admin/', admin.site.urls),
-    path('django_plotly_dash/', include('django_plotly_dash.urls')),
 ]
 
 if settings.DEBUG:
