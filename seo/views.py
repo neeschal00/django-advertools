@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
-from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_graph, crawl
+from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_graph, crawl, crawl_headers
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 from decouple import config
 
@@ -91,8 +91,16 @@ def carwlLinks(request):
             links = form.cleaned_data['links']
             links = list(map(str.strip,links.split("\n")))
             follow_links = form.cleaned_data['follow_links']
-            
-            crawlDf = crawl(url_list=links,follow_links=follow_links)
+            headers_only = form.cleaned_data['headers_only']
+
+            if headers_only:
+                crawlDf = crawl_headers(url_list=links,output_file="crawl_output.jl")
+                crawlDf = pd.read_json('crawl_output.jl', lines=True)
+
+            else:
+                crawlDf = crawl(url_list=links,output_file="crawl_output.jl",follow_links=follow_links)
+                crawlDf = pd.read_json('crawl_output.jl', lines=True)
+
             return render(request,'seo/crawl.html',{'form': form,'crawlDf':crawlDf.to_html(classes='table table-striped text-center', justify='center')})
 
     else:

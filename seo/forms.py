@@ -76,4 +76,6 @@ class Crawl(forms.Form):
 
     follow_links = forms.BooleanField(required=False)
 
+    headers_only = forms.BooleanField(required=False)
+
 
