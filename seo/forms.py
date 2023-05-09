@@ -1,4 +1,7 @@
 from django import forms
+from advertools import SERP_GOOG_VALID_VALS
+
+
 
 class RobotsTxt(forms.Form):
     urls = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, 
@@ -31,11 +34,8 @@ class MultiSelectFormField(forms.MultipleChoiceField):
 
 class SerpGoogle(forms.Form):
 
-    GL_Choices = (
-        ('np', "NP"),
-        ("us", "US"),
-        ("in", "IN"),
-    )
+    GL_Choices = ((gl,gl) for gl in SERP_GOOG_VALID_VALS['gl'])
+    CR_Choices = ((cr,cr) for cr in SERP_GOOG_VALID_VALS['cr'])
 
     query = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, 
     "cols": 40,
@@ -43,14 +43,12 @@ class SerpGoogle(forms.Form):
     }
     ))
 
-    geolocation = forms.MultipleChoiceField(choices=GL_Choices, widget=forms.CheckboxSelectMultiple())
+    geolocation = forms.MultipleChoiceField(required=False,choices=GL_Choices, widget=forms.CheckboxSelectMultiple(attrs={'class':'gl-checkbox'}))
 
-    country = forms.CharField(widget=forms.Textarea(attrs={"rows": 2, 
-    "cols": 40,
-    "placeholder": "Enter the geolocation for end user like\nnp,in,us"
-    }
-    ),required=False)
+    country = forms.MultipleChoiceField(required=False,choices=GL_Choices, widget=forms.CheckboxSelectMultiple(attrs={'class':'cr-checkbox'}))
 
+    
+    
 
 class KnowledgeG(forms.Form):
 

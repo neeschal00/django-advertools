@@ -6,7 +6,9 @@ from django.shortcuts import render,redirect, get_object_or_404, HttpResponse
 from django.http import HttpResponseRedirect, JsonResponse
 from advertools import url_to_df, emoji_search, extract_emoji, stopwords,word_frequency
 from .forms import AnalyseUrls, EmojiSearch, EmojiExtract, TextAnalysis
+from .utils import url_structure
 import pandas as pd
+
 
 
 
@@ -22,7 +24,9 @@ def analyseUrl(request):
             
             df = url_to_df(urls=urls,decode=decode)
 
-            return render(request,'analyse/anUrl.html',{'form': form,'urlsDf': df.to_html(classes='table table-striped text-center', justify='center')})
+            figure = url_structure(df).to_html()
+
+            return render(request,'analyse/anUrl.html',{'form': form,'figure': figure,'urlsDf': df.to_html(classes='table table-striped text-center', justify='center')})
 
     else:
         form = AnalyseUrls()

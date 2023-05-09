@@ -72,7 +72,7 @@ def generateAds(request):
                 replacements = form.cleaned_data['replacements']
                 replacements = list(map(str.strip,replacements.split(",")))
                 max_len = form.cleaned_data['max_len']
-                print(max_len)
+                # print(max_len)
                 # print(type(max_len))
                 fallback = form.cleaned_data['fallback']
 

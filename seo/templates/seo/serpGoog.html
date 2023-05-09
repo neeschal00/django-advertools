@@ -3,7 +3,10 @@
 
 
 {% block css %}
+<style>
+    
 
+</style>
 {% endblock css %}
 
 {% load crispy_forms_tags %}
@@ -40,7 +43,9 @@
 {% block javascript %}
 <script>
     $(document).ready(function () {
-        $('select').select2();
+        $('#div_id_geolocation div').addClass('d-flex justify-content-between flex-wrap')
+
+        $('.checkbox').select2();
      });
    
 </script>

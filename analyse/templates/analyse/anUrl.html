@@ -26,6 +26,11 @@
                 </form>
             </div>
             <div class="col-md-12 mt-4" style="width:100%;overflow-x: scroll;">
+                {% if figure %}
+                    {{ figure | safe }}
+                {% endif %}
+            </div>
+            <div class="col-md-12 mt-4" style="width:100%;overflow-x: scroll;">
                 {% if urlsDf %}
                     {{ urlsDf | safe }}
                 {% endif %}
