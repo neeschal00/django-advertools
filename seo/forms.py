@@ -1,7 +1,10 @@
 from django import forms
 from advertools import SERP_GOOG_VALID_VALS
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Div
+from crispy_forms.layout import Layout, Submit
+from django_select2.forms import Select2MultipleWidget
+
+
 
 
 
@@ -20,14 +23,6 @@ class Sitemap(forms.Form):
     ))
 
 
-class MultiSelectFormField(forms.MultipleChoiceField):
-    widget = forms.SelectMultiple
-
-    def clean(self, value):
-        if not value and self.required:
-            raise forms.ValidationError("This field is required.")
-        return value
-
 
 
 
@@ -45,19 +40,26 @@ class SerpGoogle(forms.Form):
     }
     ))
 
-    geolocation = forms.MultipleChoiceField(required=False,choices=GL_Choices, widget=forms.CheckboxSelectMultiple(attrs={'class':'gl-checkbox'}))
+    geolocation = forms.MultipleChoiceField(required=False,choices=GL_Choices, widget=Select2MultipleWidget(attrs={'class': 'select2'}),)
 
-    country = forms.MultipleChoiceField(required=False,choices=GL_Choices, widget=forms.CheckboxSelectMultiple(attrs={'class':'cr-checkbox'}))
+    country = forms.MultipleChoiceField(required=False,choices=CR_Choices, widget=Select2MultipleWidget(attrs={'class': 'select2'}))
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_method = 'POST'
-        self.helper.layout = Layout(
-            Div('geolocation', css_class='form-group'),
-            Div('country', css_class='form-group'),
-            Submit('submit', 'Submit', css_class='btn btn-primary')
-        )
+    # def __init__(self, *args, **kwargs):
+    #     super(SerpGoogle, self).__init__(*args, **kwargs)
+    #     self.helper = FormHelper()
+    #     self.helper.form_id = 'serp-google'
+    #     self.helper.form_method = 'post'
+    #     self.helper.form_class = 'form-horizontal'
+    #     self.helper.label_class = 'col-sm-3'
+    #     self.helper.field_class = 'col-sm-9'
+    #     self.helper.layout = Layout(
+    #         Fieldset(
+    #             'query'
+    #             'Select options',
+    #             'geolocation',
+    #         ),
+    #         Submit('submit', 'Submit', css_class='btn-primary')
+        # )
     
     
 

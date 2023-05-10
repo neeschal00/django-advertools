@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_graph, crawl, crawl_headers
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 from decouple import config
-
+from advertools import SERP_GOOG_VALID_VALS
 
 import pandas as pd
 pd.set_option('display.max_colwidth', 30)
@@ -56,11 +56,12 @@ def searchEngineResults(request):
             print(gl)
             # gl = list(map(str.strip,gl.split(",")))
             country = form.cleaned_data['country']
-            country = list(map(str.strip,country.split(","))) if country else None
+            # country = list(map(str.strip,country.split(","))) if country else None
             serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'),gl=gl,cr=country)
             return render(request,'seo/serpGoog.html',{'form': form,'serpDf':serpDf.to_html(classes='table table-striped text-center', justify='center')})
 
     else:
+        print(SERP_GOOG_VALID_VALS)
         form = SerpGoogle()
         return render(request, 'seo/serpGoog.html',{'form': form})
     

@@ -90,6 +90,28 @@ DATABASES = {
 }
 
 
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#         'LOCATION': '',
+#         'TIMEOUT': 300,
+#         'OPTIONS': {
+#             'MAX_ENTRIES': 300,
+#             'CULL_FREQUENCY': 3,
+#         },
+#     },
+#     "select2": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379/2",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         }
+#     }
+# }
+
+# SELECT2_CACHE_BACKEND = "select2"
+
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
