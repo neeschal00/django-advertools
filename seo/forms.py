@@ -40,9 +40,9 @@ class SerpGoogle(forms.Form):
     }
     ))
 
-    geolocation = forms.MultipleChoiceField(required=False,choices=GL_Choices, widget=Select2MultipleWidget(attrs={'class': 'select2'}),)
+    geolocation = forms.MultipleChoiceField(required=False,choices=GL_Choices, widget=Select2MultipleWidget)
 
-    country = forms.MultipleChoiceField(required=False,choices=CR_Choices, widget=Select2MultipleWidget(attrs={'class': 'select2'}))
+    country = forms.MultipleChoiceField(required=False,choices=CR_Choices, widget=Select2MultipleWidget)
 
     # def __init__(self, *args, **kwargs):
     #     super(SerpGoogle, self).__init__(*args, **kwargs)
