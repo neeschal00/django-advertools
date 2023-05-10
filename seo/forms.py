@@ -1,5 +1,7 @@
 from django import forms
 from advertools import SERP_GOOG_VALID_VALS
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Submit, Div
 
 
 
@@ -47,6 +49,15 @@ class SerpGoogle(forms.Form):
 
     country = forms.MultipleChoiceField(required=False,choices=GL_Choices, widget=forms.CheckboxSelectMultiple(attrs={'class':'cr-checkbox'}))
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_method = 'POST'
+        self.helper.layout = Layout(
+            Div('geolocation', css_class='form-group'),
+            Div('country', css_class='form-group'),
+            Submit('submit', 'Submit', css_class='btn btn-primary')
+        )
     
     
 
