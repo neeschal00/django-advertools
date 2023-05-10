@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # 'itables',
     'corsheaders',
     'crispy_forms',
     'crispy_bootstrap5',
