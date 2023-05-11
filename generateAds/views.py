@@ -42,7 +42,7 @@ def generateAds(request):
         descriptive_form = DescriptionAds(request.POST or None)
         large_form =  LargeScaleAds(request.POST or None)
 
-        if descriptive_form:
+        if 'descriptive_form_submit' in request.POST:
             form = descriptive_form
             if form.is_valid():
             
@@ -63,7 +63,7 @@ def generateAds(request):
 
                 return render(request,'generateAds/advertisement.html',{'descriptive_form': descriptive_form,'large_form':large_form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
 
-        if large_form:
+        elif 'large_form_submit' in request.POST:
             form = large_form
             if form.is_valid():
                 

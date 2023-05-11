@@ -33,6 +33,7 @@ class SerpGoogle(forms.Form):
 
     GL_Choices = ((gl,gl) for gl in SERP_GOOG_VALID_VALS['gl'])
     CR_Choices = ((cr,cr) for cr in SERP_GOOG_VALID_VALS['cr'])
+    LR_Choices = ((lr,lr) for lr in SERP_GOOG_VALID_VALS['lr'])
 
     query = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, 
     "cols": 40,
@@ -40,9 +41,11 @@ class SerpGoogle(forms.Form):
     }
     ))
 
-    geolocation = forms.MultipleChoiceField(required=False,choices=GL_Choices, widget=Select2MultipleWidget)
+    geolocation = forms.MultipleChoiceField(required=False,choices=GL_Choices, widget=Select2MultipleWidget(attrs={'class': 'select2'}),)
 
-    country = forms.MultipleChoiceField(required=False,choices=CR_Choices, widget=Select2MultipleWidget)
+    country = forms.MultipleChoiceField(required=False,choices=CR_Choices, widget=Select2MultipleWidget(attrs={'class': 'select2'}))
+
+    # language = forms.MultipleChoiceField(required=False,choices=LR_Choices, widget=Select2MultipleWidget(attrs={'class': 'select2'}))
 
     # def __init__(self, *args, **kwargs):
     #     super(SerpGoogle, self).__init__(*args, **kwargs)
