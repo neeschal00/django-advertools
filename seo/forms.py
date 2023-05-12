@@ -1,7 +1,7 @@
 from django import forms
 from advertools import SERP_GOOG_VALID_VALS
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit
+from crispy_forms.layout import Layout, Submit,Field, Div
 from django_select2.forms import Select2MultipleWidget
 
 
@@ -34,36 +34,45 @@ class SerpGoogle(forms.Form):
     GL_Choices = ((gl,gl) for gl in SERP_GOOG_VALID_VALS['gl'])
     CR_Choices = ((cr,cr) for cr in SERP_GOOG_VALID_VALS['cr'])
     LR_Choices = ((lr,lr) for lr in SERP_GOOG_VALID_VALS['lr'])
+    Rights_Choices = ((rights,rights) for rights in SERP_GOOG_VALID_VALS['rights'])
 
     query = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, 
     "cols": 40,
-    "placeholder": "Enter the search query(seperate with ',' if multiple)"
+    "placeholder": "Enter the search query(seperate with ',' if multiple)",
+    "help_text": "Query you want to get results for"
     }
     ))
 
-    geolocation = forms.MultipleChoiceField(required=False,choices=GL_Choices, widget=Select2MultipleWidget(attrs={'class': 'select2'}),)
+    geolocation = forms.MultipleChoiceField(required=False,
+                                            choices=GL_Choices, 
+                                            widget=Select2MultipleWidget(attrs={'class': 'select2 col-md-4'
+                                                                                }),)
 
-    country = forms.MultipleChoiceField(required=False,choices=CR_Choices, widget=Select2MultipleWidget(attrs={'class': 'select2'}))
+    country = forms.MultipleChoiceField(required=False,choices=CR_Choices, widget=Select2MultipleWidget(attrs={
+        'class': 'select2 col-md-4'}))
 
-    # language = forms.MultipleChoiceField(required=False,choices=LR_Choices, widget=Select2MultipleWidget(attrs={'class': 'select2'}))
+    language = forms.MultipleChoiceField(required=False,choices=LR_Choices, widget=Select2MultipleWidget(attrs={'class': 'select2 col-md-4'}))
 
-    # def __init__(self, *args, **kwargs):
-    #     super(SerpGoogle, self).__init__(*args, **kwargs)
-    #     self.helper = FormHelper()
-    #     self.helper.form_id = 'serp-google'
-    #     self.helper.form_method = 'post'
-    #     self.helper.form_class = 'form-horizontal'
-    #     self.helper.label_class = 'col-sm-3'
-    #     self.helper.field_class = 'col-sm-9'
-    #     self.helper.layout = Layout(
-    #         Fieldset(
-    #             'query'
-    #             'Select options',
-    #             'geolocation',
-    #         ),
-    #         Submit('submit', 'Submit', css_class='btn-primary')
-        # )
-    
+    rights = forms.MultipleChoiceField(required=False,choices=Rights_Choices, widget=Select2MultipleWidget(attrs={'class': 'select2 col-md-4'}))
+
+
+    def __init__(self, *args, **kwargs):
+        super(SerpGoogle, self).__init__(*args, **kwargs)
+        self.fields["geolocation"].help_text = '<span class="text-sm">geolocation of end user</span>'
+        self.fields["country"].help_text = '<span class="text-sm">restrict result originating in a particular country</span>'
+        self.helper = FormHelper(self)
+        self.helper.layout = Layout(
+            Div('query'),
+            Div(
+                Div('geolocation', css_class='col-md-6 mr-2'),  
+                Div('country', css_class='col-md-6 mr-2'),  
+                Div('language', css_class='col-md-6 mr-2'),  
+                Div('rights', css_class='col-md-6 mr-2'),
+                css_class='row'
+            ),
+            Submit('submit', 'Submit', css_class='mt-2 btn'),
+            
+        )
     
 
 class KnowledgeG(forms.Form):
@@ -79,6 +88,8 @@ class KnowledgeG(forms.Form):
     "placeholder": "Enter the languages for end user like\nen,es,de"
     }
     ),required=False)
+
+    limit = forms.IntegerField(required=False)
 
 
 class Crawl(forms.Form):

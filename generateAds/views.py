@@ -48,6 +48,7 @@ def generateAds(request):
             
                 description_text = form.cleaned_data['description_text']
                 slots = form.cleaned_data['slots']
+                # print(slots)
                 if slots:
                     slots = list(map(str.strip,slots.split(",")))
                     slots = list(map(float,slots))

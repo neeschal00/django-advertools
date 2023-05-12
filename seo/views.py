@@ -8,6 +8,7 @@ from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_grap
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 from decouple import config
 from advertools import SERP_GOOG_VALID_VALS
+import os
 
 import pandas as pd
 pd.set_option('display.max_colwidth', 30)
@@ -56,16 +57,31 @@ def searchEngineResults(request):
             # print(gl)
             # gl = list(map(str.strip,gl.split(",")))
             country = form.cleaned_data['country']
-            # language = form.cleaned_data['language']
+            language = form.cleaned_data['language']
+            rights = form.cleaned_data['rights']
+
             # country = list(map(str.strip,country.split(","))) if country else None
-            if gl or country:
-                serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'),gl=gl,cr=country)
+            if gl or country or language or rights:
+                params = {
+                    'q': query,
+                    'cx': config('CX'),
+                    'key': config('KEY'),
+                }
+                if gl:
+                    params['gl'] = gl
+                if country:
+                    params['cr'] = country
+                if language:
+                    params['lr'] = language
+                if rights:
+                    params['rights'] = rights
+                serpDf = serp_goog(**params)
             else:
                 serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
             return render(request,'seo/serpGoog.html',{'form': form,'serpDf':serpDf.to_html(classes='table table-striped text-center', justify='center')})
 
     else:
-        print(SERP_GOOG_VALID_VALS)
+        # print(SERP_GOOG_VALID_VALS)
         form = SerpGoogle()
         return render(request, 'seo/serpGoog.html',{'form': form})
     
@@ -80,8 +96,14 @@ def knowledgeGraph(request):
             languages = form.cleaned_data['languages']
             
             languages = list(map(str.strip,languages.split(",")))if languages else None
+
+            limit = form.cleaned_data['limit']
+            if limit:
+                knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages,limit=limit)
+            else:
+                knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
+
             
-            knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
             return render(request,'seo/knowledgeG.html',{'form': form,'knowDf':knowDf.to_html(classes='table table-striped text-center', justify='center')})
 
     else:
@@ -99,16 +121,23 @@ def carwlLinks(request):
             headers_only = form.cleaned_data['headers_only']
 
             if headers_only:
+                if os.path.exists('crawl_output.jl'):
+                    os.remove('crawl_output.jl')
                 crawlDf = crawl_headers(url_list=links,output_file="crawl_output.jl")
+
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
             else:
+                if os.path.exists('crawl_output.jl'):
+                    os.remove('crawl_output.jl')
                 crawlDf = crawl(url_list=links,output_file="crawl_output.jl",follow_links=follow_links)
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
             return render(request,'seo/crawl.html',{'form': form,'crawlDf':crawlDf.to_html(classes='table table-striped text-center', justify='center')})
 
     else:
+        if os.path.exists('crawl_output.jl'):
+            os.remove('crawl_output.jl')
         form = Crawl()
         return render(request, 'seo/crawl.html',{'form': form})
 
