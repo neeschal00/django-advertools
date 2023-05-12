@@ -9,6 +9,9 @@ from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 from decouple import config
 from advertools import SERP_GOOG_VALID_VALS
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 import pandas as pd
 pd.set_option('display.max_colwidth', 30)
@@ -22,6 +25,7 @@ def robotsToDf(request):
 
             urls = list(map(str.strip,urls.split("\n")))
             df = robotstxt_to_df(urls)
+            logger.info("GEnerated Robots txt")
            
             return render(request,'seo/robots.html',{'form': form,'roboDf': df.to_html(classes='table table-striped text-center', justify='center')})
 
