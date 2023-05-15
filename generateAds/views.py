@@ -8,9 +8,6 @@ from advertools import ad_create, kw_generate, ad_from_string
 from .forms import GenerateKeywords, DescriptionAds, LargeScaleAds
 
 import pandas as pd
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 def generateDescription(request):
@@ -25,11 +22,9 @@ def generateDescription(request):
                 slots = list(map(str.strip,slots.split(",")))
                 slots = list(map(float,slots))
                 generateLargeAds = ad_from_string(description_text, slots=slots)
-                logger.info("Generated Large Ads")
             else:
                 slots = None
                 generateLargeAds = generateLargeAds = ad_from_string(description_text)
-
 
             df = pd.DataFrame({
                 'large_ads': generateLargeAds
@@ -107,6 +102,29 @@ def generateAds(request):
         descriptive_form = DescriptionAds()
         large_form =  LargeScaleAds()
         return render(request,'generateAds/advertisement.html',{'descriptive_form': descriptive_form,'large_form':large_form})
+
+
+def generate(request, products=['jack'],max_length=100,fallback='Great Cities'):
+    if request.is_ajax() and request.method == "POST":
+        template = json.loads(request.POST.get('template'))
+        products = json.loads(request.POST.get('products'))
+        ads_gen = ad_create(template=template,
+                replacements=products,
+                max_len=30,
+                fallback='Great Cities')
+        return JsonResponse(
+            {
+                "success":True,
+                "result": ads_gen 
+            }
+        )
+    else:
+        return JsonResponse(
+            {
+                "sucess":False,
+                "result": "Invalid request" 
+            }
+        )
 
 
 def generateKeywords(request):
