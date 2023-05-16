@@ -26,7 +26,12 @@
                     
                 </form>
             </div>
-            <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll;">
+
+            
+
+            
+            <div id="filterContainer" class="mt-3"></div>
+            <div id="robo" class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll;">
                 {% if roboDf %}
                     {{ roboDf | safe }}
                 {% endif %}
@@ -39,6 +44,29 @@
 
 {% block javascript %}
 
+<script>
+
+    console.log(dTable);
+    // Get unique values from a specific column
+    var uniqueValues = dTable.column(0).data().unique();
+    console.log(uniqueValues);
+    // Generate filter options
+    var filterOptions = '<option value="">All</option>';
+    uniqueValues.each(function(value) {
+    filterOptions += '<option value="' + value + '">' + value + '</option>';
+    });
+
+    // Add filter to the page
+    var filterSelect = $('<select>' + filterOptions + '</select>')
+    .on('change', function() {
+        var filterValue = $(this).val();
+        dTable.column(0).search(filterValue).draw();
+    });
+
+    // Append filter to the desired element
+    $('#filterContainer').append(filterSelect);
+    
+</script>
 
 
 

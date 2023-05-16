@@ -3,7 +3,7 @@
 
 
 {% block css %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 {% endblock css %}
 
 {% load crispy_forms_tags %}
@@ -150,7 +150,17 @@
                 ticks: {
                 beginAtZero: true
                 }
-            }]
+            }],
+            xAxes: [
+                {
+                    ticks: {
+                    autoSkip: true,
+                    maxTicksLimit: 10,
+                    fontSize: 12, // Set the font size to 12px
+                    },
+                },
+            ],
+            
             }
         }
         });

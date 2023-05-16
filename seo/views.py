@@ -13,17 +13,28 @@ import os,json
 import pandas as pd
 pd.set_option('display.max_colwidth', 30)
 
-def robotsToDf(request):
+def robotsToDf(request,filters=None):
+
     if request.method == 'POST':
         form = RobotsTxt(request.POST)
         if form.is_valid():
-            
             urls = form.cleaned_data['urls']
 
             urls = list(map(str.strip,urls.split("\n")))
             df = robotstxt_to_df(urls)
-           
-            return render(request,'seo/robots.html',{'form': form,'roboDf': df.to_html(classes='table table-striped text-center', justify='center')})
+
+            unique_counts = df["directive"].value_counts().reset_index()
+
+            # Rename the columns in the new DataFrame
+            unique_counts.columns = ["directive", 'Count of unique']
+            # print(unique_counts)
+            # unique = unique_counts.to_json(orient="records")
+
+            # jsonD = df.to_json(orient="records")
+            return render(request,'seo/robots.html',{'form': form,
+                                                    #  'json': jsonD,
+                                                     'unique': unique_counts.to_html(classes='table table-striped text-center', justify='center'),
+                                                     'roboDf': df.to_html(classes='table table-striped text-center', justify='center')})
 
     else:
         form = RobotsTxt()
@@ -38,8 +49,11 @@ def sitemapToDf(request):
 
             # urls = list(map(str.strip,urls.split("\n")))
             df = sitemap_to_df(urls)
+            jsonD = df.to_json(orient="records")
            
-            return render(request,'seo/sitemap.html',{'form': form,'siteDf': df.to_html(col_space='75px',classes='table table-striped text-center', justify='center')})
+            return render(request,'seo/sitemap.html',{'form': form,
+                                                      'json': jsonD,
+                                                      'siteDf': df.to_html(col_space='75px',classes='table table-striped text-center', justify='center')})
 
     else:
         form = Sitemap()
@@ -78,7 +92,8 @@ def searchEngineResults(request):
                 serpDf = serp_goog(**params)
             else:
                 serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
-            return render(request,'seo/serpGoog.html',{'form': form,'serpDf':serpDf.to_html(classes='table table-striped text-center', justify='center')})
+            jsonD = serpDf.to_json(orient="records")
+            return render(request,'seo/serpGoog.html',{'form': form,'serpDf':serpDf.to_html(classes='table table-striped text-center', justify='center'),'json':jsonD})
 
     else:
         # print(SERP_GOOG_VALID_VALS)
@@ -133,7 +148,10 @@ def carwlLinks(request):
                 crawlDf = crawl(url_list=links,output_file="crawl_output.jl",follow_links=follow_links)
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
-            return render(request,'seo/crawl.html',{'form': form,'crawlDf':crawlDf.to_html(classes='table table-striped text-center', justify='center')})
+            jsonD = crawlDf.to_json(orient="records")
+            return render(request,'seo/crawl.html',{'form': form,
+                                                    'crawlDf':crawlDf.to_html(classes='table table-striped text-center', justify='center'),
+                                                    'json': jsonD})
 
     else:
         if os.path.exists('crawl_output.jl'):

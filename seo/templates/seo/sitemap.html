@@ -26,6 +26,9 @@
                     
                 </form>
             </div>
+            <div class="col-md-10">
+                <canvas id="lineChart" class="mt-3"></canvas>
+            </div>
             <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll;">
                 {% if siteDf %}
                     {{ siteDf | safe }}
@@ -39,6 +42,84 @@
 
 {% block javascript %}
 
+<script>
+    const jsonData = {{ json|safe }};
+    // console.log(jsonData);
+
+
+    function createBarChart(jsonData) {
+        var ctx = document.getElementById('lineChart').getContext('2d');
+        
+
+
+        var groupedData = jsonData.map(function(acc, item) {
+            // console.log(item);
+            // console.log(acc);
+            var date = new Date(item.lastmod);
+            // console.log(date)
+            var month = date.getMonth() + 1; // January is 0, so we add 1
+            var year = date.getFullYear();
+            var key = year + '-' + month;
+
+            if (!acc[key]) {
+                acc[key] = { month: key, sum: 0 };
+            }
+
+            acc[key].sum += item["sitemap_size_mb"];
+
+            return acc;
+        }, {});
+
+        console.log(groupedData);
+
+        var labels = Object.keys(groupedData)
+        var data = Object.values(groupedData);
+        // Convert groupedData object to an array
+        // var groupedArray = Object.values(groupedData);
+
+        // Define the chart data
+        var data = {
+        labels: labels,
+        datasets: [{
+            label: 'Sitemap size with last modified',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+            data: data
+        }]
+        };
+
+        // Create the chart
+        var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: data,
+        options: {
+            scales: {
+            yAxes: [{
+                ticks: {
+                beginAtZero: true
+                }
+            }],
+            xAxes: [
+                {
+                    ticks: {
+                    autoSkip: true,
+                    maxTicksLimit: 10,
+                    fontSize: 12, // Set the font size to 12px
+                    },
+                },
+            ]
+            }
+        }
+        });
+    }
+
+    // Call the function to create the chart
+    const top5 = jsonData.slice(0,5);
+    createBarChart(top5);
+
+   
+</script>
 
 
 
