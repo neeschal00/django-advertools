@@ -23,17 +23,26 @@ def robotsToDf(request,filters=None):
             urls = list(map(str.strip,urls.split("\n")))
             df = robotstxt_to_df(urls)
 
-            unique_counts = df["directive"].value_counts().reset_index()
+            unique_counts = df["directive"].value_counts()
+            # percentage = unique_counts / len(df) * 100
+            # # print(percentage)
+            # percentage.reset_index()
+            # percentage.columns = ["directive", 'percentage']
+            
+            # unique_counts.reset_index()
+            # # # Rename the columns in the new DataFrame
+            # unique_counts.columns = ["directive", 'Count of unique']
+            new_Df = pd.DataFrame({'frequency': unique_counts,'percentage':unique_counts/len(df)*100})
+            new_Df.reset_index(inplace=True)
+            new_Df.columns = ['directive','frequency','percentage'] 
 
-            # Rename the columns in the new DataFrame
-            unique_counts.columns = ["directive", 'Count of unique']
-            # print(unique_counts)
-            # unique = unique_counts.to_json(orient="records")
+            # unique_counts['percentage'] = df["directive"].value_counts() / len(unique_counts) * 100
+            unique = new_Df.to_json()
 
             # jsonD = df.to_json(orient="records")
             return render(request,'seo/robots.html',{'form': form,
-                                                    #  'json': jsonD,
-                                                     'unique': unique_counts.to_html(classes='table table-striped text-center', justify='center'),
+                                                     'json': unique,
+                                                    #  'unique': unique_counts.to_html(classes='table table-striped text-center', justify='center'),
                                                      'roboDf': df.to_html(classes='table table-striped text-center', justify='center')})
 
     else:
@@ -119,6 +128,7 @@ def knowledgeGraph(request):
                 knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
 
             jsonD = knowDf.to_json(orient="records")
+            
             return render(request,'seo/knowledgeG.html',{'form': form,'knowDf':knowDf.to_html(classes='table table-striped text-center', justify='center'),'json':jsonD})
 
     else:
@@ -127,6 +137,7 @@ def knowledgeGraph(request):
 
 
 def carwlLinks(request):
+    overview = False
     if request.method == 'POST':
         form = Crawl(request.POST)
         if form.is_valid():
@@ -148,14 +159,26 @@ def carwlLinks(request):
                 crawlDf = crawl(url_list=links,output_file="crawl_output.jl",follow_links=follow_links)
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
+            describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
+            
+            status = crawlDf["status"].value_counts()
+            status = pd.DataFrame({'frequency': status,'percentage':status/len(crawlDf)*100})
+            status.reset_index(inplace=True)
+            status.columns = ['status','frequency','percentage']
+           
+
             jsonD = crawlDf.to_json(orient="records")
+            overview = True
             return render(request,'seo/crawl.html',{'form': form,
-                                                    'crawlDf':crawlDf.to_html(classes='table table-striped text-center', justify='center'),
-                                                    'json': jsonD})
+                                                    'describe': describe.to_dict(),
+                                                    'statusJ': status.to_json(),
+                                                    'crawlDf':crawlDf.to_html(classes='table table-striped', justify='center'),
+                                                    'json': jsonD,
+                                                    'overview':overview})
 
     else:
         if os.path.exists('crawl_output.jl'):
             os.remove('crawl_output.jl')
         form = Crawl()
-        return render(request, 'seo/crawl.html',{'form': form})
+        return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
 
