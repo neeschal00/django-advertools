@@ -3,7 +3,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
 class DescriptionAds(forms.Form):
-    description_text = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, 
+    description_text = forms.CharField(required=False,widget=forms.Textarea(attrs={"rows": 5, 
     "cols": 30,
     "placeholder": "Add the descriptive text to generate Ads from"
     }
@@ -20,14 +20,14 @@ class DescriptionAds(forms.Form):
 
 class LargeScaleAds(forms.Form):
 
-    template = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, 
+    template = forms.CharField(required=False,widget=forms.Textarea(attrs={"rows": 5, 
     "cols": 30,
     "placeholder": "Add the templates to generate adds for like \n 5-star Hotels in {}"
     }
 
     ))
 
-    replacements = forms.CharField(widget=forms.Textarea(attrs={
+    replacements = forms.CharField(required=False,widget=forms.Textarea(attrs={
         "rows": 5, 
     "cols": 30,
     "placeholder": "Add replacements values such as Kathmandu,New-York,New-Delhi"
@@ -35,7 +35,7 @@ class LargeScaleAds(forms.Form):
 
     ))
 
-    fallback = forms.CharField(widget=forms.TextInput(attrs={
+    fallback = forms.CharField(required=False,widget=forms.TextInput(attrs={
     "placeholder": "Add fallback value 'great cities'"
     }
 

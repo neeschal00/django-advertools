@@ -13,14 +13,14 @@
         <h1 class="h1 text-bolder">Generate Advertisement</h1>
         <div class="row">
             <div class="col-md-6">
-                <form method="post" name="descriptive">
+                <form method="post" name="descriptive" id="descriptiveForm">
                     {% csrf_token %}
                     <fieldset class="form-group">
                         <legend class="border-bottom mb-4 main-t">Generate Description Based</legend>
                         {{ descriptive_form|crispy }}
                     </fieldset>
                     <div class="form-group">
-                        <button class="btn btn-outline-info" name="descriptive_form_submit" type="submit">
+                        <button class="btn btn-outline-info" name="descriptive_form_submit" type="submit" on>
                             Generate Advertisement
                         </button>
                     </div>
@@ -28,7 +28,7 @@
                 </form>
             </div>
             <div class="ml-1 col-md-6">
-                <form method="post" name="large">
+                <form method="post" name="large" id="largeForm">
                     {% csrf_token %}
                     <fieldset class="form-group">
                         <legend class="border-bottom mb-4 main-t">Generate Large Advertisements</legend>
@@ -55,7 +55,62 @@
 
 {% block javascript %}
 
+<script>
 
+    document.getElementById('descriptiveForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the form from being submitted
+
+        // Perform form validation
+        if (validateForm()) {
+            this.submit(); // Submit the form if validation succeeds
+        }
+    });
+
+
+
+    function validateForm() {
+        // Perform form validation logic
+        // Return true if the form is valid, false otherwise
+        var description_text = document.getElementById('id_description_text').value;
+        
+
+        // Perform validation checks
+        if (description_text === '') {
+            alert('Description Text must be added for the field');
+            return false;
+        }
+
+
+        return true;
+    }
+
+    document.getElementById('largeForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the form from being submitted
+
+        // Perform form validation
+        if (validateLarge()) {
+            this.submit(); // Submit the form if validation succeeds
+        }
+    });
+
+    function validateLarge() {
+        // Perform form validation logic
+        // Return true if the form is valid, false otherwise
+        var template = document.getElementById('id_template').value;
+        var replacements = document.getElementById('id_replacements').value;
+        var fallback = document.getElementById('id_fallback').value;
+        
+
+        // Perform validation checks
+        if (description_text === '' || replacements === '' || fallback === '') {
+            alert('Template, replacements, fallback should not be empty for large Ads form');
+            return false;
+        }
+
+
+        return true;
+    }
+</script>
 
 
 {% endblock javascript %}

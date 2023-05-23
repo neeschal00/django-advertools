@@ -99,10 +99,31 @@ def searchEngineResults(request):
                 if rights:
                     params['rights'] = rights
                 serpDf = serp_goog(**params)
+
+                
+
             else:
                 serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
-            jsonD = serpDf.to_json(orient="records")
-            return render(request,'seo/serpGoog.html',{'form': form,'serpDf':serpDf.to_html(classes='table table-striped text-center', justify='center'),'json':jsonD})
+            
+            domains_df = serpDf['displayLink'].value_counts()
+            domains_df = pd.DataFrame({'frequency': domains_df,'percentage':domains_df/len(serpDf)*100})
+            domains_df.reset_index(inplace=True)
+            domains_df.columns = ['displayLink','frequency','percentage']
+
+            rank_df = serpDf[["searchTerms","displayLink","rank","link"]].head(10)
+            # print(rank_df)
+            ## convert to html
+            rank_df.rename(columns={"displayLink":"domain"},inplace=True)
+            rank_df = rank_df.reset_index(drop=True).to_html(classes='table', justify='center')
+        
+            rank_df = rank_df.replace('class="dataframe table"','class="table table-primary table-striped text-center"')
+            
+            return render(request,'seo/serpGoog.html',{'form': form,
+                                                       'serpDf':serpDf.to_html(
+                classes='table table-striped text-center', justify='center'),
+                'domains_df': domains_df.to_json(orient="records"),
+                'rankDf':rank_df
+            })
 
     else:
         # print(SERP_GOOG_VALID_VALS)
