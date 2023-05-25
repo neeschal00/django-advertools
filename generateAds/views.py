@@ -38,12 +38,14 @@ def generateDescription(request):
 
 
 def generateAds(request):
-    if request.method == 'POST':
-        descriptive_form = DescriptionAds(request.POST or None)
-        large_form =  LargeScaleAds(request.POST or None)
 
+    descriptive_form = DescriptionAds()
+    large_form =  LargeScaleAds()
+
+    if request.method == 'POST':
+    
         if 'descriptive_form_submit' in request.POST:
-            form = descriptive_form
+            form = DescriptionAds(request.POST)
             if form.is_valid():
             
                 description_text = form.cleaned_data['description_text']
@@ -55,16 +57,16 @@ def generateAds(request):
                     generateLargeAds = ad_from_string(description_text, slots=slots)
                 else:
                     slots = None
-                    generateLargeAds = generateLargeAds = ad_from_string(description_text)
+                    generateLargeAds = ad_from_string(description_text)
 
                 df = pd.DataFrame({
                     'large_ads': generateLargeAds
                 })
 
-                return render(request,'generateAds/advertisement.html',{'descriptive_form': descriptive_form,'large_form':large_form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
-
+                return render(request,'generateAds/advertisement.html',{'descriptive_form': form,'large_form':large_form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
+            
         elif 'large_form_submit' in request.POST:
-            form = large_form
+            form = LargeScaleAds(request.POST)
             if form.is_valid():
                 
                 template = form.cleaned_data['template']
@@ -95,7 +97,7 @@ def generateAds(request):
                     'large_ads': generateLargeAds
                 })
 
-                return render(request,'generateAds/advertisement.html',{'descriptive_form': descriptive_form,'large_form':large_form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
+                return render(request,'generateAds/advertisement.html',{'descriptive_form': descriptive_form,'large_form':form,'adsDf': df.to_html(classes='table table-striped text-center', justify='center')})
         
 
     else:
