@@ -9,6 +9,8 @@ from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 from decouple import config
 from advertools import SERP_GOOG_VALID_VALS
 import os,json
+import logging
+logger = logging.getLogger(__name__)
 
 import pandas as pd
 pd.set_option('display.max_colwidth', 30)
@@ -61,14 +63,15 @@ def sitemapToDf(request):
             jsonD = df.to_json(orient="records")
 
 
-            overview = df.loc.describe()
+            overview = df["loc"].describe()
+            # print(overview)
 
             check_http = df[["loc"]].copy()
-            print(check_http)
+            # print(check_http)
             check_http["https"] = list(
                 map(lambda x: x.startswith('https'), check_http['loc']))
             
-            print(check_http)
+            # print(check_http)
             unique_counts = check_http["https"].value_counts()
 
             new_Df = pd.DataFrame({'frequency': unique_counts,'percentage':unique_counts/len(check_http)*100})
@@ -77,6 +80,7 @@ def sitemapToDf(request):
 
             # unique_counts['percentage'] = df["directive"].value_counts() / len(unique_counts) * 100
             unique = new_Df.to_json()
+            logger.info("Successfully create neccessary dataframe visuals")
 
            
             return render(request,'seo/sitemap.html',{'form': form,
@@ -86,6 +90,7 @@ def sitemapToDf(request):
                                                       'siteDf': df.to_html(col_space='75px',classes='table table-striped text-center', justify='center')})
 
     else:
+        logger.info("data helled")
         form = Sitemap()
         return render(request,'seo/sitemap.html',{'form': form})
 
@@ -120,9 +125,6 @@ def searchEngineResults(request):
                 if rights:
                     params['rights'] = rights
                 serpDf = serp_goog(**params)
-
-                
-
             else:
                 serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
             
@@ -184,9 +186,13 @@ def carwlLinks(request):
         form = Crawl(request.POST)
         if form.is_valid():
             links = form.cleaned_data['links']
-            links = list(map(str.strip,links.split("\n")))
-            follow_links = form.cleaned_data['follow_links']
-            headers_only = form.cleaned_data['headers_only']
+            if not links.startswith("http"):
+                logger.warning("Improper links")
+                return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
+            else:
+                links = list(map(str.strip,links.split("\n")))
+                follow_links = form.cleaned_data['follow_links']
+                headers_only = form.cleaned_data['headers_only']
 
             if headers_only:
                 if os.path.exists('crawl_output.jl'):

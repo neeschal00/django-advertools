@@ -11,7 +11,7 @@
 <div class="container">
     <div class="container">
         <div class="row d-flex justify-content-center">
-            <div class="col-md-6">
+            <div class="col-md-8 col-sm-12">
                 <form method="post">
                     {% csrf_token %}
                     <fieldset class="form-group">
@@ -27,28 +27,31 @@
                 </form>
             </div>
             {% if overview %}
-            <div class="col-md-6">
-                <div class="card bg-primary text-white">
+            <div class="col-md-6 col-sm-12 mt-3">
+                <div class="card text-white mt-2" style="background-color: rgb(126, 186, 235);">
                     <div class="container m-2">
-                        <h5 class="h5 card-title fw-bold">Latency Overview</h5>
+                        <h5 class="h5 card-title fw-bold">Overview of Sitemap</h5>
 
                         <div class="card-body">
-                            <b>Average Download Latency:</b> {{ describe.download_latency.mean|floatformat:4 }} sec.
+                            <b>Sitemap Links Counts:</b> {{ overview.count }}
                         </div>
                         <div class="card-body">
-                            <b>Max Download Latency:</b> {{ describe.download_latency.max|floatformat:4 }} sec.
+                            <b>Unique Links Counts:</b> {{ overview.unique }}
                         </div>
                         <div class="card-body">
-                            <b>Minimum Download Latency:</b> {{ describe.download_latency.min|floatformat:4 }} sec.
+                            <b>Top Link:</b> <a href="{{ overview.top }}" class="text-white">{{ overview.top }}</a> 
+                        </div>
+                        <div class="card-body">
+                            <b>Frequency of links:</b> {{ overview.freq }}
                         </div>
                     </div>
                 </div>
             </div>
             {% endif %}
-            <div class="col-md-6">
+            <div class="col-md-6 col-sm-12" style="max-height: 320px;">
                 <canvas id="donutChart" class="mt-3"></canvas>
             </div>
-            <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll;">
+            <div class="col-md-12 mt-4" style="height: 600px; overflow-y: scroll;">
                 {% if siteDf %}
                     {{ siteDf | safe }}
                 {% endif %}
@@ -85,17 +88,19 @@
         var data2 = jsonData.frequency;
 
         var colors = generateRandomColors(4);
+        console.log("colores");
+        console.log(colors);
         // Define the chart data
         var data = {
         labels: labels,
         datasets: [{
-            label: 'percentage https',
-            backgroundColor: colors,
+            label: 'percentage of https enabled',
+            backgroundColor: colors[0],
             data: data
         },
         {
-            label: 'frequency https',
-            backgroundColor: colors,
+            label: 'frequency of https enabled',
+            backgroundColor: colors[1],
             data: data2
         }
     ]
