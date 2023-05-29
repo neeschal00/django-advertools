@@ -8,6 +8,7 @@ from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_grap
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 from decouple import config
 from advertools import SERP_GOOG_VALID_VALS
+from ydata_profiling import ProfileReport
 import os,json
 import logging
 logger = logging.getLogger(__name__)
@@ -24,6 +25,8 @@ def robotsToDf(request,filters=None):
 
             urls = list(map(str.strip,urls.split("\n")))
             df = robotstxt_to_df(urls)
+            report = ProfileReport(df)
+            report.to_file(os.path.join('templates',"report.html"))
 
             unique_counts = df["directive"].value_counts()
             # percentage = unique_counts / len(df) * 100
