@@ -2,6 +2,9 @@ from celery import shared_task
 import os
 from ydata_profiling import ProfileReport
 import pandas as pd
+from django_advertools.celery import app
+import time
+
 
 @shared_task
 def generateReport(df,minimal=False,title="Profile Report"):
@@ -11,8 +14,12 @@ def generateReport(df,minimal=False,title="Profile Report"):
     # # try:
     # profile = ProfileReport(load_df,minimal=minimal,title=title)
     # profile.to_file(os.path.join('templates',"report.html"))
-    return True
+    time.sleep(8)
+    return df
     # except Exception as e:
     #     print(e)
     #     return False
 
+@shared_task
+def add(a,d):
+    return int(a)+ int(d)

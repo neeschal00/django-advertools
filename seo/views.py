@@ -11,7 +11,7 @@ from decouple import config
 from advertools import SERP_GOOG_VALID_VALS
 # from ydata_profiling import ProfileReport
 from celery.result import AsyncResult
-from seo.tasks import generateReport
+from seo.tasks import generateReport, add
 import os,json
 import logging
 logger = logging.getLogger(__name__)
@@ -44,10 +44,12 @@ def robotsToDf(request,filters=None):
 
             urls = list(map(str.strip,urls.split("\n")))
             df = robotstxt_to_df(urls)
-            generateReport.delay(df.to_json(),title="Robots.txt Data profile")
+            task = add.delay(1,2)
+            
             # task.ready()
-            # report_gen = AsyncResult(task.id)
-            # print(report_gen.result)
+            report_gen = AsyncResult(task.id)
+            print(report_gen.status)
+            print(report_gen.result)
             
 
             unique_counts = df["directive"].value_counts()
