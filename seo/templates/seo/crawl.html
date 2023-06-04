@@ -11,8 +11,8 @@
 <div class="container">
     <div class="container">
         <div class="row d-flex justify-content-center">
-            <div class="col-md-6">
-                <form method="post" id="crawlf">
+            <div class="col-md-7">
+                <form method="post" id="crawlf" onsubmit="openLoader()">
                     {% csrf_token %}
                     <fieldset class="form-group">
                         <legend class="border-bottom mb-4 main-t">Crawl Urls</legend>
@@ -23,8 +23,13 @@
                             Crawl links
                         </button>
                     </div>
-                    
                 </form>
+            </div>
+            <div id="loadingModal" class="col-md-7 mt-2" style="display: none;">
+                <div class="mt-2">
+                  <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                  Loading...
+                </div>
             </div>
 
             {% if overview %}
@@ -76,6 +81,9 @@
             </div>
             <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
                 {% if crawlDf %}
+                    <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
+                        View Data Profiling Report
+                    </a>
                     {{ crawlDf | safe }}
                 {% endif %}
             </div>
@@ -86,6 +94,14 @@
 {% endblock pageContent %}
 
 {% block javascript %}
+<script>
+
+    function openLoader() {
+        document.getElementById("loadingModal").style.display = "block";
+      }
+    
+</script>
+
 <script>
     function disableButton() {
         var button = document.getElementById('submitb');
@@ -233,7 +249,7 @@
                 position: 'left',
                 ticks: {
                 beginAtZero: true,
-                
+
                 },
             },
             'line-y-axis': {

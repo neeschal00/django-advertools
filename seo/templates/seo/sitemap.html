@@ -12,7 +12,7 @@
     <div class="container">
         <div class="row d-flex justify-content-center">
             <div class="col-md-8 col-sm-12">
-                <form method="post">
+                <form method="post" onsubmit="openLoader()">
                     {% csrf_token %}
                     <fieldset class="form-group">
                         <legend class="border-bottom mb-4 main-t">Convert Sitemap to dataframe</legend>
@@ -23,26 +23,32 @@
                             Get Sitemap
                         </button>
                     </div>
-                    
                 </form>
+            </div>
+            <div id="loadingModal" class="col-md-7 mt-2" style="display: none;">
+                <div class="mt-2">
+                  <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                  Loading...
+                </div>
             </div>
             {% if overview %}
             <div class="col-md-6 col-sm-12 mt-3">
                 <div class="card text-white mt-2" style="background-color: rgb(126, 186, 235);">
-                    <div class="container m-2">
-                        <h5 class="h5 card-title fw-bold">Overview of Sitemap</h5>
-
-                        <div class="card-body">
-                            <b>Sitemap Links Counts:</b> {{ overview.count }}
-                        </div>
-                        <div class="card-body">
-                            <b>Unique Links Counts:</b> {{ overview.unique }}
-                        </div>
-                        <div class="card-body">
-                            <b>Top Link:</b> <a href="{{ overview.top }}" class="text-white">{{ overview.top }}</a> 
-                        </div>
-                        <div class="card-body">
-                            <b>Frequency of links:</b> {{ overview.freq }}
+                    <div class="container m-1">
+                        <div class="card-body mb-3">
+                            <h5 class="h5 fw-bold">Overview of Sitemap</h5>
+                            <div class="mb-1">
+                                <b>Sitemap Links Counts:</b> {{ overview.count }}
+                            </div>
+                            <div class="mb-1">
+                                <b>Unique Links Counts:</b> {{ overview.unique }}
+                            </div>
+                            <div class="mb-1">
+                                <b>Top Link:</b> <a href="{{ overview.top }}" class="text-white">{{ overview.top }}</a> 
+                            </div>
+                            <div class="mb-1">
+                                <b>Frequency of links:</b> {{ overview.freq }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -53,6 +59,9 @@
             </div>
             <div class="col-md-12 mt-4" style="height: 600px; overflow-y: scroll;">
                 {% if siteDf %}
+                    <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
+                        View Data Profiling Report
+                    </a>
                     {{ siteDf | safe }}
                 {% endif %}
             </div>
@@ -63,6 +72,11 @@
 {% endblock pageContent %}
 
 {% block javascript %}
+<script>
+    function openLoader() {
+        document.getElementById("loadingModal").style.display = "block";
+      }
+</script>
 
 <script>
 

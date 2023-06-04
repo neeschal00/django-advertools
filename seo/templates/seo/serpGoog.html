@@ -15,15 +15,20 @@
     <div class="container">
         <div class="row d-flex justify-content-center">
             <div class="col-md-10">
-                <form method="post">
+                <form method="post" onsubmit="openLoader()">
                     {% csrf_token %}
                     <fieldset class="form-group">
                         <legend class="border-bottom mb-4 main-t">Get Search Engine Results</legend>
                         {% crispy form %}
                     </fieldset>
                     
-                    
                 </form>
+            </div>
+            <div id="loadingModal" class="col-md-7 mt-2" style="display: none;">
+                <div class="mt-2">
+                  <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                  Loading...
+                </div>
             </div>
             <div class="col-md-10 mt-3">
                 <canvas id="domainChart" class="mt-3"></canvas>
@@ -31,11 +36,15 @@
             </div>
             <div class="col-md-11 mt-2">
                 {% if rankDf %}
+                    <h3 class="h3 text-secondary">Top 10 Data Found</h3>
                     {{ rankDf | safe }}
                 {% endif %}
             </div>
             <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
                 {% if serpDf %}
+                    <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
+                        View Data Profiling Report
+                    </a>
                     {{ serpDf | safe }}
                 {% endif %}
             </div>
@@ -46,6 +55,14 @@
 {% endblock pageContent %}
 
 {% block javascript %}
+<script>
+
+    function openLoader() {
+        document.getElementById("loadingModal").style.display = "block";
+      }
+    
+</script>
+
 <script>
 
 

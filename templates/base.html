@@ -15,7 +15,6 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-    <script type="module" src="node_modules/spin.js/spin.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     {% if page_title %}
     <title>{{ page_title }} | Django Advertools Wrapper</title>
@@ -92,6 +91,7 @@
                 {% include 'sidebar.html' %}
                 
                 <div class="col-md-9 col-xl-10 py-3 ml-md-auto offset-md-3 offset-xl-2">
+                    {% block iframeCont %} {% endblock iframeCont %}
                     
                     <div class="container mb-5 ">
                         {% if messages %}

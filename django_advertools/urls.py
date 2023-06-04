@@ -25,8 +25,16 @@ from django.views import View
 def index(request):
     return render(request,"base.html")
 
+def serveReport(request):
+    return render(request,"reportMain.html")
+
+def getReport(request):
+    return render(request,"report.html")
+
 urlpatterns = [
     path('',index),
+    path('report/get/',getReport,name="getReport"),
+    path('report/',serveReport,name="report"),
     path("select2/", include("django_select2.urls")),
     path('generate/',include('generateAds.urls')),
     path('analyse/',include('analyse.urls')),

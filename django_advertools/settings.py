@@ -26,7 +26,10 @@ SECRET_KEY = 'django-insecure--q3ja9e($2v$6e--yq3sjmkzsup24hzj9l5a7&$9w0r#62u3p%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1"
+    ]
 
 
 # Application definition
@@ -35,6 +38,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'crispy_forms',
     'crispy_bootstrap5',
+    'celery',
     'django_filters',
     'django_select2',
     'generateAds.apps.GenerateadsConfig',
@@ -57,8 +61,11 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
 ]
+
+SECURE_FRAME_DENY = False
 
 ROOT_URLCONF = 'django_advertools.urls'
 
@@ -208,3 +215,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'media/')
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+  
+# set the celery timezone
+CELERY_TIMEZONE = 'UTC'

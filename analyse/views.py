@@ -5,7 +5,6 @@ from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404, HttpResponse
 from django.http import HttpResponseRedirect, JsonResponse
 from advertools import url_to_df, emoji_search, extract_emoji, stopwords,word_frequency
-from ydata_profiling import ProfileReport
 from .forms import AnalyseUrls, EmojiSearch, EmojiExtract, TextAnalysis
 from .utils import url_structure
 import pandas as pd

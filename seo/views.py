@@ -6,37 +6,52 @@ from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
 from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_graph, crawl, crawl_headers
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
+
 from decouple import config
 from advertools import SERP_GOOG_VALID_VALS
-from ydata_profiling import ProfileReport
+# from ydata_profiling import ProfileReport
+from celery.result import AsyncResult
+from seo.tasks import generateReport
 import os,json
 import logging
 logger = logging.getLogger(__name__)
 
+
 import pandas as pd
 pd.set_option('display.max_colwidth', 30)
+
+
+# def generateReport(df,minimal=False,title="Profile Report"):
+
+#     # try:
+#     profile = ProfileReport(df,minimal=minimal,title=title)
+#     profile.to_file(os.path.join('templates',"report.html"))
+#     return True
+#     #     return True
+#     # except Exception as e:
+#     #     print(e)
+        # return False
+
+
 
 def robotsToDf(request,filters=None):
 
     if request.method == 'POST':
         form = RobotsTxt(request.POST)
         if form.is_valid():
+            
             urls = form.cleaned_data['urls']
 
             urls = list(map(str.strip,urls.split("\n")))
             df = robotstxt_to_df(urls)
-            report = ProfileReport(df)
-            report.to_file(os.path.join('templates',"report.html"))
+            generateReport.delay(df.to_json(),title="Robots.txt Data profile")
+            # task.ready()
+            # report_gen = AsyncResult(task.id)
+            # print(report_gen.result)
+            
 
             unique_counts = df["directive"].value_counts()
-            # percentage = unique_counts / len(df) * 100
-            # # print(percentage)
-            # percentage.reset_index()
-            # percentage.columns = ["directive", 'percentage']
             
-            # unique_counts.reset_index()
-            # # # Rename the columns in the new DataFrame
-            # unique_counts.columns = ["directive", 'Count of unique']
             new_Df = pd.DataFrame({'frequency': unique_counts,'percentage':unique_counts/len(df)*100})
             new_Df.reset_index(inplace=True)
             new_Df.columns = ['directive','frequency','percentage'] 
@@ -63,6 +78,10 @@ def sitemapToDf(request):
 
             # urls = list(map(str.strip,urls.split("\n")))
             df = sitemap_to_df(urls)
+
+            generateReport(df,title="Sitemap Data profile")
+
+
             jsonD = df.to_json(orient="records")
 
 
@@ -131,6 +150,9 @@ def searchEngineResults(request):
             else:
                 serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
             
+            generateReport(serpDf,title="SERP Data profile")
+
+            
             domains_df = serpDf['displayLink'].value_counts()
             domains_df = pd.DataFrame({'frequency': domains_df,'percentage':domains_df/len(serpDf)*100})
             domains_df.reset_index(inplace=True)
@@ -174,6 +196,8 @@ def knowledgeGraph(request):
             else:
                 knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
 
+            generateReport(knowDf,title="Knowledge Graph Data profile")
+
             jsonD = knowDf.to_json(orient="records")
             
             return render(request,'seo/knowledgeG.html',{'form': form,'knowDf':knowDf.to_html(classes='table table-striped text-center', justify='center'),'json':jsonD})
@@ -209,6 +233,9 @@ def carwlLinks(request):
                     os.remove('crawl_output.jl')
                 crawlDf = crawl(url_list=links,output_file="crawl_output.jl",follow_links=follow_links)
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
+
+            generateReport(crawlDf,title="Crawling Data Set profile")
+
 
             describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
             
