@@ -3,10 +3,12 @@ from django.shortcuts import render
 # Create your views here.
 from django.contrib import messages
 from django.shortcuts import render,redirect, get_object_or_404, HttpResponse
+from django.contrib import messages
 from django.http import HttpResponseRedirect, JsonResponse
 from advertools import url_to_df, emoji_search, extract_emoji, stopwords,word_frequency
-from .forms import AnalyseUrls, EmojiSearch, EmojiExtract, TextAnalysis
+from .forms import AnalyseUrls, EmojiSearch, EmojiExtract, TextAnalysis, DatasetExtract, DatasetSelect
 from .utils import url_structure
+from .models import DatasetFile
 import pandas as pd
 
 
@@ -78,7 +80,7 @@ def getStopWords(request):
         return HttpResponse('Ínvalid request Type')
 
 
-def analyzeText(request):
+def overviewText(request):
     if request.method == 'POST':
         form = TextAnalysis(request.POST)
         if form.is_valid():
@@ -100,5 +102,52 @@ def analyzeText(request):
         return render(request,'analyse/textan.html',{'form': form})
 
 
+def getDataset(request):
+    if request.method == 'POST':
+        form = DatasetExtract(request.POST,request.FILES)
+        # print(form)
+        if form.is_valid():
+            print(form.cleaned_data)
+            # form.save()
+            data, created = DatasetFile.objects.get_or_create(**form.cleaned_data)
+            # print(data)
+            if created:
+                messages.success(request,f'The dataset has been successfully added')
+            else:
+                messages.warning(request,f'The dataset {data.file_title}:{data.file_field} already exits.')
+            # print(df)
+            # df = pd.DataFrame.from_dict(df,orient='index')
+            # df = df.transpose()
+            return redirect("home")
+        else:
+            print(form.cleaned_data)
+            return HttpResponse("form invalid")
+    else:
+        form = DatasetExtract()
+        return render(request,'analyse/extraction.html',{'form': form})
 
+
+def dataSetAnalysis(request):
+    if request.method == 'POST':
+        form = DatasetSelect(request.POST)
+        # print(form)
+        if form.is_valid():
+            print(form.cleaned_data)
+            # form.save()
+            data, created = DatasetFile.objects.get_or_create(**form.cleaned_data)
+            # print(data)
+            if created:
+                messages.success(request,f'The dataset has been successfully added')
+            else:
+                messages.warning(request,f'The dataset {data.file_title}:{data.file_field} already exits.')
+            # print(df)
+            # df = pd.DataFrame.from_dict(df,orient='index')
+            # df = df.transpose()
+            return redirect("home")
+        else:
+            print(form.cleaned_data)
+            return HttpResponse("form invalid")
+    else:
+        form = DatasetSelect()
+        return render(request,'analyse/extraction.html',{'form': form})
 

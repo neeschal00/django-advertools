@@ -10,6 +10,7 @@ from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 from decouple import config
 from advertools import SERP_GOOG_VALID_VALS
 # from ydata_profiling import ProfileReport
+from django.contrib import messages
 from celery.result import AsyncResult
 from seo.tasks import generateReport, add
 import os,json
@@ -44,13 +45,17 @@ def robotsToDf(request,filters=None):
 
             urls = list(map(str.strip,urls.split("\n")))
             df = robotstxt_to_df(urls)
-            task = add.delay(1,2)
-            
-            # task.ready()
-            report_gen = AsyncResult(task.id)
-            print(report_gen.status)
-            print(report_gen.result)
-            
+            # json_df = df.to_json()
+
+            # print(json_df)
+            # print(type(json_df))
+            generateReport.delay(df.to_json(),title="Robots.txt Data profile")
+            # report_gen = AsyncResult()
+            # task = add.delay(1,2)
+            # print(task.status)
+            # print(task.id)
+            # if report_gen:
+            #     logger.info("Robots txt genereted df")
 
             unique_counts = df["directive"].value_counts()
             
@@ -60,7 +65,9 @@ def robotsToDf(request,filters=None):
 
             # unique_counts['percentage'] = df["directive"].value_counts() / len(unique_counts) * 100
             unique = new_Df.to_json()
-
+           
+            messages.success(request,f'Robots txt dataset viewed successfully')
+            
             # jsonD = df.to_json(orient="records")
             return render(request,'seo/robots.html',{'form': form,
                                                      'json': unique,
@@ -81,7 +88,7 @@ def sitemapToDf(request):
             # urls = list(map(str.strip,urls.split("\n")))
             df = sitemap_to_df(urls)
 
-            generateReport(df,title="Sitemap Data profile")
+            generateReport.delay(df.to_json(),title="Sitemap Data profile")
 
 
             jsonD = df.to_json(orient="records")
@@ -104,6 +111,7 @@ def sitemapToDf(request):
 
             # unique_counts['percentage'] = df["directive"].value_counts() / len(unique_counts) * 100
             unique = new_Df.to_json()
+            messages.success(request,f'Sitemap dataset viewed successfully')
             logger.info("Successfully create neccessary dataframe visuals")
 
            
@@ -112,9 +120,10 @@ def sitemapToDf(request):
                                                       'unique': unique,
                                                       'overview': overview.to_dict(),
                                                       'siteDf': df.to_html(col_space='75px',classes='table table-striped text-center', justify='center')})
-
+        else:
+            messages.error(request,f'Invalid form values')
     else:
-        logger.info("data helled")
+        # logger.info("data helled")
         form = Sitemap()
         return render(request,'seo/sitemap.html',{'form': form})
 
@@ -152,7 +161,7 @@ def searchEngineResults(request):
             else:
                 serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
             
-            generateReport(serpDf,title="SERP Data profile")
+            generateReport.delay(serpDf.to_json(),title="SERP Data profile")
 
             
             domains_df = serpDf['displayLink'].value_counts()
@@ -198,7 +207,7 @@ def knowledgeGraph(request):
             else:
                 knowDf = knowledge_graph(query=query,key=config('KEY'),languages=languages)
 
-            generateReport(knowDf,title="Knowledge Graph Data profile")
+            generateReport.delay(knowDf.to_json(),title="Knowledge Graph Data profile")
 
             jsonD = knowDf.to_json(orient="records")
             
@@ -236,7 +245,8 @@ def carwlLinks(request):
                 crawlDf = crawl(url_list=links,output_file="crawl_output.jl",follow_links=follow_links)
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
-            generateReport(crawlDf,title="Crawling Data Set profile")
+            jsonD = crawlDf.to_json(orient="records")
+            generateReport.delay(jsonD,title="Crawling Data Set profile")
 
 
             describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
@@ -246,8 +256,7 @@ def carwlLinks(request):
             status.reset_index(inplace=True)
             status.columns = ['status','frequency','percentage']
            
-
-            jsonD = crawlDf.to_json(orient="records")
+            
             overview = True
             return render(request,'seo/crawl.html',{'form': form,
                                                     'describe': describe.to_dict(),

@@ -32,7 +32,7 @@ def getReport(request):
     return render(request,"report.html")
 
 urlpatterns = [
-    path('',index),
+    path('',index,name="home"),
     path('report/get/',getReport,name="getReport"),
     path('report/',serveReport,name="report"),
     path("select2/", include("django_select2.urls")),

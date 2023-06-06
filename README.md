@@ -51,4 +51,3 @@ Optional Arguments if celery is receiving the tasks but not executing
 ```
 --without-gossip --without-mingle --without-heartbeat -Ofair
 ```
-
