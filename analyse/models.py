@@ -11,6 +11,6 @@ class DatasetFile(models.Model):
         unique_together = ["file_title","file_field","added_dt"]
 
     def __str__(self):
-        return self.file_title
+        return self.file_title + " " + str(self.file_field)
 
 

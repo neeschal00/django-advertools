@@ -7,6 +7,7 @@ urlpatterns = [
     path("emoji/extract/",views.extractEmoji, name='extractEmoji'),
     path("stopwords/",views.getStopWords, name='stopwords'),
     path("text/overview/",views.overviewText, name='overviewT'),
+    path("text/analyze/",views.dataSetAnalysis, name='datasetT'),
     path("extract/",views.getDataset, name='upload'),
 
 ]

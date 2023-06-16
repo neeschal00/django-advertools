@@ -1,34 +1,237 @@
 {% extends "base.html" %}
 {% load static %}
+{% load custom_filters %}
 
 
 {% block css %}
+<style>
+    body{
+    margin-top:20px;
+    background:#FAFAFA;
+}
+.order-card {
+    color: #fff;
+}
+
+.bg-c-blue {
+    background: linear-gradient(45deg,#4099ff,#73b4ff);
+}
+
+.bg-c-green {
+    background: linear-gradient(45deg,#2ed8b6,#59e0c5);
+}
+
+.bg-c-yellow {
+    background: linear-gradient(45deg,#FFB64D,#ffcb80);
+}
+
+.bg-c-pink {
+    background: linear-gradient(45deg,#FF5370,#ff869a);
+}
+
+.card {
+    border-radius: 5px;
+    -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
+    box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
+    border: none;
+    margin-bottom: 30px;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+.card .card-block {
+    padding: 25px;
+}
+
+.order-card i {
+    font-size: 26px;
+}
+
+.f-left {
+    float: left;
+}
+
+.f-right {
+    float: right;
+}
+</style>
 
 {% endblock css %}
 
 {% load crispy_forms_tags %}
 {% block pageContent %}
-<div class="container">
-    <div class="container">
+<div class="container-fluid">
+    <div class="container-fluid">
         <div class="row d-flex justify-content-center">
             <div class="col-md-6 ">
                 <form method="post">
                     {% csrf_token %}
                     <fieldset class="form-group">
-                        <legend class="border-bottom mb-4 main-t">Analyse Dataset</legend>
+                        <legend class="border-bottom mb-4 main-t">Text Analysis from dataset column</legend>
                         {{ form|crispy }}
                     </fieldset>
                     <div class="form-group">
                         <button class="btn btn-outline-info" type="submit">
-                            Analyse
+                            Analyze
                         </button>
+                        <hr />
+                        <p>OR</p>
+                        <hr />
+                        <a class="btn btn-info" href="{% url 'upload' %}">
+                            Upload
+                        </a>
                     </div>
                 </form>
             </div>
-            <div class="col-md-12 mt-4" style="width:100%;overflow-x: scroll;">
-                {% if df %}
-                    {{ df | safe }}
+            {% if submission %}
+            <div class="col-md-12 mt-4">
+                <div class="row d-flex justify-content-center">
+                    <h2 class="h2 mb-2 text-center">Text Overview</h2>
+                    <div class="col-md-4 col-xl-4">
+                        <div class="card bg-c-green order-card">
+                            <div class="card-block">
+                                <h6 class="m-b-20">URLs found</h6>
+                                <h2 class="text-right"><i class="fa fa-link f-left"></i><span class="px-2">{{ urls.overview.num_urls }}</span></h2>
+                                <p class="m-b-0">Urls per post<span class="f-right">{{ urls.overview.urls_per_post }}</span></p>
+                                <p class="m-b-0">Unique Urls<span class="f-right">{{ urls.overview.unique_urls }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-xl-4">
+                        <div class="card bg-c-yellow order-card">
+                            <div class="card-block">
+                                <h6 class="m-b-20">Mentions found</h6>
+                                <h2 class="text-right"><i class="fa fa-quote-left f-left"></i><span class="px-2">{{ mentions.overview.num_mentions}}</span></h2>
+                                <p class="m-b-0">Mentions per post<span class="f-right">{{ mentions.overview.mentions_per_post}}</span></p>
+                                <p class="m-b-0">Unique Mentions<span class="f-right">{{ mentions.overview.unique_mentions }}</span></p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="col-md-4 col-xl-4">
+                        <div class="card bg-c-pink order-card">
+                            <div class="card-block">
+                                <h6 class="m-b-20">Questions found</h6>
+                                <h2 class="text-right"><i class="fa fa-question f-left"></i><span class="px-2">{{ questions.overview.num_question_marks}}</span></h2>
+                                <p class="m-b-0">Questions per post<span class="f-right">{{ questions.overview.question_marks_per_post}}</span></p>
+                                <p class="m-b-0">Unique Questions<span class="f-right">{{ questions.overview.unique_question_marks }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-xl-4">
+                        <div class="card bg-c-blue order-card">
+                            <div class="card-block">
+                                <h6 class="m-b-20">Hashtags found</h6>
+                                <h2 class="text-right"><i class="fa fa-hashtag f-left"></i><span class="px-2">{{ hashtags.overview.num_hashtags}}</span></h2>
+                                <p class="m-b-0">Hashtags per post<span class="f-right">{{ hashtags.overview.hashtags_per_post}}</span></p>
+                                <p class="m-b-0">Unique Hashtags<span class="f-right">{{ hashtags.overview.unique_hashtags }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-xl-4">
+                        <div class="card bg-c-green order-card">
+                            <div class="card-block">
+                                <h6 class="m-b-20">Numbers found</h6>
+                                <h2 class="text-right"><i class="fa fa-arrow-up f-left"></i><span class="px-2">{{ numbers.overview.num_numbers}}</span></h2>
+                                <p class="m-b-0">Numbers per post<span class="f-right">{{ numbers.overview.numbers_per_post}}</span></p>
+                                <p class="m-b-0">Unique Numbers<span class="f-right">{{ numbers.overview.unique_numbers }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-xl-4">
+                        <div class="card bg-c-yellow order-card">
+                            <div class="card-block">
+                                <h6 class="m-b-20">Intense Words found</h6>
+                                <h2 class="text-right"><i class="fa fa-repeat f-left"></i><span class="px-2">{{ intense_words.overview.num_intense_words}}</span></h2>
+                                <p class="m-b-0">Intense Words per post<span class="f-right">{{ intense_words.overview.intense_words_per_post}}</span></p>
+                                <p class="m-b-0">Unique Intense Words<span class="f-right">{{ intense_words.overview.unique_intense_words }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            <div class="col-md-12 mt-4" style="max-height: 600px;overflow-y: scroll;">
+                {% if textDf %}
+                    {{ textDf | safe }}
                 {% endif %}
+            </div>
+
+            <div class="col-md-12 mt-4">
+                <div class="row d-flex justify-content-center mt-2">
+                    {% if urls.urls_flat %}
+                    <div class="col-md-6 col-sm-12 col-xl-4" style="max-height: 450px;overflow-y: scroll;">
+                        <h5 class="h5">
+                            URLs 
+                        </h5>
+                        <ul class="list-group list-group-flush">
+                            {% for url in urls.urls_flat %}
+                            <li class="list-group-item">{{ url }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% if mentions.mentions_flat %}
+                    <div class="col-md-6 col-sm-12 col-xl-4" style="max-height: 450px;overflow-y: scroll;">
+                        <h5 class="h5">
+                            Mentions 
+                        </h5>
+                        <ul class="list-group list-group-flush">
+                            {% for url in mentions.mentions_flat %}
+                            <li class="list-group-item">{{ url }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% if questions.question_marks_flat %}
+                    <div class="col-md-6 col-sm-12 col-xl-4" style="max-height: 450px;overflow-y: scroll;">
+                        <h5 class="h5">
+                            Questions
+                        </h5>
+                        <ul class="list-group list-group-flush">
+                            {% for question in question_marks.question_marks_flat %}
+                            <li class="list-group-item">{{ question }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% if hashtags.hashtags_flat %}
+                    <div class="col-md-6 col-sm-12 col-xl-4" style="max-height: 450px;overflow-y: scroll;">
+                        <h5 class="h5">
+                            Hashtags 
+                        </h5>
+                        <ul class="list-group list-group-flush">
+                            {% for hashtag in hashtags.hashtags_flat %}
+                            <li class="list-group-item">{{ hashtag }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% if numbers.numbers_flat %}
+                    <div class="col-md-6 col-sm-12 col-xl-4" style="max-height: 450px;overflow-y: scroll;">
+                        <h5 class="h5">
+                            Numbers 
+                        </h5>
+                        <ul class="list-group list-group-flush">
+                            {% for number in numbers.numbers_flat %}
+                            <li class="list-group-item">{{ number }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% if intense_words.intense_words_flat %}
+                    <div class="col-md-6 col-sm-12 col-xl-4" style="max-height: 450px;overflow-y: scroll;">
+                        <h5 class="h5">
+                            Intense Words 
+                        </h5>
+                        <ul class="list-group list-group-flush">
+                            {% for intense in intense_words.intense_words_flat %}
+                            <li class="list-group-item">{{ intense }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
 
         </div>

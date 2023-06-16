@@ -34,10 +34,10 @@
             </div>
 
             <div class="col-md-6">
-                <canvas id="donutChart" class="mt-3"></canvas>
+                <canvas id="donutChart" class="mt-2"></canvas>
             </div>
             
-            <div id="filterContainer" class="mt-3"></div>
+            <div id="filterContainer" class="mt-1"></div>
             <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll;">
                 {% if roboDf %}
                     <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
@@ -53,6 +53,23 @@
 {% endblock pageContent %}
 
 {% block javascript %}
+
+<script>
+    const taskId = "{{ task_id|safe }}";
+    console.log(taskId);
+    if(taskId){
+        const socket = new WebSocket(`ws://localhost:8000/ws/task/robot_123`);
+    
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            const result = data.result;
+            console.log(result);
+        };
+    }
+
+
+</script>
+
 <script>
 
     function openLoader() {
@@ -138,7 +155,9 @@
     }
     // Call the function to create the chart
     // const top5 = jsonData.slice(0,5);
-    createDonutChart(jsonData);
+    if (jsonData){
+        createDonutChart(jsonData);
+    }
     
     
 </script>

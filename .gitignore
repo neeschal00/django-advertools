@@ -3,3 +3,6 @@ venv/
 *.jl
 
 *.log
+
+# any csv files
+*.csv

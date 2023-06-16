@@ -38,7 +38,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'crispy_forms',
     'crispy_bootstrap5',
+    'daphne',
     'celery',
+    'channels',
     'django_filters',
     'django_select2',
     'generateAds.apps.GenerateadsConfig',
@@ -81,6 +83,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries': {
+                'custom_filters': 'analyse.templatetags.custom_filters',
+            },
         },
     },
 ]
@@ -119,6 +124,7 @@ DATABASES = {
 #         }
 #     }
 # }
+ASGI_APPLICATION = 'django_advertools.asgi.application'
 
 # SELECT2_CACHE_BACKEND = "select2"
 

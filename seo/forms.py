@@ -77,9 +77,11 @@ class SerpGoogle(forms.Form):
 
 class KnowledgeG(forms.Form):
 
+    # LR_Choices = ((lr.split("_")[1],lr.split("_")[1]) for lr in SERP_GOOG_VALID_VALS['lr'])
+
     query = forms.CharField(widget=forms.Textarea(attrs={"rows": 5, 
     "cols": 40,
-    "placeholder": "Enter the search query(seperate with ',' if multiple)"
+    "placeholder": "Enter the search query(seperate with ',' if multiple) like flights,tickets,barley"
     }
     ))
 
@@ -89,7 +91,7 @@ class KnowledgeG(forms.Form):
     }
     ),required=False)
 
-    limit = forms.IntegerField(required=False)
+    limit = forms.IntegerField(required=False,min_value=1)
 
 
 class Crawl(forms.Form):
@@ -99,8 +101,10 @@ class Crawl(forms.Form):
     }
     ))
 
-    follow_links = forms.BooleanField(required=False)
+    follow_links = forms.BooleanField(required=False,help_text="Crawl all reachable links from page")
 
     headers_only = forms.BooleanField(required=False)
+
+    pg_count = forms.IntegerField(required=False, min_value=1,max_value=10000, help_text="max crawlable pages")
 
 

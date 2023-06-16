@@ -3,6 +3,13 @@
 
 
 {% block css %}
+<script>
+    $(document).ready(function() {
+        $("button").click(function() {
+            $(document).scroll($(document).height());
+        });
+    });
+</script>
 
 {% endblock css %}
 
@@ -55,9 +62,8 @@
 
 {% block javascript %}
 
-<script>
 
-</script>
+
 
 
 {% endblock javascript %}

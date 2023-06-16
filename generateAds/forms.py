@@ -43,9 +43,6 @@ class LargeScaleAds(forms.Form):
 
     capitalize = forms.BooleanField(required=False)
     max_len = forms.IntegerField(required=False)
-    # def __init__(self, *args, **kwargs):
-    #     super(DescriptionAds, self).__init__(*args, **kwargs)
-    #     self.fields['slots'].required = False
 
 
 

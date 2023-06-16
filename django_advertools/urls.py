@@ -23,7 +23,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 
 def index(request):
-    return render(request,"base.html")
+    return render(request,"home.html")
 
 def serveReport(request):
     return render(request,"reportMain.html")
@@ -42,6 +42,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 ]
 
+urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_ROOT)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL,
                             document_root = settings.MEDIA_ROOT)

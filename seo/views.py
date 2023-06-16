@@ -8,18 +8,21 @@ from advertools import robotstxt_to_df, sitemap_to_df, serp_goog, knowledge_grap
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl
 
 from decouple import config
-from advertools import SERP_GOOG_VALID_VALS
+# from advertools import SERP_GOOG_VALID_VALS
 # from ydata_profiling import ProfileReport
 from django.contrib import messages
-from celery.result import AsyncResult
+# from celery.result import AsyncResult
 from seo.tasks import generateReport, add
 import os,json
 import logging
 logger = logging.getLogger(__name__)
 
-
 import pandas as pd
 pd.set_option('display.max_colwidth', 30)
+# from parallel_pandas import ParallelPandas
+
+#initialize parallel-pandas
+# ParallelPandas.initialize(disable_pr_bar=True)
 
 
 # def generateReport(df,minimal=False,title="Profile Report"):
@@ -43,34 +46,40 @@ def robotsToDf(request,filters=None):
             
             urls = form.cleaned_data['urls']
 
-            urls = list(map(str.strip,urls.split("\n")))
+            urls = urls.strip()
+            # urls = list(map(str.strip,urls.split("\n")))
+            if not urls.startswith(("http","www")):
+                messages.warning(request,"Invalid URL type")
+            
+            # urls = [url for url in urls if url.startswith("http")]
+            
             df = robotstxt_to_df(urls)
-            # json_df = df.to_json()
-
-            # print(json_df)
-            # print(type(json_df))
-            generateReport.delay(df.to_json(),title="Robots.txt Data profile")
-            # report_gen = AsyncResult()
-            # task = add.delay(1,2)
-            # print(task.status)
-            # print(task.id)
-            # if report_gen:
-            #     logger.info("Robots txt genereted df")
-
-            unique_counts = df["directive"].value_counts()
             
-            new_Df = pd.DataFrame({'frequency': unique_counts,'percentage':unique_counts/len(df)*100})
-            new_Df.reset_index(inplace=True)
-            new_Df.columns = ['directive','frequency','percentage'] 
+            task_id = "robot_123"
+            generateReport.delay(task_id,df.to_json(),title="Robots.txt Data profile")
+            
+            unique = None
+            
+            if "directive" in df:
+                unique_counts = df["directive"].value_counts()
+                
+                new_Df = pd.DataFrame({'frequency': unique_counts,'percentage':unique_counts/len(df)*100})
+                new_Df.reset_index(inplace=True)
+                new_Df.columns = ['directive','frequency','percentage'] 
 
-            # unique_counts['percentage'] = df["directive"].value_counts() / len(unique_counts) * 100
-            unique = new_Df.to_json()
+                
+                unique = new_Df.to_json()
+            
+                messages.success(request,f'Robots txt dataset viewed successfully')
+            
+            if df.empty:
+                messages.warning(request, "No columns in the dataframe")
            
-            messages.success(request,f'Robots txt dataset viewed successfully')
             
-            # jsonD = df.to_json(orient="records")
+            
             return render(request,'seo/robots.html',{'form': form,
                                                      'json': unique,
+                                                     'task_id':task_id,
                                                     #  'unique': unique_counts.to_html(classes='table table-striped text-center', justify='center'),
                                                      'roboDf': df.to_html(classes='table table-striped text-center', justify='center')})
 
@@ -84,15 +93,17 @@ def sitemapToDf(request):
         if form.is_valid():
             
             urls = form.cleaned_data['urls']
-
-            # urls = list(map(str.strip,urls.split("\n")))
-            df = sitemap_to_df(urls)
+            try:
+                # urls = list(map(str.strip,urls.split("\n")))
+                df = sitemap_to_df(urls)
+            except Exception as e:
+                # print(e)
+                messages.warning(request,"The url was not able to convert to a dataframe")
+                return render(request,'seo/sitemap.html',{'form': form})
 
             generateReport.delay(df.to_json(),title="Sitemap Data profile")
 
-
             jsonD = df.to_json(orient="records")
-
 
             overview = df["loc"].describe()
             # print(overview)
@@ -143,23 +154,30 @@ def searchEngineResults(request):
             rights = form.cleaned_data['rights']
 
             # country = list(map(str.strip,country.split(","))) if country else None
-            if gl or country or language or rights:
-                params = {
-                    'q': query,
-                    'cx': config('CX'),
-                    'key': config('KEY'),
-                }
-                if gl:
-                    params['gl'] = gl
-                if country:
-                    params['cr'] = country
-                if language:
-                    params['lr'] = language
-                if rights:
-                    params['rights'] = rights
-                serpDf = serp_goog(**params)
-            else:
-                serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
+            try:
+                if gl or country or language or rights:
+                    params = {
+                        'q': query,
+                        'cx': config('CX'),
+                        'key': config('KEY'),
+                    }
+                    if gl:
+                        params['gl'] = gl
+                    if country:
+                        params['cr'] = country
+                    if language:
+                        params['lr'] = language
+                    if rights:
+                        params['rights'] = rights
+                    
+                    serpDf = serp_goog(**params)
+                else:
+                    serpDf = serp_goog(q=query,cx=config('CX'),key=config('KEY'))
+            
+            except Exception as e:
+                print(e)
+                messages.warning(request,"Unable to make a query for invalid data")
+                return render(request, 'seo/serpGoog.html',{'form': form})
             
             generateReport.delay(serpDf.to_json(),title="SERP Data profile")
 
@@ -170,8 +188,7 @@ def searchEngineResults(request):
             domains_df.columns = ['displayLink','frequency','percentage']
 
             rank_df = serpDf[["searchTerms","displayLink","rank","link"]].head(10)
-            # print(rank_df)
-            ## convert to html
+            
             rank_df.rename(columns={"displayLink":"domain"},inplace=True)
             rank_df = rank_df.reset_index(drop=True).to_html(classes='table', justify='center')
         
@@ -225,16 +242,23 @@ def carwlLinks(request):
         if form.is_valid():
             links = form.cleaned_data['links']
             if not links.startswith("http"):
+                messages.warning(request,"The url is invalid")
                 logger.warning("Improper links")
                 return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
             else:
                 links = list(map(str.strip,links.split("\n")))
                 follow_links = form.cleaned_data['follow_links']
                 headers_only = form.cleaned_data['headers_only']
-
-            if headers_only:
+            
+            try:
                 if os.path.exists('crawl_output.jl'):
                     os.remove('crawl_output.jl')
+            except PermissionError:
+                messages.warning(request,"Somebody Else is using this service")
+                return HttpResponseRedirect("home")
+
+            if headers_only:
+                
                 crawlDf = crawl_headers(url_list=links,output_file="crawl_output.jl")
 
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
@@ -242,28 +266,44 @@ def carwlLinks(request):
             else:
                 if os.path.exists('crawl_output.jl'):
                     os.remove('crawl_output.jl')
-                crawlDf = crawl(url_list=links,output_file="crawl_output.jl",follow_links=follow_links)
+                crawlDf = crawl(
+                    url_list=links,output_file="crawl_output.jl",follow_links=follow_links,
+
+                    custom_settings={
+                        # 'CONCURRENT_REQUESTS_PER_DOMAIN': 1,
+                        'CLOSESPIDER_PAGECOUNT': int(form.cleaned_data['pg_count']) if form.cleaned_data['pg_count'] else 100 ,
+                        'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+                        'LOG_FILE': 'output_file.log',
+                    }
+                    )
+                
                 crawlDf = pd.read_json('crawl_output.jl', lines=True)
 
-            jsonD = crawlDf.to_json(orient="records")
-            generateReport.delay(jsonD,title="Crawling Data Set profile")
+            if crawlDf.empty:
+                messages.warning(request,"Empty columns observed this url may not be crawlable")
+                return render(request, 'seo/crawl.html',{'form': form,'overview':overview})
+            else:
+                jsonD = crawlDf.to_json()
+                generateReport.delay(jsonD,minimal=True,title="Crawling Data Set profile")
 
-
-            describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
+                try:
+                    describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
+                except KeyError:
             
-            status = crawlDf["status"].value_counts()
-            status = pd.DataFrame({'frequency': status,'percentage':status/len(crawlDf)*100})
-            status.reset_index(inplace=True)
-            status.columns = ['status','frequency','percentage']
-           
+                    return render(request,'seo/crawl.html',{'form': form,'crawlDf':crawlDf.to_html(classes='table table-striped', justify='center'),'json': jsonD})
+                status = crawlDf["status"].value_counts()
+                status = pd.DataFrame({'frequency': status,'percentage':status/len(crawlDf)*100})
+                status.reset_index(inplace=True)
+                status.columns = ['status','frequency','percentage']
             
-            overview = True
-            return render(request,'seo/crawl.html',{'form': form,
-                                                    'describe': describe.to_dict(),
-                                                    'statusJ': status.to_json(),
-                                                    'crawlDf':crawlDf.to_html(classes='table table-striped', justify='center'),
-                                                    'json': jsonD,
-                                                    'overview':overview})
+                
+                overview = True
+                return render(request,'seo/crawl.html',{'form': form,
+                                                        'describe': describe.to_dict(),
+                                                        'statusJ': status.to_json(),
+                                                        'crawlDf':crawlDf.to_html(classes='table table-striped', justify='center'),
+                                                        'json': jsonD,
+                                                        'overview':overview})
 
     else:
         if os.path.exists('crawl_output.jl'):

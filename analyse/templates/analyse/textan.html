@@ -27,6 +27,9 @@
             </div>
             <div class="col-md-12 mt-4" style="max-height: 700px;overflow-y: scroll;">
                 {% if textDf %}
+                    <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
+                        View Data Profiling Report
+                    </a>
                     {{ textDf | safe }}
                 {% endif %}
             </div>
