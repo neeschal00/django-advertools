@@ -132,38 +132,30 @@ ASGI_APPLICATION = 'django_advertools.asgi.application'
 #logging
 LOGGING = {
     'version': 1,
-    # The version number of our log
     'disable_existing_loggers': False,
-    # django uses some of its own loggers for internal operations. In case you want to disable them just replace the False above with true.
-    # A handler for WARNING. It is basically writing the WARNING messages into a file called WARNING.log
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
-        },
-    },
     'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'django_advertools.log',
-            'formatter': 'simple'
+        'console': {
+            'class': 'logging.StreamHandler',
         },
     },
-    # A logger for INFO which has a handler called 'file'. A logger can have multiple handler
     'loggers': {
-       # notice the blank '', Usually you would put built in loggers like django or root here based on your needs
-        '': {
-            'handlers': ['file'], #notice how file variable is called in handler which has been defined above
-            'level': 'INFO',
-            'propagate': True,
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',  # Set the desired log level for the 'django' logger
+        },
+        'channels': {
+            'handlers': ['console'],
+            'level': 'DEBUG',  # Set the desired log level for the 'channels' logger
+            'propagate': False,
+        },
+        'asgi': {
+            'handlers': ['console'],
+            'level': 'DEBUG',  # Set the desired log level for the 'asgi' logger
+            'propagate': False,
         },
     },
 }
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -181,6 +173,18 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
+# settings.py
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('localhost', 6379)],
+        },
+    },
+}
 
 
 # Internationalization

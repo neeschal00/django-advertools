@@ -1,5 +1,6 @@
 import os
 from celery import Celery
+from datetime import timedelta
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_advertools.settings')
@@ -14,8 +15,19 @@ app = Celery('django_advertools')
 app.config_from_object('django.conf:settings',
 					namespace='CELERY')
 
+# celery.py (or wherever you configure Celery)
+# app.conf.beat_schedule = {
+#     'flower-stats': {
+#         'task': 'flower.commands.stats',
+#         'schedule': timedelta(seconds=5),
+#         'options': {'queue': 'flower'},
+#     },
+# }
+
+
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks()
+
 
 # @app.task(bind=True)
 # def debug_task(self):

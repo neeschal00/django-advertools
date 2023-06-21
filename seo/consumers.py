@@ -29,3 +29,11 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'result': result
         }))
+    
+    async def task_started(self, event):
+        start = event['start']
+
+        # Send task completion notification to the client
+        await self.send(text_data=json.dumps({
+            'start': start
+        }))

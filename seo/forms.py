@@ -17,8 +17,9 @@ class RobotsTxt(forms.Form):
 
 
 class Sitemap(forms.Form):
-    urls = forms.CharField(widget=forms.TextInput(attrs={
-    "placeholder": "Enter sitemap .xml urls in new lines like https://www.bbc.com/sitemaps/https-sitemap-com-archive-1.xml"
+    urls = forms.CharField(widget=forms.Textarea(attrs={"rows":2,
+                                                        "cols":40,
+    "placeholder": "Enter sitemap .xml url like https://www.bbc.com/sitemaps/https-sitemap-com-archive-1.xml"
     }
     ))
 
@@ -108,3 +109,16 @@ class Crawl(forms.Form):
     pg_count = forms.IntegerField(required=False, min_value=1,max_value=10000, help_text="max crawlable pages")
 
 
+class SERPCrawl(SerpGoogle):
+    limit = forms.IntegerField(
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter the limit'}),
+        help_text='Limit the number of urls you want to crawl'
+    )
+
+    headers_only = forms.BooleanField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper.layout[1].append('limit')
+        self.helper.layout[1].append('headers_only')

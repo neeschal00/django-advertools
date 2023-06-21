@@ -80,6 +80,12 @@
                 <canvas id="lineChart" class="mt-2"></canvas>
             </div>
             <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
+                {% if logsDf %}
+                    <h3 class="h3"> Logs Dataframe </h3>
+                    {{ logsDf | safe }}
+                {% endif %}
+            </div>
+            <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
                 {% if crawlDf %}
                     <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
                         View Data Profiling Report
