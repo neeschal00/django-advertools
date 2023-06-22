@@ -74,7 +74,7 @@ def robotsToDf(request,filters=None):
 
             urls = list(map(configRobots,valid_urls))
             df = robotstxt_to_df(urls)
-            task_id = "robot_123"
+            task_id = "test"
             dynamic_title = "Robots.txt Data profile"
             generateReport.delay(task_id,df.to_json(),False,dynamic_title)
             unique = None
@@ -97,7 +97,6 @@ def robotsToDf(request,filters=None):
             
             return render(request,'seo/robots.html',{'form': form,
                                                      'json': unique,
-                                                     'task_id':task_id,
                                                      "invalid_urls": invalid_urls,
                                                     #  'unique': unique_counts.to_html(classes='table table-striped text-center', justify='center'),
                                                      'roboDf': df.to_html(classes='table table-striped text-center', justify='center')})
@@ -261,7 +260,7 @@ def analyzeCrawlLogs(logsDf):
 
 
 
-
+from .utils import validate_links, delete_existing_files
 
 def carwlLinks(request):
     overview = False
@@ -279,10 +278,7 @@ def carwlLinks(request):
                 headers_only = form.cleaned_data['headers_only']
             
             try:
-                if os.path.exists('crawl_output.jl'):
-                    os.remove('crawl_output.jl')
-                if os.path.exists('output_file.log'):
-                    os.remove('output_file.log')
+                delete_existing_files()
             except PermissionError:
                 messages.warning(request,"Somebody Else is using this service")
                 return HttpResponseRedirect("home")
@@ -331,10 +327,9 @@ def carwlLinks(request):
             else:
                 jsonD = crawlDf.to_json()
 
-                task_id = "crawlD_123"
+                task_id = "test"
                 dynamic_title = "Crawl Data profile"
                 generateReport.delay(task_id,jsonD,True,dynamic_title)
-
 
                 try:
                     describe = crawlDf[["size","download_latency","status"]].describe().loc[['mean','max','min']]
@@ -406,9 +401,9 @@ def serpCrawl(request):
             
             
             if headers_only:
-                serpCrawlHeaders.delay(links)
+                serpCrawlHeaders.delay('test',links)
             else:
-                serpCrawlFull.delay(links)
+                serpCrawlFull.delay('test',links)
             
             return render(request,'seo/serpCrawl.html',{'form': form,
                                                        'serpDf':serpDf.to_html(

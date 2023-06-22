@@ -1,17 +1,20 @@
 from celery import shared_task
 import os
 from ydata_profiling import ProfileReport
-from django.contrib import messages
+from django.core.cache import cache
+
 import pandas as pd
 from advertools import crawl_headers, crawl
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+import json
 
 channel_layer = get_channel_layer()
 @shared_task
-def generateReport(task_id,df,minimal=False,title="Profile Report"):
+def generateReport(group_id,df,minimal=False,title="Profile Report"):
    
     load_df = pd.read_json(df)
+    
     try:
         if minimal:
             profile = ProfileReport(load_df,minimal=True,title=title)
@@ -21,15 +24,22 @@ def generateReport(task_id,df,minimal=False,title="Profile Report"):
         # messages.success("Report Has been generated sucessfully")
         
         async_to_sync(channel_layer.group_send)(
-            f'task_{task_id}',
+            "group_"+group_id,
             {
                 'type': 'task_completed',
-                'result': 'Report generated successfully. for Id '+ task_id
+                'result': 'Report generated successfully. for Id '+ group_id
             }
         )
         return "Report Has been generated successfully"
     except Exception as e:
-        print(e)
+        # print(e)
+        async_to_sync(channel_layer.group_send)(
+            "group_"+group_id,
+            {
+                'type': 'conversion_failed',
+            }
+        )
+        return "Report Has been generated successfully"
         return "Report was not generated"
 
 
@@ -41,7 +51,7 @@ def add(a,b):
 
 
 @shared_task
-def serpCrawlHeaders(links:list):
+def serpCrawlHeaders(group_id,links:list):
     # print(links)
     links = list(links)
     # print(links)
@@ -52,10 +62,26 @@ def serpCrawlHeaders(links:list):
         return False
     
     crawl_headers(url_list=links,output_file="serp_crawl_headers_output.jl",custom_settings={'LOG_FILE': 'headerCrawl.log'})
+    async_to_sync(channel_layer.group_send)(
+            "group_"+group_id,
+            {
+                'type': 'task_completed',
+                'result': 'headers crawled'
+            }
+        )
+    serpReadDf.delay(group_id,"headers")
+    # df = pd.read_json('serp_crawl_headers_output.jl', lines=True)
+    # async_to_sync(channel_layer.group_send)(
+    #         "group_"+group_id,
+    #         {
+    #             'type': 'task_completed',
+    #             'result': df.to_json(orient="records")
+    #         }
+    #     )
     return True
     
 @shared_task
-def serpCrawlFull(links:list):
+def serpCrawlFull(group_id,links:list):
     try:
         if os.path.exists('serp_crawl_output.jl'):
             os.remove('serp_crawl_output.jl')
@@ -63,8 +89,34 @@ def serpCrawlFull(links:list):
         return False
     
     crawl(url_list=links,output_file="serp_crawl_output.jl",custom_settings={'LOG_FILE': 'fullCrawl.log'})
+    async_to_sync(channel_layer.group_send)(
+            "group_"+group_id,
+            {
+                'type': 'task_completed',
+                'result': 'full crawled'
+            }
+        )
     return True
 
 @shared_task
-def serpReadDf(type:str):
-    pass
+def serpReadDf(group_id,type:str):
+    if type == "headers":
+        df = pd.read_json('serp_crawl_headers_output.jl', lines=True)
+    else:
+        df = pd.read_json('serp_crawl_output.jl', lines=True)
+
+    data = df.to_json(orient="records")
+    # print(type(data))
+    async_to_sync(channel_layer.group_send)(
+            "group_"+group_id,
+            {
+                'type': 'data_converted',
+                'result': data
+            }
+        )
+
+    return True
+    
+
+
+

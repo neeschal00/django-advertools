@@ -69,42 +69,7 @@
 
 {% block javascript %}
 
-<script>
-    
-    // Replace <task_id> with the actual value
-    var task_id = "{{ task_id | safe }}"; // Replace with the desired task ID
-    
-    if(task_id){
-        // Create the WebSocket connection
-        var socket = new WebSocket('ws://' + window.location.host + '/ws/task/' + task_id + '/');
 
-        // Event handler for successful connection
-        socket.onopen = function(event) {
-        console.log('WebSocket connection established');
-
-        // You can perform any necessary actions after the connection is established
-        };
-
-        // Event handler for receiving messages
-        socket.onmessage = function(event) {
-        var message = JSON.parse(event.data);
-            console.log(typeof message)
-            console.log('Received message:', message);
-            window.alert(message.result);
-        // Handle the received message as needed
-        };
-
-        // Event handler for connection close
-        socket.onclose = function(event) {
-        console.log('WebSocket connection closed');
-
-        // You can perform any necessary actions after the connection is closed
-        };
-    }
-    
-
-
-</script>
 
 <script>
 

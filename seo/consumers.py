@@ -1,17 +1,19 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.core.cache import cache
+
 import json
 
 class TaskCompletionConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.task_id = self.scope['url_route']['kwargs']['task_id']
-        self.task_group_name = f'task_{self.task_id}'
+        self.random_id = self.scope['url_route']['kwargs']['random_id']
+        self.task_group_name = f'group_{self.random_id}'
 
         # Join task group
         await self.channel_layer.group_add(
             self.task_group_name,
             self.channel_name
         )
-
+        # cache.set(self.random_id, self.task_group_name)
         await self.accept()
 
     async def disconnect(self, close_code):
@@ -36,4 +38,20 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
         # Send task completion notification to the client
         await self.send(text_data=json.dumps({
             'start': start
+        }))
+
+    async def data_converted(self, event):
+        result = event['result']
+
+        # Send task completion notification to the client
+        await self.send(text_data=json.dumps({
+            'result': result
+        }))
+    
+    async def conversion_failed(self, event):
+        # result = event['result']
+
+        # Send task completion notification to the client
+        await self.send(text_data=json.dumps({
+            'result': "Unable to process the dataset"
         }))
