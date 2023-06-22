@@ -1,0 +1,3 @@
+### Seperate out logic for crawling a dataset 
+### Use websocket seamlessly for data visulisation in 
+### remove unnecessary code 

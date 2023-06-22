@@ -306,11 +306,21 @@ def knowledgeGraph(request):
         return render(request, "seo/knowledgeG.html", {"form": form})
 
 
-def analyzeCrawlLogs(logsDf):
+def analyzeCrawlLogs():
+    logsDf = crawllogs_to_df(logs_file_path="output_file.log")
+
+    logsDf = logsDf.reset_index(drop=True).to_html(
+        classes="table", justify="center"
+    )
+
+    logsDf = logsDf.replace(
+        'class="dataframe table"',
+        'class="table table-primary table-striped text-center"',
+    )
     logsDescribe = logsDf.message.value_counts()
 
 
-from .utils import validate_links, delete_existing_files
+from .utils import delete_existing_files
 
 
 def carwlLinks(request):
@@ -365,16 +375,7 @@ def carwlLinks(request):
 
                 crawlDf = pd.read_json("crawl_output.jl", lines=True)
 
-            logsDf = crawllogs_to_df(logs_file_path="output_file.log")
-
-            logsDf = logsDf.reset_index(drop=True).to_html(
-                classes="table", justify="center"
-            )
-
-            logsDf = logsDf.replace(
-                'class="dataframe table"',
-                'class="table table-primary table-striped text-center"',
-            )
+            
             
             if crawlDf.empty:
                 messages.warning(
@@ -423,7 +424,7 @@ def carwlLinks(request):
                         "form": form,
                         "describe": describe.to_dict(),
                         "statusJ": status.to_json(),
-                        "logsDf": logsDf,
+                        # "logsDf": logsDf,
                         "crawlDf": crawlDf.to_html(
                             classes="table table-striped", justify="center"
                         ),

@@ -15,32 +15,31 @@ def generateReport(group_id,df,minimal=False,title="Profile Report"):
    
     load_df = pd.read_json(df)
     
-    try:
-        if minimal:
-            profile = ProfileReport(load_df,minimal=True,title=title)
-        else:
-            profile = ProfileReport(load_df,minimal=False,title=title)
-        profile.to_file(os.path.join('templates',"report.html"))
-        # messages.success("Report Has been generated sucessfully")
-        
-        async_to_sync(channel_layer.group_send)(
-            "group_"+group_id,
-            {
-                'type': 'task_completed',
-                'result': 'Report generated successfully. for Id '+ group_id
-            }
-        )
-        return "Report Has been generated successfully"
-    except Exception as e:
-        # print(e)
-        async_to_sync(channel_layer.group_send)(
-            "group_"+group_id,
-            {
-                'type': 'conversion_failed',
-            }
-        )
-        return "Report Has been generated successfully"
-        return "Report was not generated"
+    # try:
+    if minimal:
+        profile = ProfileReport(load_df,minimal=True,title=title)
+    else:
+        profile = ProfileReport(load_df,minimal=False,title=title)
+    profile.to_file(os.path.join('templates',"report.html"))
+    # messages.success("Report Has been generated sucessfully")
+    
+    async_to_sync(channel_layer.group_send)(
+        "group_"+group_id,
+        {
+            'type': 'task_completed',
+            'result': 'Report generated successfully. for Id '+ group_id
+        }
+    )
+    return "Report Has been generated successfully"
+    # except Exception as e:
+    #     print(e)
+    #     async_to_sync(channel_layer.group_send)(
+    #         "group_"+group_id,
+    #         {
+    #             'type': 'conversion_failed',
+    #         }
+    #     )
+    #     return "Report was not generated"
 
 
 

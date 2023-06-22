@@ -42,6 +42,17 @@
             border-radius: 10px;
             -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
         }
+        .truncate {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .expand {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: initial;
+            cursor: pointer;
+        }
     </style>
 
   </head>
@@ -216,6 +227,13 @@
                 });
         },
     
+            });
+            $('.dataframe tbody').on('click', 'td', function() {
+                if ($(this).hasClass('expand')) {
+                    $(this).removeClass('expand');
+                } else {
+                    $(this).addClass('expand');
+                }
             });
         });
     </script>
