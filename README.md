@@ -8,7 +8,8 @@ This Project utilizies the library named **Advertools** https://advertools.readt
 - Django
 - ChartJS
 - Celery 
-- Pandas
+- Pandas 
+- Y Data Profiling
 - Data Tables Jquery
 - Select2 js lib
 
