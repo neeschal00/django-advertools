@@ -1,0 +1,19 @@
+venv/
+.env
+*.jl
+
+*.log
+
+# any csv files
+*.csv
+
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+
+*.bak
+.vscode/
+.idea/

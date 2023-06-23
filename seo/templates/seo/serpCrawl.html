@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block css %}
+<style>
+    
+
+</style>
+{% endblock css %}
+
+{% load crispy_forms_tags %}
+{% block pageContent %}
+<div class="container">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-10">
+                <form method="post" onsubmit="openLoader()">
+                    {% csrf_token %}
+                    <fieldset class="form-group">
+                        <legend class="border-bottom mb-4 main-t">Get Search Engine Results</legend>
+                        {% crispy form %}
+                    </fieldset>
+                    
+                </form>
+            </div>
+            <div id="loadingModal" class="col-md-7 mt-2" style="display: none;">
+                <div class="mt-2">
+                  <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                  Loading...
+                </div>
+            </div>
+            
+            <div id="testResp"></div>
+
+        </div>
+    </div>
+</div>
+{% endblock pageContent %}
+
+{% block javascript %}
+<script>
+
+    function openLoader() {
+        document.getElementById("loadingModal").style.display = "block";
+      }
+    
+</script>
+
+<script>
+
+    
+</script>
+
+
+
+{% endblock javascript %}

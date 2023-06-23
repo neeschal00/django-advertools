@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block css %}
+<script>
+    $(document).ready(function() {
+        $("button").click(function() {
+            $(document).scroll($(document).height());
+        });
+    });
+</script>
+
+{% endblock css %}
+
+{% load crispy_forms_tags %}
+{% block pageContent %}
+<div class="container">
+    <div class="container">
+        <h1 class="h1 text-bolder">Generate Advertisement</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <form method="post" name="descriptive" id="descriptiveForm">
+                    {% csrf_token %}
+                    <fieldset class="form-group">
+                        <legend class="border-bottom mb-4 main-t">Generate Description Based</legend>
+                        {{ descriptive_form|crispy }}
+                    </fieldset>
+                    <div class="form-group">
+                        <button class="btn btn-outline-info" name="descriptive_form_submit" type="submit" on>
+                            Generate Advertisement
+                        </button>
+                    </div>
+                    
+                </form>
+            </div>
+            <div class="ml-1 col-md-6">
+                <form method="post" name="large" id="largeForm">
+                    {% csrf_token %}
+                    <fieldset class="form-group">
+                        <legend class="border-bottom mb-4 main-t">Generate Large Advertisements</legend>
+                        {{ large_form|crispy }}
+                    </fieldset>
+                    <div class="form-group">
+                        <button class="btn btn-outline-info" name="large_form_submit" type="submit">
+                            Generate Large ads
+                        </button>
+                    </div>
+                    
+                </form>
+            </div>
+            <div class="mt-3 col-md-12" style="height: 80%; overflow-y: scroll;">
+                {% if adsDf %}
+                    {{ adsDf | safe }}
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock pageContent %}
+
+{% block javascript %}
+
+
+
+
+
+{% endblock javascript %}

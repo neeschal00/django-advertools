@@ -1,0 +1,91 @@
+{% load static %}
+
+<div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark h-100 overflow-scroll position-fixed">
+    <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+        <a href="/" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+            <span class="fs-5 d-none d-sm-inline">Advertools</span>
+        </a>
+        <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
+            <li>
+                <a href="#sem" data-bs-toggle="collapse" class="nav-link px-0 align-middle fw-bold">
+                    <i class="fs-4 bi-speedometer2"></i> <span class="ms-1 d-none d-sm-inline">SEM</span> </a>
+                <ul class="collapse show nav flex-column ms-1" id="sem" data-bs-parent="#menu">
+                    <li>
+                        <a href="{% url 'advertisement' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">Generate</span> Ads </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'keywords' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">Generate</span> Keywords </a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#seo" data-bs-toggle="collapse" class="nav-link px-0 align-middle fw-bold">
+                    <i class="fs-4 bi-speedometer2"></i> <span class="ms-1 d-none d-sm-inline">SEO</span> </a>
+                <ul class="collapse show nav flex-column ms-1" id="seo" data-bs-parent="#menu1">
+                    <li class="w-100">
+                        <a href="{% url 'robotsdf' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">Robots.txt</span> View </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'sitemapdf' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">Sitemap</span> View </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'serp' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">SERP</span> Google </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'know' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">Knowledge</span> Graph </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'crawl' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">Crawler</span> View </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'serp-crawl' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">SERP</span> Crawler </a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#analysis" data-bs-toggle="collapse" class="nav-link px-0 align-middle fw-bold">
+                    <i class="fs-4 bi-speedometer2"></i> <span class="ms-1 d-none d-sm-inline">Analyse & Extract</span> </a>
+                <ul class="collapse show nav flex-column ms-1" id="analysis" data-bs-parent="#menu2">
+                    <li class="w-100">
+                        <a href="{% url 'anUrl' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">URL</span> Analysis </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'searchEmoji' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">Search</span> Emoji </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'extractEmoji' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">Emoji</span> Extraction </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'stopwords' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">View</span> StopWords </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'overviewT' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">Text</span> Overview </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'upload' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">Upload</span> DataFile </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'datasetT' %}" class="nav-link px-0 text-white"> <span class="d-none d-sm-inline">Analyze</span> DataFile </a>
+                    </li>
+                </ul>
+            </li>
+        
+        </ul>
+        <hr>
+        <!-- <div class="dropdown pb-4">
+            <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="https://github.com/mdo.png" alt="hugenerd" width="30" height="30" class="rounded-circle">
+                <span class="d-none d-sm-inline mx-1">User</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                <li><a class="dropdown-item" href="#">New project...</a></li>
+                <li><a class="dropdown-item" href="#">Settings</a></li>
+                <li><a class="dropdown-item" href="#">Profile</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" href="#">Sign out</a></li>
+            </ul>
+        </div> -->
+    </div>
+</div>

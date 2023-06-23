@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block css %}
+
+{% endblock css %}
+
+{% load crispy_forms_tags %}
+{% block pageContent %}
+<div class="container">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-8">
+                <form method="post" onsubmit="openLoader()">
+                    {% csrf_token %}
+                    <fieldset class="form-group">
+                        <legend class="border-bottom mb-4 main-t">Knowledge Graph</legend>
+                        {{ form|crispy }}
+                    </fieldset>
+                    <div class="form-group">
+                        <button class="btn btn-outline-info" type="submit">
+                            Get Knowledge
+                        </button>
+                    </div>
+                    
+                </form>
+            </div>
+
+            <div id="loadingModal" class="col-md-7 mt-2" style="display: none;">
+                <div class="mt-2">
+                  <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                  Loading...
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <canvas id="myChart" class="mt-3"></canvas>
+
+            </div>
+            <div class="col-md-10">
+                <canvas id="lineChart" class="mt-3"></canvas>
+            </div>
+
+            <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
+                {% if knowDf %}
+                    <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
+                        View Data Profiling Report
+                    </a>
+                    {{ knowDf | safe }}
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock pageContent %}
+
+{% block javascript %}
+<script>
+
+    function openLoader() {
+        document.getElementById("loadingModal").style.display = "block";
+      }
+    
+</script>
+<script>
+    const jsonData = {{ json|safe }};
+    console.log(jsonData);
+
+
+    function createLineChart(jsonData) {
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var labels = jsonData.map(function(obj) {
+            return obj["result.name"];
+        });
+        var data = jsonData.map(function(obj) {
+            return obj["resultScore"];
+        });
+        var chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+            labels: labels,
+            datasets: [{
+                label: 'Knowledge Graph query result score',
+                data: data,
+                borderColor: 'blue',
+                fill: false
+            }]
+            },
+            options: {
+            hover: {
+                mode: 'nearest',
+                intersect: true
+            },
+            tooltips: {
+                mode: 'index',
+                intersect: false
+            },
+            scales: {
+                xAxes: [{
+                    ticks: {
+                    callback: function(value, index, values) {
+                        if (value.length > 7) {
+                        return value.substr(0, 7) + '...';
+                        } else {
+                        return value;
+                        }
+                    }
+                    },
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Result Name'
+                    }
+                }],
+                yAxes: [{
+                display: true,
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Knowledge Graph Score'
+                }
+                }]
+            },
+            plugins:{
+                title: {
+                        display: true,
+                        text: 'Knowledge Graph Score Chart',
+                        font: {
+                        size: 18
+                        }
+                    }
+            }
+            }
+        });
+    }
+    const top5 = jsonData.slice(0,10);
+    createLineChart(top5);
+
+    function createBarChart(jsonData) {
+        var ctx = document.getElementById('lineChart').getContext('2d');
+        var labels = jsonData.map(function(obj) {
+            return obj["result.@type"];
+        });
+        labels = labels.flat();
+        const counts = labels.reduce((acc, value) => {
+        if (value in acc) {
+            acc[value]++;
+        } else {
+            acc[value] = 1;
+        }
+        return acc;
+        }, {});
+        labels = Object.keys(counts);
+        var data = Object.values(counts);
+
+        // Define the chart data
+        var data = {
+        labels: labels,
+        datasets: [{
+            label: 'Mostly Repeated entity type',
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1,
+            data: data
+        }]
+        };
+
+        // Create the chart
+        var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: data,
+        options: {
+            scales: {
+            yAxes: [{
+                ticks: {
+                beginAtZero: true
+                }
+            }],
+            xAxes: [
+                {
+                    ticks: {
+                    autoSkip: true,
+                    maxTicksLimit: 10,
+                    fontSize: 12, // Set the font size to 12px
+                    },
+                },
+            ],
+            
+            }
+        }
+        });
+    }
+
+    // Call the function to create the chart
+    createBarChart(jsonData);
+
+</script>
+
+
+
+{% endblock javascript %}

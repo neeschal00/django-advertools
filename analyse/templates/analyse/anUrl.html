@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block css %}
+
+{% endblock css %}
+
+{% load crispy_forms_tags %}
+{% block pageContent %}
+<div class="container">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-6 ">
+                <form method="post">
+                    {% csrf_token %}
+                    <fieldset class="form-group">
+                        <legend class="border-bottom mb-4 main-t">Analyse URLs</legend>
+                        {{ form|crispy }}
+                    </fieldset>
+                    <div class="form-group">
+                        <button class="btn btn-outline-info" type="submit">
+                            Analyse
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-12 mt-4" style="width:100%;overflow-x: scroll;">
+                {% if figure %}
+                    {{ figure | safe }}
+                {% endif %}
+            </div>
+            <div class="col-md-12 mt-4" style="width:100%;overflow-x: scroll;">
+                {% if urlsDf %}
+                    {{ urlsDf | safe }}
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock pageContent %}
+
+{% block javascript %}
+
+
+
+
+{% endblock javascript %}
