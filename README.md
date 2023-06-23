@@ -19,6 +19,11 @@ This Project utilizies the library named **Advertools** https://advertools.readt
 This django wrapper utilizes the above mentioned tools and technologies in order to create and implement those feature with user associated input as well as preprocessing some inputs for making it appropriate to pass as a parameter for those methods. The project utilizes Data Tables library of jquery to view pandas tables (i.e. converted to html table) in template in paginated format with additional feature to search the table, view only selected column as well as exporting the table in csv, excel, pdf, etc. The ChartJS library is used to create charts for few feature to visually represent data to show an overview as well as distinction for few of the dataset. The forms are organzied and prioritized based on the required and optional fields in the templates and django forms.
 
 
+## System Overview:
+
+![plot](./sysdesign.png)
+
+
 ## How to run this project
 
 - Setup venv, activate and install packages from requirements.txt
