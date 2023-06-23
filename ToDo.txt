@@ -1,3 +1,5 @@
 ### Seperate out logic for crawling a dataset 
 ### Use websocket seamlessly for data visulisation in 
 ### remove unnecessary code 
+### nested celery task .. figure out a way to send response from socket so it updates in frontend 
+### currently using based on task so it sends a JsonResponse

@@ -39,6 +39,7 @@ urlpatterns = [
     path('generate/',include('generateAds.urls')),
     path('analyse/',include('analyse.urls')),
     path('seo/',include('seo.urls')),
+    path('api/',include('api.urls')),
     path('admin/', admin.site.urls),
 ]
 

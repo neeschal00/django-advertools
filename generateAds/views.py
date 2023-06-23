@@ -6,7 +6,7 @@ from django.shortcuts import render,redirect, get_object_or_404
 from django.http import HttpResponseRedirect, JsonResponse
 from advertools import ad_create, kw_generate, ad_from_string
 from .forms import GenerateKeywords, DescriptionAds, LargeScaleAds
-
+import json
 import pandas as pd
 
 

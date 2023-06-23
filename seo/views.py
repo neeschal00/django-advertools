@@ -85,7 +85,8 @@ def robotsToDf(request, filters=None):
             df = robotstxt_to_df(urls)
             task_id = "test"
             dynamic_title = "Robots.txt Data profile"
-            generateReport.delay(task_id, df.to_json(), False, dynamic_title)
+            task_id = generateReport.delay(task_id, df.to_json(), False, dynamic_title)
+            # print("Task id in robots.txt "+ task_id.id)
             unique = None
             if "directive" in df:
                 unique_counts = df["directive"].value_counts()
@@ -113,6 +114,7 @@ def robotsToDf(request, filters=None):
                     "form": form,
                     "json": unique,
                     "invalid_urls": invalid_urls,
+                    "task_id": task_id.id,
                     #  'unique': unique_counts.to_html(classes='table table-striped text-center', justify='center'),
                     "roboDf": df.to_html(
                         classes="table table-striped text-center", justify="center"
@@ -322,6 +324,29 @@ def analyzeCrawlLogs():
 
 from .utils import delete_existing_files
 
+def analyzeCrawlLogs():
+    logsDf = crawllogs_to_df(logs_file_path="output_file.log")
+
+    logs_m = logsDf["message"].value_counts().to_json()
+    logs_s = logsDf["status"].value_counts().to_json()
+    logs_mi = logsDf["middleware"].value_counts().to_json()
+
+    logsDf = logsDf.reset_index(drop=True).to_html(
+        classes="table", justify="center"
+    )
+
+    logsDf = logsDf.replace(
+        'class="dataframe table"',
+        'class="table table-primary table-striped text-center"',
+    )
+    
+    
+    return {
+        'logs_message': logs_m,
+        'logs_status': logs_s,
+        'logs_mi': logs_mi,
+        'logs_dt': logsDf 
+    }
 
 def carwlLinks(request):
     overview = False
@@ -385,7 +410,7 @@ def carwlLinks(request):
                     request, "seo/crawl.html", {"form": form, "overview": overview}
                 )
             else:
-                jsonD = crawlDf.to_json()
+                jsonD = crawlDf.to_json(orient="records")
 
                 task_id = "test"
                 dynamic_title = "Crawl Data profile"
@@ -417,6 +442,7 @@ def carwlLinks(request):
                 status.columns = ["status", "frequency", "percentage"]
 
                 overview = True
+                
                 return render(
                     request,
                     "seo/crawl.html",
@@ -424,7 +450,7 @@ def carwlLinks(request):
                         "form": form,
                         "describe": describe.to_dict(),
                         "statusJ": status.to_json(),
-                        # "logsDf": logsDf,
+                        
                         "crawlDf": crawlDf.to_html(
                             classes="table table-striped", justify="center"
                         ),
@@ -477,9 +503,11 @@ def serpCrawl(request):
             links = serpDf["link"].to_list()
 
             if headers_only:
-                serpCrawlHeaders.delay("test", links)
+                task_id = serpCrawlHeaders.delay("test", links)
             else:
-                serpCrawlFull.delay("test", links)
+                task_id = serpCrawlFull.delay("test", links)
+            
+
 
             return render(
                 request,
@@ -489,6 +517,7 @@ def serpCrawl(request):
                     "serpDf": serpDf.to_html(
                         classes="table table-striped text-center", justify="center"
                     ),
+                    "task_id": task_id.id
                 },
             )
 

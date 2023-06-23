@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django_select2',
     'generateAds.apps.GenerateadsConfig',
     'analyse.apps.AnalyseConfig',
+    'api.apps.ApiConfig',
     'seo.apps.SeoConfig',
     'django.contrib.admin',
     'django.contrib.auth',
