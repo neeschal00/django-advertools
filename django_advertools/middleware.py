@@ -1,8 +1,9 @@
 from django.template.response import TemplateResponse
 
+
 class LoaderMiddleware(object):
     def __init__(self, get_response):
-        print('LoaderMiddleware initialized')
+        print("LoaderMiddleware initialized")
         self.get_response = get_response
 
     def process_request(self, request):
@@ -11,6 +12,6 @@ class LoaderMiddleware(object):
 
     def process_template_response(self, request, response):
         if isinstance(response, TemplateResponse):
-            response.context_data['show_loader'] = request.show_loader
+            response.context_data["show_loader"] = request.show_loader
             del request.show_loader
         return response

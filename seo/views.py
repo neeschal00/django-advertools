@@ -260,7 +260,6 @@ def searchEngineResults(request):
             )
 
     else:
-        
         form = SerpGoogle()
         return render(request, "seo/serpGoog.html", {"form": form})
 
@@ -287,7 +286,9 @@ def knowledgeGraph(request):
                     query=query, key=config("KEY"), languages=languages
                 )
 
-            generateReport.delay("test",knowDf.to_json(),False,"Knowledge Graph Data profile")
+            generateReport.delay(
+                "test", knowDf.to_json(), False, "Knowledge Graph Data profile"
+            )
 
             jsonD = knowDf.to_json(orient="records")
 
@@ -311,9 +312,7 @@ def knowledgeGraph(request):
 def analyzeCrawlLogs():
     logsDf = crawllogs_to_df(logs_file_path="output_file.log")
 
-    logsDf = logsDf.reset_index(drop=True).to_html(
-        classes="table", justify="center"
-    )
+    logsDf = logsDf.reset_index(drop=True).to_html(classes="table", justify="center")
 
     logsDf = logsDf.replace(
         'class="dataframe table"',
@@ -324,6 +323,7 @@ def analyzeCrawlLogs():
 
 from .utils import delete_existing_files
 
+
 def analyzeCrawlLogs():
     logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/output_file.log")
 
@@ -331,23 +331,20 @@ def analyzeCrawlLogs():
     logs_s = logsDf["status"].value_counts().to_json()
     logs_mi = logsDf["middleware"].value_counts().to_json()
 
-    logsDf = logsDf.reset_index(drop=True).to_html(
-        classes="table", justify="center"
-    )
+    logsDf = logsDf.reset_index(drop=True).to_html(classes="table", justify="center")
 
     logsDf = logsDf.replace(
         'class="dataframe table"',
         'class="table table-primary table-striped text-center"',
     )
-    
-    
-    return {
 
-        'logs_message': logs_m,
-        'logs_status': logs_s,
-        'logs_mi': logs_mi,
-        'logsDf': logsDf 
+    return {
+        "logs_message": logs_m,
+        "logs_status": logs_s,
+        "logs_mi": logs_mi,
+        "logsDf": logsDf,
     }
+
 
 def carwlLinks(request):
     overview = False
@@ -371,15 +368,14 @@ def carwlLinks(request):
             except PermissionError:
                 messages.warning(request, "Somebody Else is using this service")
                 return HttpResponseRedirect("home")
-            
-            custom_settings = {
 
-                        "CLOSESPIDER_PAGECOUNT": int(form.cleaned_data["pg_count"])
-                        if form.cleaned_data["pg_count"]
-                        else 100,
-                        "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
-                        "LOG_FILE": "logs/crawlLogs/output_file.log",
-                    }
+            custom_settings = {
+                "CLOSESPIDER_PAGECOUNT": int(form.cleaned_data["pg_count"])
+                if form.cleaned_data["pg_count"]
+                else 100,
+                "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+                "LOG_FILE": "logs/crawlLogs/output_file.log",
+            }
 
             if headers_only:
                 crawlDf = crawl_headers(
@@ -396,13 +392,13 @@ def carwlLinks(request):
                     url_list=links,
                     output_file="output/crawl_output.jl",
                     follow_links=follow_links,
-                    custom_settings=custom_settings
+                    custom_settings=custom_settings,
                 )
 
                 crawlDf = pd.read_json("output/crawl_output.jl", lines=True)
 
             logsAnalysis = analyzeCrawlLogs()
-            
+
             if crawlDf.empty:
                 messages.warning(
                     request, "Empty columns observed this url may not be crawlable"
@@ -444,7 +440,7 @@ def carwlLinks(request):
                 status.columns = ["status", "frequency", "percentage"]
 
                 overview = True
-                
+
                 return render(
                     request,
                     "seo/crawl.html",
@@ -475,14 +471,13 @@ def serpCrawl(request):
             query = form.cleaned_data["query"]
             query = list(map(str.strip, query.split(",")))
             gl = form.cleaned_data["geolocation"]
-            
+
             country = form.cleaned_data["country"]
             language = form.cleaned_data["language"]
             rights = form.cleaned_data["rights"]
             limit = form.cleaned_data["limit"]
             headers_only = form.cleaned_data["headers_only"]
 
-            
             if gl or country or language or rights:
                 params = {
                     "q": query,
@@ -508,8 +503,6 @@ def serpCrawl(request):
                 task_id = serpCrawlHeaders.delay("test", links)
             else:
                 task_id = serpCrawlFull.delay("test", links)
-            
-
 
             return render(
                 request,
@@ -519,7 +512,7 @@ def serpCrawl(request):
                     "serpDf": serpDf.to_html(
                         classes="table table-striped text-center", justify="center"
                     ),
-                    "task_id": task_id.id
+                    "task_id": task_id.id,
                 },
             )
 

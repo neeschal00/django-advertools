@@ -15,35 +15,38 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path, include
 from django.http import HttpResponse
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 
+
 def index(request):
-    return render(request,"home.html")
+    return render(request, "home.html")
+
 
 def serveReport(request):
-    return render(request,"reportMain.html")
+    return render(request, "reportMain.html")
+
 
 def getReport(request):
-    return render(request,"report.html")
+    return render(request, "report.html")
+
 
 urlpatterns = [
-    path('',index,name="home"),
-    path('report/get/',getReport,name="getReport"),
-    path('report/',serveReport,name="report"),
+    path("", index, name="home"),
+    path("report/get/", getReport, name="getReport"),
+    path("report/", serveReport, name="report"),
     path("select2/", include("django_select2.urls")),
-    path('generate/',include('generateAds.urls')),
-    path('analyse/',include('analyse.urls')),
-    path('seo/',include('seo.urls')),
-    path('api/',include('api.urls')),
-    path('admin/', admin.site.urls),
+    path("generate/", include("generateAds.urls")),
+    path("analyse/", include("analyse.urls")),
+    path("seo/", include("seo.urls")),
+    path("api/", include("api.urls")),
+    path("admin/", admin.site.urls),
 ]
 
-urlpatterns += static(settings.STATIC_URL, document_root = settings.STATIC_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL,
-                            document_root = settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

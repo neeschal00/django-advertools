@@ -10,43 +10,40 @@ from channels.layers import get_channel_layer
 import json
 
 channel_layer = get_channel_layer()
+
+
 @shared_task
-def generateReport(group_id,df,minimal=False,title="Profile Report"):
-   
+def generateReport(group_id, df, minimal=False, title="Profile Report"):
     task_id = generateReport.request.id
     print("taks id in generateReport " + task_id)
     load_df = pd.read_json(df)
-    
+
     # try:
     if minimal:
-        profile = ProfileReport(load_df,minimal=True,title=title)
+        profile = ProfileReport(load_df, minimal=True, title=title)
     else:
-        profile = ProfileReport(load_df,minimal=False,title=title)
-    
+        profile = ProfileReport(load_df, minimal=False, title=title)
+
     try:
-        profile.to_file(os.path.join('templates',"report.html"))
+        profile.to_file(os.path.join("templates", "report.html"))
         async_to_sync(channel_layer.group_send)(
-            "group_"+group_id,
+            "group_" + group_id,
             {
-                'type': 'task_completed',
-                'result': 'Report generated successfully. for Id '+ group_id
-            }
+                "type": "task_completed",
+                "result": "Report generated successfully. for Id " + group_id,
+            },
         )
         return "Report Has been generated successfully"
-    
+
     except Exception as e:
         print(e)
         async_to_sync(channel_layer.group_send)(
-            "group_"+group_id,
-            {
-                'type': 'report_failed'
-            }
+            "group_" + group_id, {"type": "report_failed"}
         )
         return e
 
     # messages.success("Report Has been generated sucessfully")
-    
-    
+
     # except Exception as e:
     #     print(e)
     #     async_to_sync(channel_layer.group_send)(
@@ -58,98 +55,79 @@ def generateReport(group_id,df,minimal=False,title="Profile Report"):
     #     return "Report was not generated"
 
 
+@shared_task
+def add(a, b):
+    return a + b
 
 
 @shared_task
-def add(a,b):
-    return a+b
-
-
-@shared_task
-def serpCrawlHeaders(group_id,links:list):
+def serpCrawlHeaders(group_id, links: list):
     # print(links)
     links = list(links)
     # print(links)
     try:
-        if os.path.exists('output/serp_crawl_headers_output.jl'):
-            os.remove('output/serp_crawl_headers_output.jl')
+        if os.path.exists("output/serp_crawl_headers_output.jl"):
+            os.remove("output/serp_crawl_headers_output.jl")
     except PermissionError:
         return False
-    
 
-    crawl_headers(url_list=links,output_file="output/serp_crawl_headers_output.jl",custom_settings={'LOG_FILE': 'logs/crawlLogs/headerCrawl.log'})
+    crawl_headers(
+        url_list=links,
+        output_file="output/serp_crawl_headers_output.jl",
+        custom_settings={"LOG_FILE": "logs/crawlLogs/headerCrawl.log"},
+    )
     async_to_sync(channel_layer.group_send)(
-            "group_"+group_id,
-            {
-                'type': 'task_completed',
-                'result': 'headers crawled'
-            }
-        )
-    serpReadDf.delay(group_id,"headers")
-    df = pd.read_json('output/serp_crawl_headers_output.jl', lines=True)
+        "group_" + group_id, {"type": "task_completed", "result": "headers crawled"}
+    )
+    serpReadDf.delay(group_id, "headers")
+    df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
     async_to_sync(channel_layer.group_send)(
-            "group_"+group_id,
-            {
-                'type': 'task_completed',
-                'result': 'headers crawled'
-            }
-        )
-    return {
-        "status":"completed",
-        "result": df.to_json(orient="records")
-    }
-    
+        "group_" + group_id, {"type": "task_completed", "result": "headers crawled"}
+    )
+    return {"status": "completed", "result": df.to_json(orient="records")}
+
+
 @shared_task
-def serpCrawlFull(group_id,links:list):
+def serpCrawlFull(group_id, links: list):
     try:
-        if os.path.exists('output/serp_crawl_output.jl'):
-            os.remove('output/serp_crawl_output.jl')
+        if os.path.exists("output/serp_crawl_output.jl"):
+            os.remove("output/serp_crawl_output.jl")
     except PermissionError:
         return False
-    
+
     task_id = serpCrawlFull.request.id
-    
-    crawl(url_list=links,output_file="output/serp_crawl_output.jl",custom_settings={'LOG_FILE': 'logs/crawlLogs/fullCrawl.log'})
+
+    crawl(
+        url_list=links,
+        output_file="output/serp_crawl_output.jl",
+        custom_settings={"LOG_FILE": "logs/crawlLogs/fullCrawl.log"},
+    )
     async_to_sync(channel_layer.group_send)(
-            "group_"+group_id,
-            {
-                'type': 'task_completed',
-                'result': 'full crawled'
-            }
-        )
-    df = pd.read_json('output/serp_crawl_headers_output.jl', lines=True)
+        "group_" + group_id, {"type": "task_completed", "result": "full crawled"}
+    )
+    df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
 
     async_to_sync(channel_layer.group_send)(
-            "group_"+group_id,
-            {
-                'type': 'crawlRead',
-                'task_id': task_id
-            }
-        )
-    return {
-        "status":"completed",
-        "result": df.to_json(orient="records")
-    }
+        "group_" + group_id, {"type": "crawlRead", "task_id": task_id}
+    )
+    return {"status": "completed", "result": df.to_json(orient="records")}
+
 
 @shared_task
-def serpReadDf(group_id,type:str):
+def serpReadDf(group_id, type: str):
     if type == "headers":
-        df = pd.read_json('output/serp_crawl_headers_output.jl', lines=True)
+        df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
     else:
-        df = pd.read_json('output/serp_crawl_output.jl', lines=True)
+        df = pd.read_json("output/serp_crawl_output.jl", lines=True)
 
     data = df.to_json(orient="records")
     # print(type(data))
     async_to_sync(channel_layer.group_send)(
-            "group_"+group_id,
-            {
-                'type': 'data_converted',
-                'result': data
-            }
-        )
+        "group_" + group_id, {"type": "data_converted", "result": data}
+    )
 
     return True
-    
+
 
 @shared_task
 def analyzeCrawlLogs():
@@ -159,20 +137,16 @@ def analyzeCrawlLogs():
     logs_s = logsDf["status"].value_counts().to_json()
     logs_mi = logsDf["middleware"].value_counts().to_json()
 
-    logsDf = logsDf.reset_index(drop=True).to_html(
-        classes="table", justify="center"
-    )
+    logsDf = logsDf.reset_index(drop=True).to_html(classes="table", justify="center")
 
     logsDf = logsDf.replace(
         'class="dataframe table"',
         'class="table table-primary table-striped text-center"',
     )
-    
-    
-    return {
-        'logs_message': logs_m,
-        'logs_status': logs_s,
-        'logs_mi': logs_mi,
-        'logs_dt': logsDf 
-    }
 
+    return {
+        "logs_message": logs_m,
+        "logs_status": logs_s,
+        "logs_mi": logs_mi,
+        "logs_dt": logsDf,
+    }
