@@ -7,7 +7,6 @@ venv/
 # any csv files
 *.csv
 
-
 __pycache__/
 *.pyc
 *.pyo

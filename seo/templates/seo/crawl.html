@@ -75,11 +75,17 @@
             <div class="col-md-4 mt-2">
                 <canvas id="donutChart"></canvas>
             </div>
+            <div class="col-md-4 mt-2">
+                <canvas id="pieChart"></canvas>
+            </div>
+            <div class="col-md-4 mt-2">
+                <canvas id="donutChart1"></canvas>
+            </div>
 
             <div class="col-md-10 mt-3">
                 <canvas id="lineChart" class="mt-2"></canvas>
             </div>
-            <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
+            <div class="col-md-12 mt-3" style="max-height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
                 {% if logsDf %}
                     <h3 class="h3"> Logs Dataframe </h3>
                     {{ logsDf | safe }}
@@ -195,6 +201,131 @@
     // Call the function to create the chart
     // const top5 = jsonData.slice(0,5);
     createDonutChart(statusJ);
+
+    const logsMessage = {{ logs_message|safe }};
+    console.log(logsMessage);
+
+    function createDonutChart1(jsonData) {
+        var ctx = document.getElementById('donutChart1').getContext('2d');
+        var labels = Object.keys(jsonData);
+        // console.log(labels)
+        var length = labels.length;
+
+        var data = Object.values(jsonData);
+        
+        var colors = generateRandomColors(length);
+        // Define the chart data
+        var data = {
+        labels: labels,
+        datasets: [{
+            label: 'Message Received',
+            backgroundColor: colors,
+            data: data
+        }
+    ]
+        };
+
+        // Create the chart
+        var donutChart = new Chart(document.getElementById('donutChart1'), {
+            type: 'doughnut',
+            data: data,
+            options: {
+                cutoutPercentage: 70, // Adjust the size of the hole in the middle (optional)
+                responsive: true,
+                plugins: {
+                    afterDraw: function(chart) {
+                        var width = chart.chart.width;
+                        var height = chart.chart.height;
+                        var ctx = chart.chart.ctx;
+
+                        ctx.restore();
+                        var fontSize = (height / 114).toFixed(2);
+                        ctx.font = fontSize + "em sans-serif";
+                        ctx.textBaseline = "middle";
+
+                        var text = "Status Frequencies";
+                        var textX = Math.round((width - ctx.measureText(text).width) / 2);
+                        var textY = height / 2;
+
+                        ctx.fillText(text, textX, textY);
+                        ctx.save();
+                    },
+                    title: {
+                        display: true,
+                        text: 'Types of Messages in Logs',
+                        font: {
+                        size: 18
+                        }
+                    }
+                }
+            }
+        });
+    }
+    createDonutChart1(logsMessage)
+    // Call the function to create the chart
+    // const top5 = jsonData.slice(0,5);
+
+    function createPieChart(jsonData){
+        var ctx = document.getElementById('pieChart').getContext('2d');
+        var labels = Object.keys(jsonData);
+        // console.log(labels)
+        var length = labels.length;
+
+        var data = Object.values(jsonData);
+        
+
+        var colors = generateRandomColors(length);
+        // Define the chart data
+        var data = {
+        labels: labels,
+        datasets: [{
+            label: 'Message Received',
+            backgroundColor: colors,
+            data: data
+        }
+    ]
+        };
+
+        // Create the chart
+        var donutChart = new Chart(document.getElementById('pieChart'), {
+            type: 'pie',
+            data: data,
+            options: {
+                cutoutPercentage: 70, // Adjust the size of the hole in the middle (optional)
+                responsive: true,
+                plugins: {
+                    afterDraw: function(chart) {
+                        var width = chart.chart.width;
+                        var height = chart.chart.height;
+                        var ctx = chart.chart.ctx;
+
+                        ctx.restore();
+                        var fontSize = (height / 114).toFixed(2);
+                        ctx.font = fontSize + "em sans-serif";
+                        ctx.textBaseline = "middle";
+
+                        var text = "Status Frequencies";
+                        var textX = Math.round((width - ctx.measureText(text).width) / 2);
+                        var textY = height / 2;
+
+                        ctx.fillText(text, textX, textY);
+                        ctx.save();
+                    },
+                    title: {
+                        display: true,
+                        text: 'Middlewares in Logs',
+                        font: {
+                        size: 18
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const logsMiddleware = {{ logs_mi|safe }};
+    console.log(logsMessage);
+    createPieChart(logsMiddleware);
 
     const jsonData = {{ json|safe }};
     console.log(jsonData);

@@ -5,6 +5,7 @@ deployment:
  - /bin/cp -R django_advertools $DEPLOYPATH
  - /bin/cp -R analyse $DEPLOYPATH
  - /bin/cp -R generateAds $DEPLOYPATH
+ - /bin/cp -R api $DEPLOYPATH
  - /bin/cp -R media $DEPLOYPATH
  - /bin/cp -R seo $DEPLOYPATH
  - /bin/cp -R static $DEPLOYPATH

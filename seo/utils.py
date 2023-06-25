@@ -1,10 +1,10 @@
 import os 
 
 def delete_existing_files():
-    if os.path.exists('crawl_output.jl'):
-        os.remove('crawl_output.jl')
-    if os.path.exists('output_file.log'):
-        os.remove('output_file.log')
+    if os.path.exists('output/crawl_output.jl'):
+        os.remove('output/crawl_output.jl')
+    if os.path.exists('logs/crawlLogs/output_file.log'):
+        os.remove('logs/crawlLogs/output_file.log')
 
 
 def validate_links(links):

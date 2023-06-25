@@ -78,3 +78,12 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
             'result': "Read crawled file",
             'task_id': task_id
         }))
+    
+    async def analysisComplete(self,event):
+        task_id = event["task_id"]
+
+        await self.send(text_data=json.dumps({
+            'type':'analysisComplete',
+            'result': "Sub analysis complete",
+            'task_id': task_id
+        }))

@@ -131,6 +131,7 @@ ASGI_APPLICATION = 'django_advertools.asgi.application'
 
 
 #logging
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -138,20 +139,31 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/debug.log'),  
+            'formatter': 'verbose',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} {levelname} {name} {message}',
+            'style': '{',
+        },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
-            'level': 'INFO',  # Set the desired log level for the 'django' logger
+            'handlers': ['console', 'file'],  # Add 'file' handler to the 'django' logger
+            'level': 'INFO',
         },
         'channels': {
-            'handlers': ['console'],
-            'level': 'DEBUG',  # Set the desired log level for the 'channels' logger
+            'handlers': ['console', 'file'],  # Add 'file' handler to the 'channels' logger
+            'level': 'INFO',
             'propagate': False,
         },
         'asgi': {
-            'handlers': ['console'],
-            'level': 'DEBUG',  # Set the desired log level for the 'asgi' logger
+            'handlers': ['console', 'file'],  # Add 'file' handler to the 'asgi' logger
+            'level': 'INFO',
             'propagate': False,
         },
     },

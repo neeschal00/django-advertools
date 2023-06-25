@@ -71,13 +71,13 @@ def serpCrawlHeaders(group_id,links:list):
     links = list(links)
     # print(links)
     try:
-        if os.path.exists('serp_crawl_headers_output.jl'):
-            os.remove('serp_crawl_headers_output.jl')
+        if os.path.exists('output/serp_crawl_headers_output.jl'):
+            os.remove('output/serp_crawl_headers_output.jl')
     except PermissionError:
         return False
     
 
-    crawl_headers(url_list=links,output_file="serp_crawl_headers_output.jl",custom_settings={'LOG_FILE': 'headerCrawl.log'})
+    crawl_headers(url_list=links,output_file="output/serp_crawl_headers_output.jl",custom_settings={'LOG_FILE': 'logs/crawlLogs/headerCrawl.log'})
     async_to_sync(channel_layer.group_send)(
             "group_"+group_id,
             {
@@ -86,7 +86,7 @@ def serpCrawlHeaders(group_id,links:list):
             }
         )
     serpReadDf.delay(group_id,"headers")
-    df = pd.read_json('serp_crawl_headers_output.jl', lines=True)
+    df = pd.read_json('output/serp_crawl_headers_output.jl', lines=True)
     async_to_sync(channel_layer.group_send)(
             "group_"+group_id,
             {
@@ -102,14 +102,14 @@ def serpCrawlHeaders(group_id,links:list):
 @shared_task
 def serpCrawlFull(group_id,links:list):
     try:
-        if os.path.exists('serp_crawl_output.jl'):
-            os.remove('serp_crawl_output.jl')
+        if os.path.exists('output/serp_crawl_output.jl'):
+            os.remove('output/serp_crawl_output.jl')
     except PermissionError:
         return False
     
     task_id = serpCrawlFull.request.id
     
-    crawl(url_list=links,output_file="serp_crawl_output.jl",custom_settings={'LOG_FILE': 'fullCrawl.log'})
+    crawl(url_list=links,output_file="output/serp_crawl_output.jl",custom_settings={'LOG_FILE': 'logs/crawlLogs/fullCrawl.log'})
     async_to_sync(channel_layer.group_send)(
             "group_"+group_id,
             {
@@ -117,7 +117,7 @@ def serpCrawlFull(group_id,links:list):
                 'result': 'full crawled'
             }
         )
-    df = pd.read_json('serp_crawl_headers_output.jl', lines=True)
+    df = pd.read_json('output/serp_crawl_headers_output.jl', lines=True)
 
     async_to_sync(channel_layer.group_send)(
             "group_"+group_id,
@@ -134,9 +134,9 @@ def serpCrawlFull(group_id,links:list):
 @shared_task
 def serpReadDf(group_id,type:str):
     if type == "headers":
-        df = pd.read_json('serp_crawl_headers_output.jl', lines=True)
+        df = pd.read_json('output/serp_crawl_headers_output.jl', lines=True)
     else:
-        df = pd.read_json('serp_crawl_output.jl', lines=True)
+        df = pd.read_json('output/serp_crawl_output.jl', lines=True)
 
     data = df.to_json(orient="records")
     # print(type(data))
