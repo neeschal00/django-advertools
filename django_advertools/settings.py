@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+import dotenv
 
+dotenv.load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -104,27 +106,9 @@ DATABASES = {
 }
 
 
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-#         'LOCATION': '',
-#         'TIMEOUT': 300,
-#         'OPTIONS': {
-#             'MAX_ENTRIES': 300,
-#             'CULL_FREQUENCY': 3,
-#         },
-#     },
-#     "select2": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": "redis://127.0.0.1:6379/2",
-#         "OPTIONS": {
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#         }
-#     }
-# }
+
 ASGI_APPLICATION = "django_advertools.asgi.application"
 
-# SELECT2_CACHE_BACKEND = "select2"
 
 
 # logging
@@ -153,19 +137,19 @@ LOGGING = {
             "handlers": [
                 "console",
                 "file",
-            ],  # Add 'file' handler to the 'django' logger
+            ],  
             "level": "INFO",
         },
         "channels": {
             "handlers": [
                 "console",
                 "file",
-            ],  # Add 'file' handler to the 'channels' logger
+            ],  
             "level": "INFO",
             "propagate": False,
         },
         "asgi": {
-            "handlers": ["console", "file"],  # Add 'file' handler to the 'asgi' logger
+            "handlers": ["console", "file"],  
             "level": "INFO",
             "propagate": False,
         },
@@ -197,7 +181,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("localhost", 6379)],
+            "hosts": [(os.getenv("REDIS_HOST"), os.getenv("REDIS_PORT"))],
         },
     },
 }
@@ -240,8 +224,8 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 
 
 # set the celery timezone
