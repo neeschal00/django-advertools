@@ -26,6 +26,10 @@ This django wrapper utilizes the above mentioned tools and technologies in order
 
 ## How to run this project
 
+- Create .env file based on the sample.
+  Refer to this url https://advertools.readthedocs.io/en/master/advertools.serp.html for the stps to create credentials and add it to the env file.
+  Similarly use this url https://advertools.readthedocs.io/en/master/advertools.knowledge_graph.html#account-setup to setup knowledge graph as well in the same project for google creds
+
 - Setup venv, activate and install packages from requirements.txt
 
 ```

@@ -42,18 +42,6 @@ def generateReport(group_id, df, minimal=False, title="Profile Report"):
         )
         return e
 
-    # messages.success("Report Has been generated sucessfully")
-
-    # except Exception as e:
-    #     print(e)
-    #     async_to_sync(channel_layer.group_send)(
-    #         "group_"+group_id,
-    #         {
-    #             'type': 'conversion_failed',
-    #         }
-    #     )
-    #     return "Report was not generated"
-
 
 @shared_task
 def add(a, b):
@@ -76,15 +64,16 @@ def serpCrawlHeaders(group_id, links: list):
         output_file="output/serp_crawl_headers_output.jl",
         custom_settings={"LOG_FILE": "logs/crawlLogs/headerCrawl.log"},
     )
-    async_to_sync(channel_layer.group_send)(
-        "group_" + group_id, {"type": "task_completed", "result": "headers crawled"}
-    )
     serpReadDf.delay(group_id, "headers")
     df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
+
+    analyzeCrawlLogs.delay(group_id,"headers")
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "headers crawled"}
     )
     return {"status": "completed", "result": df.to_json(orient="records")}
+
+
 
 
 @shared_task
@@ -106,6 +95,8 @@ def serpCrawlFull(group_id, links: list):
         "group_" + group_id, {"type": "task_completed", "result": "full crawled"}
     )
     df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
+    task_idr = analyzeCrawlLogs.delay(group_id,"full")
+    print("main id"+ task_idr.id)
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "crawlRead", "task_id": task_id}
@@ -130,9 +121,18 @@ def serpReadDf(group_id, type: str):
 
 
 @shared_task
-def analyzeCrawlLogs():
-    logsDf = crawllogs_to_df(logs_file_path="output_file.log")
+def analyzeCrawlLogs(group_id,type):
+    task_id = analyzeCrawlLogs.request.id
+    print("analyze crawl logs")
+    print(task_id)
+    if type == "headers":
 
+        logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/headerCrawl.log")
+    else:
+        logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/fullCrawl.log")
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id, {"type": "task_completed", "result": "Crawl logs loaded"}
+    )
     logs_m = logsDf["message"].value_counts().to_json()
     logs_s = logsDf["status"].value_counts().to_json()
     logs_mi = logsDf["middleware"].value_counts().to_json()
@@ -143,10 +143,18 @@ def analyzeCrawlLogs():
         'class="dataframe table"',
         'class="table table-primary table-striped text-center"',
     )
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"crawlLogs"}
+    )
 
-    return {
+    result = json.dumps({
         "logs_message": logs_m,
         "logs_status": logs_s,
         "logs_mi": logs_mi,
         "logs_dt": logsDf,
+    })
+
+    return {
+        "status": "completed",
+        "result": result
     }

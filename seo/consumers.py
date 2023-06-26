@@ -73,6 +73,8 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
 
     async def analysisComplete(self, event):
         task_id = event["task_id"]
+        task_name = event["task_name"]
+        
 
         await self.send(
             text_data=json.dumps(
@@ -80,6 +82,7 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
                     "type": "analysisComplete",
                     "result": "Sub analysis complete",
                     "task_id": task_id,
+                    "task_name": task_name,
                 }
             )
         )

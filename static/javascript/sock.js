@@ -19,14 +19,33 @@ if (random_id) {
     // Event handler for receiving messages
     socket.onmessage = function (event) {
         var message = JSON.parse(event.data);
-        // console.log(message)
+        console.log(message)
         // console.log(typeof message)
-        // console.log('Received message:', message);
-        if (message.type != "data_converted") {
-            window.alert(message.result);
+        console.log(message.type)
+        if(message.task_id){
+            console.log(message.task_id)
+        }
+        console.log('Received message:', message);
+
+        if (message.type === 'analysisComplete'){
+            console.log("Analysis complete")
+            console.log(message.task_id)
+            var url = "/api/analysis/"+message.task_id+"/";
+            console.log(url);
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.status);  
+                const element = document.getElementById('analysisResp');
+                element.textContent = JSON.stringify(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
 
-        if (message.type == 'crawlRead'){
+        
+        if (message.type === 'crawlRead'){
             console.log("Crawl Read")
             console.log(message.task_id)
             var url = "/api/result/"+message.task_id+"/";
@@ -42,6 +61,12 @@ if (random_id) {
                 console.error('Error:', error);
             });
         }
+
+        
+        // if (message.type != "data_converted") {
+        //     window.alert(message.result);
+        // }
+
 
         // Handle the received message as needed
     };

@@ -309,17 +309,6 @@ def knowledgeGraph(request):
         return render(request, "seo/knowledgeG.html", {"form": form})
 
 
-def analyzeCrawlLogs():
-    logsDf = crawllogs_to_df(logs_file_path="output_file.log")
-
-    logsDf = logsDf.reset_index(drop=True).to_html(classes="table", justify="center")
-
-    logsDf = logsDf.replace(
-        'class="dataframe table"',
-        'class="table table-primary table-striped text-center"',
-    )
-    logsDescribe = logsDf.message.value_counts()
-
 
 from .utils import delete_existing_files
 
