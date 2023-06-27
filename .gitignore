@@ -1,8 +1,9 @@
 venv/
 .env
-*.jl
+output/*.jl
+logs/crawlLogs/*.log
 
-*.log
+debug.log
 
 # any csv files
 *.csv

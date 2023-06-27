@@ -238,13 +238,13 @@ def searchEngineResults(request):
 
             rank_df.rename(columns={"displayLink": "domain"}, inplace=True)
             rank_df = rank_df.reset_index(drop=True).to_html(
-                classes="table", justify="center"
+                classes="table table-primary table-striped text-center", justify="center"
             )
 
-            rank_df = rank_df.replace(
-                'class="dataframe table"',
-                'class="table table-primary table-striped text-center"',
-            )
+            # rank_df = rank_df.replace(
+            #     'class="dataframe table"',
+            #     'class="table table-primary table-striped text-center"',
+            # )
 
             return render(
                 request,
