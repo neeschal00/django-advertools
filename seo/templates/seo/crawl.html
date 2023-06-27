@@ -127,14 +127,7 @@
     const statusJ = {{ statusJ|safe }};
     console.log(statusJ);
 
-    function generateRandomColors(count) {
-        var colors = [];
-        for (var i = 0; i < count; i++) {
-            var color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-            colors.push(color);
-        }
-        return colors;
-    }
+    
 
     function createDonutChart(jsonData) {
         var ctx = document.getElementById('donutChart').getContext('2d');

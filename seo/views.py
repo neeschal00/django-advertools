@@ -493,6 +493,20 @@ def serpCrawl(request):
             else:
                 task_id = serpCrawlFull.delay("test", links)
 
+            domains_df = serpDf["displayLink"].value_counts()
+            domains_df = pd.DataFrame(
+                {"frequency": domains_df, "percentage": domains_df / len(serpDf) * 100}
+            )
+            domains_df.reset_index(inplace=True)
+            domains_df.columns = ["displayLink", "frequency", "percentage"]
+
+            rank_df = serpDf[["searchTerms", "displayLink", "rank", "link"]].head(10)
+
+            rank_df.rename(columns={"displayLink": "domain"}, inplace=True)
+            rank_df = rank_df.reset_index(drop=True).to_html(
+                classes="table table-primary table-striped text-center", justify="center"
+            )
+
             return render(
                 request,
                 "seo/serpCrawl.html",
@@ -502,8 +516,10 @@ def serpCrawl(request):
                         classes="table table-striped text-center", justify="center"
                     ),
                     "task_id": task_id.id,
-                    "processing": True
-                },
+                    "processing": True,
+                    "domains_df": domains_df.to_json(orient="records"),
+                    "rankDf": rank_df,
+                }
             )
 
     else:
