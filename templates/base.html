@@ -195,7 +195,6 @@
       </div>
     </div>
 
-    <script src="{% static 'javascript/sock.js' %}"></script>
     <!-- Option 1: jQuery and Bootstrap Bundle (includes Popper) -->
     <script
       src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
@@ -225,8 +224,108 @@
     <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.colVis.min.js"></script>
     <script>
-      // var dTable;
-      $(document).ready(function () {
+      function applyDataTablesFormatting(tableElement) {
+        var table = $(tableElement).find(".dataframe");
+
+        table
+          .find("thead tr")
+          .clone(true)
+          .addClass("filters")
+          .appendTo(table.find("thead"));
+
+        var dTable = table.DataTable({
+          colReorder: true,
+          dom: "Bfrtip",
+          columnDefs: [
+            {
+              targets: 1,
+              className: "noVis",
+            },
+            {
+              targets: "_all",
+              render: function (data, type, row) {
+                if (type === "display" && data.length > 30) {
+                  // Customize the threshold as needed
+                  return (
+                    '<div class="expandable-cell"><div class="expandable-content">' +
+                    data +
+                    "</div></div>"
+                  );
+                } else {
+                  return data;
+                }
+              },
+            },
+          ],
+          buttons: [
+            {
+              extend: "colvis",
+              columns: ":not(.noVis)",
+            },
+            "copy",
+            "csv",
+            "excel",
+            "pdf",
+            "print",
+          ],
+          fixedHeader: true,
+          initComplete: function () {
+            var api = this.api();
+
+            api
+              .columns()
+              .eq(0)
+              .each(function (colIdx) {
+                var cell = $(".filters th").eq(
+                  $(api.column(colIdx).header()).index()
+                );
+                var title = $(cell).text();
+                $(cell).html(
+                  '<input type="text" placeholder="' + title + '" />'
+                );
+
+                $(
+                  "input",
+                  $(".filters th").eq($(api.column(colIdx).header()).index())
+                )
+                  .off("keyup change")
+                  .on("change", function (e) {
+                    $(this).attr("title", $(this).val());
+                    var regexr = "({search})";
+                    var cursorPosition = this.selectionStart;
+
+                    api
+                      .column(colIdx)
+                      .search(
+                        this.value !== ""
+                          ? regexr.replace(
+                              "{search}",
+                              "(((" + this.value + ")))"
+                            )
+                          : "",
+                        this.value !== "",
+                        this.value === ""
+                      )
+                      .draw();
+                  })
+                  .on("keyup", function (e) {
+                    e.stopPropagation();
+
+                    $(this).trigger("change");
+                    $(this)
+                      .focus()[0]
+                      .setSelectionRange(cursorPosition, cursorPosition);
+                  });
+              });
+          },
+        });
+
+        table.find("tbody").on("click", "td .expandable-cell", function () {
+          $(this).toggleClass("expanded");
+        });
+      }
+
+      function initializeDatatables() {
         $(".dataframe").each(function () {
           var table = $(this);
 
@@ -327,8 +426,14 @@
             $(this).toggleClass("expanded");
           });
         });
+      }
+      // var dTable;
+      $(document).ready(function () {
+        initializeDatatables();
       });
     </script>
+
+    <script src="{% static 'javascript/sock.js' %}"></script>
 
     {% block javascript %} {% endblock javascript %}
   </body>

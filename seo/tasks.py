@@ -67,13 +67,17 @@ def serpCrawlHeaders(group_id, links: list):
     serpReadDf.delay(group_id, "headers")
     df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
 
-    analyzeCrawlLogs.delay(group_id,"headers")
+    analyzeCrawlLogs.delay(group_id, "headers")
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "headers crawled"}
     )
-    return {"status": "completed", "result": df.to_json(orient="records")}
-
-
+    return {
+        "status": "completed",
+        "result": {
+            "crawlDf": df.to_html(classes="table table-striped", justify="center"),
+            "json": df.to_json(orient="records"),
+        },
+    }
 
 
 @shared_task
@@ -95,13 +99,19 @@ def serpCrawlFull(group_id, links: list):
         "group_" + group_id, {"type": "task_completed", "result": "full crawled"}
     )
     df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
-    task_idr = analyzeCrawlLogs.delay(group_id,"full")
-    print("main id"+ task_idr.id)
+    task_idr = analyzeCrawlLogs.delay(group_id, "full")
+    print("main id" + task_idr.id)
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "crawlRead", "task_id": task_id}
     )
-    return {"status": "completed", "result": df.to_json(orient="records")}
+    return {
+        "status": "completed",
+        "result": {
+            "crawlDf": df.to_html(classes="table table-striped", justify="center"),
+            "json": df.to_json(orient="records"),
+        },
+    }
 
 
 @shared_task
@@ -121,12 +131,11 @@ def serpReadDf(group_id, type: str):
 
 
 @shared_task
-def analyzeCrawlLogs(group_id,type):
+def analyzeCrawlLogs(group_id, type):
     task_id = analyzeCrawlLogs.request.id
     print("analyze crawl logs")
     print(task_id)
     if type == "headers":
-
         logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/headerCrawl.log")
     else:
         logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/fullCrawl.log")
@@ -137,24 +146,25 @@ def analyzeCrawlLogs(group_id,type):
     logs_s = logsDf["status"].value_counts().to_json()
     logs_mi = logsDf["middleware"].value_counts().to_json()
 
-    logsDf = logsDf.reset_index(drop=True).to_html(classes="table", justify="center")
-
-    logsDf = logsDf.replace(
-        'class="dataframe table"',
-        'class="table table-primary table-striped text-center"',
+    logsDf = logsDf.reset_index(drop=True).to_html(
+        classes="table table-primary table-striped text-center", justify="center"
     )
+
+    # logsDf = logsDf.replace(
+    #     'class="dataframe table"',
+    #     'class="table table-primary table-striped text-center"',
+    # )
     async_to_sync(channel_layer.group_send)(
-        "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"crawlLogs"}
+        "group_" + group_id,
+        {"type": "analysisComplete", "task_id": task_id, "task_name": "crawlLogs"},
     )
-
-    result = json.dumps({
-        "logs_message": logs_m,
-        "logs_status": logs_s,
-        "logs_mi": logs_mi,
-        "logs_dt": logsDf,
-    })
 
     return {
         "status": "completed",
-        "result": result
+        "result": {
+            "logs_message": logs_m,
+            "logs_status": logs_s,
+            "logs_mi": logs_mi,
+            "logs_dt": logsDf,
+        },
     }

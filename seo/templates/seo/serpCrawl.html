@@ -30,10 +30,20 @@
                   Loading...
                 </div>
             </div>
+            {% if processing %}
+                <div class="col-md-4 mt-2">
+                    <canvas id="donutChart"></canvas>
+                </div>
+                <div class="col-md-4 mt-2">
+                    <canvas id="pieChart"></canvas>
+                </div>
+                <div class="col-md-4 mt-2">
+                    <canvas id="donutChart1"></canvas>
+                </div>
             
-            <div id="analysisResp" style="max-height: 600px;overflow: hidden;"></div>
-            <div id="testResp" style="max-height: 600px;overflow: hidden;"></div>
-
+                <div id="analysisResp" class="col-md-12 mt-2 mb-2" style="max-height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;"></div>
+                <div id="testResp" class="col-md-12 mt-2 mb-2" style="max-height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;"></div>
+            {% endif %}
         </div>
     </div>
 </div>

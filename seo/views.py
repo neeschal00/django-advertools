@@ -502,6 +502,7 @@ def serpCrawl(request):
                         classes="table table-striped text-center", justify="center"
                     ),
                     "task_id": task_id.id,
+                    "processing": True
                 },
             )
 
