@@ -238,11 +238,11 @@
       function applyDataTablesFormatting(tableElement) {
         var table = $(tableElement).find(".dataframe");
 
-        table
-          .find("thead tr")
-          .clone(true)
-          .addClass("filters")
-          .appendTo(table.find("thead"));
+        // table
+        //   .find("thead tr")
+        //   .clone(true)
+        //   .addClass("filters")
+        //   .appendTo(table.find("thead"));
 
         var dTable = table.DataTable({
           colReorder: true,
@@ -280,55 +280,55 @@
             "print",
           ],
           fixedHeader: true,
-          initComplete: function () {
-            var api = this.api();
+        //   initComplete: function () {
+        //     var api = this.api();
 
-            api
-              .columns()
-              .eq(0)
-              .each(function (colIdx) {
-                var cell = $(".filters th").eq(
-                  $(api.column(colIdx).header()).index()
-                );
-                var title = $(cell).text();
-                $(cell).html(
-                  '<input type="text" placeholder="' + title + '" />'
-                );
+        //     api
+        //       .columns()
+        //       .eq(0)
+        //       .each(function (colIdx) {
+        //         var cell = $(".filters th").eq(
+        //           $(api.column(colIdx).header()).index()
+        //         );
+        //         var title = $(cell).text();
+        //         $(cell).html(
+        //           '<input type="text" placeholder="' + title + '" />'
+        //         );
 
-                $(
-                  "input",
-                  $(".filters th").eq($(api.column(colIdx).header()).index())
-                )
-                  .off("keyup change")
-                  .on("change", function (e) {
-                    $(this).attr("title", $(this).val());
-                    var regexr = "({search})";
-                    var cursorPosition = this.selectionStart;
+        //         $(
+        //           "input",
+        //           $(".filters th").eq($(api.column(colIdx).header()).index())
+        //         )
+        //           .off("keyup change")
+        //           .on("change", function (e) {
+        //             $(this).attr("title", $(this).val());
+        //             var regexr = "({search})";
+        //             var cursorPosition = this.selectionStart;
 
-                    api
-                      .column(colIdx)
-                      .search(
-                        this.value !== ""
-                          ? regexr.replace(
-                              "{search}",
-                              "(((" + this.value + ")))"
-                            )
-                          : "",
-                        this.value !== "",
-                        this.value === ""
-                      )
-                      .draw();
-                  })
-                  .on("keyup", function (e) {
-                    e.stopPropagation();
+        //             api
+        //               .column(colIdx)
+        //               .search(
+        //                 this.value !== ""
+        //                   ? regexr.replace(
+        //                       "{search}",
+        //                       "(((" + this.value + ")))"
+        //                     )
+        //                   : "",
+        //                 this.value !== "",
+        //                 this.value === ""
+        //               )
+        //               .draw();
+        //           })
+        //           .on("keyup", function (e) {
+        //             e.stopPropagation();
 
-                    $(this).trigger("change");
-                    $(this)
-                      .focus()[0]
-                      .setSelectionRange(cursorPosition, cursorPosition);
-                  });
-              });
-          },
+        //             $(this).trigger("change");
+        //             $(this)
+        //               .focus()[0]
+        //               .setSelectionRange(cursorPosition, cursorPosition);
+        //           });
+        //       });
+        //   },
         });
 
         table.find("tbody").on("click", "td .expandable-cell", function () {

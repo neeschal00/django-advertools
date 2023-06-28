@@ -6,4 +6,7 @@ urlpatterns = [
     path(
         "analysis/<str:task_id>/", views.getAnalysisTaskResponse, name="analysis-result"
     ),
+    path(
+        "file/<int:pid>/", views.getCsvColumns, name="csv-columns"
+    ),
 ]

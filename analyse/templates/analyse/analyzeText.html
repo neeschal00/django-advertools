@@ -241,7 +241,33 @@
 
 {% block javascript %}
 
+<script>
 
+    $('id_file_title').on('change', function (e) {
+        var optionSelected = $("option:selected", this);
+        var valueSelected = this.value;
+        var url = "";
+        fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data.status);
+          // const content = JSON.parse(data);
+          const element = document.getElementById("testResp");
+          element.innerHTML = data.result.crawlDf;
+          applyDataTablesFormatting(element);
+          // initializeDatatables();
+        })
+
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    });
+// var fileSelector = document.getElementById("id_file_title");
+// fileSelector.onchange((e)=>{
+
+// })
+
+</script>
 
 
 {% endblock javascript %}

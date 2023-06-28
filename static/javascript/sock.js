@@ -68,6 +68,8 @@ function createDonutChart(
       },
     },
   });
+  // Apply ellipsis and hover display for labels
+  
 }
 
 function createPieChart(
@@ -134,6 +136,7 @@ function createPieChart(
       },
     },
   });
+  
 }
 
 if (random_id) {
@@ -152,13 +155,13 @@ if (random_id) {
   // Event handler for receiving messages
   socket.onmessage = function (event) {
     var message = JSON.parse(event.data);
-    console.log(message);
+    // console.log(message);
     // console.log(typeof message)
-    console.log(message.type);
+    // console.log(message.type);
     if (message.task_id) {
-      console.log(message.task_id);
+      console.log("Task id: "+message.task_id);
     }
-    console.log("Received message:", message);
+    // console.log("Received message:", message);
 
     if (message.type === "analysisComplete") {
       console.log("Analysis complete");
@@ -168,8 +171,8 @@ if (random_id) {
       fetch(url)
         .then((response) => response.json())
         .then((data) => {
-          console.log(data.status);
-          console.log(data);
+          // console.log(data.status);
+          // console.log(data);
           // const content = JSON.parse(data);
 
           createDonutChart(
