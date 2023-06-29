@@ -26,7 +26,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
-    <link rel="stylesheet" type="text/css" href="{% static "css/styles.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
     <script
       src="https://code.jquery.com/jquery-3.6.4.min.js"
       integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8="
@@ -273,62 +273,92 @@
               extend: "colvis",
               columns: ":not(.noVis)",
             },
-            "copy",
-            "csv",
-            "excel",
+            {
+              extend: "copy",
+              exportOptions: {
+                columns: ":visible",
+                format: {
+                  header: function (data, columnIdx) {
+                    return table.find("thead th").eq(columnIdx).text();
+                  },
+                },
+              },
+            },
+            {
+              extend: "csv",
+              exportOptions: {
+                columns: ":visible",
+                format: {
+                  header: function (data, columnIdx) {
+                    return table.find("thead th").eq(columnIdx).text();
+                  },
+                },
+              },
+            },
+            {
+              extend: "excel",
+              exportOptions: {
+                columns: ":visible",
+                format: {
+                  header: function (data, columnIdx) {
+                    return table.find("thead th").eq(columnIdx).text();
+                  },
+                },
+              },
+            },
             "pdf",
             "print",
           ],
           fixedHeader: true,
-        //   initComplete: function () {
-        //     var api = this.api();
+          //   initComplete: function () {
+          //     var api = this.api();
 
-        //     api
-        //       .columns()
-        //       .eq(0)
-        //       .each(function (colIdx) {
-        //         var cell = $(".filters th").eq(
-        //           $(api.column(colIdx).header()).index()
-        //         );
-        //         var title = $(cell).text();
-        //         $(cell).html(
-        //           '<input type="text" placeholder="' + title + '" />'
-        //         );
+          //     api
+          //       .columns()
+          //       .eq(0)
+          //       .each(function (colIdx) {
+          //         var cell = $(".filters th").eq(
+          //           $(api.column(colIdx).header()).index()
+          //         );
+          //         var title = $(cell).text();
+          //         $(cell).html(
+          //           '<input type="text" placeholder="' + title + '" />'
+          //         );
 
-        //         $(
-        //           "input",
-        //           $(".filters th").eq($(api.column(colIdx).header()).index())
-        //         )
-        //           .off("keyup change")
-        //           .on("change", function (e) {
-        //             $(this).attr("title", $(this).val());
-        //             var regexr = "({search})";
-        //             var cursorPosition = this.selectionStart;
+          //         $(
+          //           "input",
+          //           $(".filters th").eq($(api.column(colIdx).header()).index())
+          //         )
+          //           .off("keyup change")
+          //           .on("change", function (e) {
+          //             $(this).attr("title", $(this).val());
+          //             var regexr = "({search})";
+          //             var cursorPosition = this.selectionStart;
 
-        //             api
-        //               .column(colIdx)
-        //               .search(
-        //                 this.value !== ""
-        //                   ? regexr.replace(
-        //                       "{search}",
-        //                       "(((" + this.value + ")))"
-        //                     )
-        //                   : "",
-        //                 this.value !== "",
-        //                 this.value === ""
-        //               )
-        //               .draw();
-        //           })
-        //           .on("keyup", function (e) {
-        //             e.stopPropagation();
+          //             api
+          //               .column(colIdx)
+          //               .search(
+          //                 this.value !== ""
+          //                   ? regexr.replace(
+          //                       "{search}",
+          //                       "(((" + this.value + ")))"
+          //                     )
+          //                   : "",
+          //                 this.value !== "",
+          //                 this.value === ""
+          //               )
+          //               .draw();
+          //           })
+          //           .on("keyup", function (e) {
+          //             e.stopPropagation();
 
-        //             $(this).trigger("change");
-        //             $(this)
-        //               .focus()[0]
-        //               .setSelectionRange(cursorPosition, cursorPosition);
-        //           });
-        //       });
-        //   },
+          //             $(this).trigger("change");
+          //             $(this)
+          //               .focus()[0]
+          //               .setSelectionRange(cursorPosition, cursorPosition);
+          //           });
+          //       });
+          //   },
         });
 
         table.find("tbody").on("click", "td .expandable-cell", function () {
@@ -375,9 +405,39 @@
                 extend: "colvis",
                 columns: ":not(.noVis)",
               },
-              "copy",
-              "csv",
-              "excel",
+              {
+                extend: "copy",
+                exportOptions: {
+                  columns: ":visible",
+                  format: {
+                    header: function (data, columnIdx) {
+                      return table.find("thead th").eq(columnIdx).text();
+                    },
+                  },
+                },
+              },
+              {
+                extend: "csv",
+                exportOptions: {
+                  columns: ":visible",
+                  format: {
+                    header: function (data, columnIdx) {
+                      return table.find("thead th").eq(columnIdx).text();
+                    },
+                  },
+                },
+              },
+              {
+                extend: "excel",
+                exportOptions: {
+                  columns: ":visible",
+                  format: {
+                    header: function (data, columnIdx) {
+                      return table.find("thead th").eq(columnIdx).text();
+                    },
+                  },
+                },
+              },
               "pdf",
               "print",
             ],

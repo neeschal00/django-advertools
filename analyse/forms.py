@@ -57,7 +57,7 @@ class DatasetExtract(forms.ModelForm):
 
 
 class DatasetSelect(forms.Form):
-    file_title = forms.ModelChoiceField(queryset=DatasetFile.objects.all())
+    file_title = forms.ModelChoiceField(queryset=DatasetFile.objects.all().reverse())
     column_name = forms.CharField(
         widget=forms.TextInput(
             attrs={"placeholder": "Enter column you want to analyze text from"}

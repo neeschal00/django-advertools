@@ -29,7 +29,7 @@ def generateReport(group_id, df, minimal=False, title="Profile Report"):
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id,
             {
-                "type": "task_completed",
+                "type": "data_converted",
                 "result": "Report generated successfully. for Id " + group_id,
             },
         )
@@ -64,7 +64,7 @@ def serpCrawlHeaders(group_id, links: list):
         output_file="output/serp_crawl_headers_output.jl",
         custom_settings={"LOG_FILE": "logs/crawlLogs/headerCrawl.log"},
     )
-    serpReadDf.delay(group_id, "headers")
+    # serpReadDf.delay(group_id, "headers")
     df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
 
     analyzeCrawlLogs.delay(group_id, "headers")

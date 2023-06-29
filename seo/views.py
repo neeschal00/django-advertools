@@ -12,6 +12,12 @@ from advertools import (
     crawl,
     crawl_headers,
     crawllogs_to_df,
+    extract_intense_words,
+    extract_hashtags,
+    extract_mentions,
+    extract_numbers,
+    extract_questions,
+    extract_urls,
 )
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl, SERPCrawl
 
@@ -285,24 +291,76 @@ def knowledgeGraph(request):
                 knowDf = knowledge_graph(
                     query=query, key=config("KEY"), languages=languages
                 )
+            analysis = False
+            try:
+                
+                listCol = knowDf[knowDf["result.detailedDescription.articleBody"].notna()]
 
-            generateReport.delay(
-                "test", knowDf.to_json(), False, "Knowledge Graph Data profile"
-            )
+                listCol = listCol["result.detailedDescription.articleBody"].to_list()
+                urls = extract_urls(listCol)
 
-            jsonD = knowDf.to_json(orient="records")
+                mentions = extract_mentions(listCol)
 
-            return render(
-                request,
-                "seo/knowledgeG.html",
-                {
-                    "form": form,
-                    "knowDf": knowDf.to_html(
-                        classes="table table-striped text-center", justify="center"
-                    ),
-                    "json": jsonD,
-                },
-            )
+                questions = extract_questions(listCol)
+
+                numbers = extract_numbers(listCol)
+
+                hashtags = extract_hashtags(listCol)
+
+                intense_words = extract_intense_words(
+                    listCol, min_reps=3
+                )  # minimum repertition of words 3
+
+                submission = True
+                generateReport.delay(
+                    "test", knowDf.to_json(), False, "Knowledge Graph Data profile"
+                )
+
+                jsonD = knowDf.to_json(orient="records")
+                analysis = True
+                return render(
+                    request,
+                    "seo/knowledgeG.html",
+                    {
+                        "form": form,
+                        "knowDf": knowDf.to_html(
+                            classes="table table-striped text-center", justify="center"
+                        ),
+                        "json": jsonD,
+                        "analysis": analysis,
+                        "submission": submission,
+                        "urls": urls,
+                        "mentions": mentions,
+                        "questions": questions,
+                        "numbers": numbers,
+                        "hashtags": hashtags,
+                        "intense_words": intense_words,
+                    },
+                )
+
+            except Exception as e:
+                print(e)
+                messages.warning(request, "Unable to analyze the particular column")
+                submission = True
+                generateReport.delay(
+                    "test", knowDf.to_json(), False, "Knowledge Graph Data profile"
+                )
+
+                jsonD = knowDf.to_json(orient="records")
+
+                return render(
+                    request,
+                    "seo/knowledgeG.html",
+                    {
+                        "form": form,
+                        "knowDf": knowDf.to_html(
+                            classes="table table-striped text-center", justify="center"
+                        ),
+                        "json": jsonD,
+                        "analysis": analysis,
+                    },
+                )
+            
 
     else:
         form = KnowledgeG()

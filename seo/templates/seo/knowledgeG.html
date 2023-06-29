@@ -1,202 +1,388 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "base.html" %} {% load static %} 
+{% block css %} 
+<style>
+    body{
+    margin-top:20px;
+    background:#FAFAFA;
+}
+.order-card {
+    color: #fff;
+}
 
+.bg-c-blue {
+    background: linear-gradient(45deg,#4099ff,#73b4ff);
+}
 
-{% block css %}
+.bg-c-green {
+    background: linear-gradient(45deg,#2ed8b6,#59e0c5);
+}
 
+.bg-c-yellow {
+    background: linear-gradient(45deg,#FFB64D,#ffcb80);
+}
+
+.bg-c-pink {
+    background: linear-gradient(45deg,#FF5370,#ff869a);
+}
+
+.card {
+    border-radius: 5px;
+    -webkit-box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
+    box-shadow: 0 1px 2.94px 0.06px rgba(4,26,55,0.16);
+    border: none;
+    margin-bottom: 30px;
+    -webkit-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+}
+
+.card .card-block {
+    padding: 25px;
+}
+
+.order-card i {
+    font-size: 26px;
+}
+
+.f-left {
+    float: left;
+}
+
+.f-right {
+    float: right;
+}
+</style>
 {% endblock css %}
-
-{% load crispy_forms_tags %}
-{% block pageContent %}
+{% load crispy_forms_tags %} {% block pageContent %}
 <div class="container">
-    <div class="container">
-        <div class="row d-flex justify-content-center">
-            <div class="col-md-8">
-                <form method="post" onsubmit="openLoader()">
-                    {% csrf_token %}
-                    <fieldset class="form-group">
-                        <legend class="border-bottom mb-4 main-t">Knowledge Graph</legend>
-                        {{ form|crispy }}
-                    </fieldset>
-                    <div class="form-group">
-                        <button class="btn btn-outline-info" type="submit">
-                            Get Knowledge
-                        </button>
-                    </div>
-                    
-                </form>
-            </div>
+  <div class="container">
+    <div class="row d-flex justify-content-center">
+      <div class="col-md-8">
+        <form method="post" onsubmit="openLoader()">
+          {% csrf_token %}
+          <fieldset class="form-group">
+            <legend class="border-bottom mb-4 main-t">Knowledge Graph</legend>
+            {{ form|crispy }}
+          </fieldset>
+          <div class="form-group">
+            <button class="btn btn-outline-info" type="submit">
+              Get Knowledge
+            </button>
+          </div>
+        </form>
+      </div>
 
-            <div id="loadingModal" class="col-md-7 mt-2" style="display: none;">
-                <div class="mt-2">
-                  <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                  Loading...
-                </div>
-            </div>
-
-            <div class="col-md-10">
-                <canvas id="myChart" class="mt-3"></canvas>
-
-            </div>
-            <div class="col-md-10">
-                <canvas id="lineChart" class="mt-3"></canvas>
-            </div>
-
-            <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
-                {% if knowDf %}
-                    <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
-                        View Data Profiling Report
-                    </a>
-                    {{ knowDf | safe }}
-                {% endif %}
-            </div>
-
+      <div id="loadingModal" class="col-md-7 mt-2" style="display: none">
+        <div class="mt-2">
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
         </div>
+      </div>
+
+      <div class="col-md-10">
+        <canvas id="myChart" class="mt-3"></canvas>
+      </div>
+      <div class="col-md-10">
+        <canvas id="lineChart" class="mt-3"></canvas>
+      </div>
+      {% if analysis %}
+
+      <div class="col-md-12 mt-4">
+        <div class="row d-flex justify-content-center">
+          <h2 class="h2 mb-2 text-center">Description Analysis Overview</h2>
+          <div class="col-md-4 col-xl-4">
+            <div class="card bg-c-green order-card">
+              <div class="card-block">
+                <h6 class="m-b-20">URLs found</h6>
+                <h2 class="text-right">
+                  <i class="fa fa-link f-left"></i
+                  ><span class="px-2">{{ urls.overview.num_urls }}</span>
+                </h2>
+                <p class="m-b-0">
+                  Urls per post<span class="f-right"
+                    >{{ urls.overview.urls_per_post }}</span
+                  >
+                </p>
+                <p class="m-b-0">
+                  Unique Urls<span class="f-right"
+                    >{{ urls.overview.unique_urls }}</span
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 col-xl-4">
+            <div class="card bg-c-yellow order-card">
+              <div class="card-block">
+                <h6 class="m-b-20">Mentions found</h6>
+                <h2 class="text-right">
+                  <i class="fa fa-quote-left f-left"></i
+                  ><span class="px-2">{{ mentions.overview.num_mentions}}</span>
+                </h2>
+                <p class="m-b-0">
+                  Mentions per post<span class="f-right"
+                    >{{ mentions.overview.mentions_per_post}}</span
+                  >
+                </p>
+                <p class="m-b-0">
+                  Unique Mentions<span class="f-right"
+                    >{{ mentions.overview.unique_mentions }}</span
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 col-xl-4">
+            <div class="card bg-c-pink order-card">
+              <div class="card-block">
+                <h6 class="m-b-20">Questions found</h6>
+                <h2 class="text-right">
+                  <i class="fa fa-question f-left"></i
+                  ><span class="px-2"
+                    >{{ questions.overview.num_question_marks}}</span
+                  >
+                </h2>
+                <p class="m-b-0">
+                  Questions per post<span class="f-right"
+                    >{{ questions.overview.question_marks_per_post}}</span
+                  >
+                </p>
+                <p class="m-b-0">
+                  Unique Questions<span class="f-right"
+                    >{{ questions.overview.unique_question_marks }}</span
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 col-xl-4">
+            <div class="card bg-c-blue order-card">
+              <div class="card-block">
+                <h6 class="m-b-20">Hashtags found</h6>
+                <h2 class="text-right">
+                  <i class="fa fa-hashtag f-left"></i
+                  ><span class="px-2">{{ hashtags.overview.num_hashtags}}</span>
+                </h2>
+                <p class="m-b-0">
+                  Hashtags per post<span class="f-right"
+                    >{{ hashtags.overview.hashtags_per_post}}</span
+                  >
+                </p>
+                <p class="m-b-0">
+                  Unique Hashtags<span class="f-right"
+                    >{{ hashtags.overview.unique_hashtags }}</span
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 col-xl-4">
+            <div class="card bg-c-green order-card">
+              <div class="card-block">
+                <h6 class="m-b-20">Numbers found</h6>
+                <h2 class="text-right">
+                  <i class="fa fa-arrow-up f-left"></i
+                  ><span class="px-2">{{ numbers.overview.num_numbers}}</span>
+                </h2>
+                <p class="m-b-0">
+                  Numbers per post<span class="f-right"
+                    >{{ numbers.overview.numbers_per_post}}</span
+                  >
+                </p>
+                <p class="m-b-0">
+                  Unique Numbers<span class="f-right"
+                    >{{ numbers.overview.unique_numbers }}</span
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 col-xl-4">
+            <div class="card bg-c-yellow order-card">
+              <div class="card-block">
+                <h6 class="m-b-20">Intense Words found</h6>
+                <h2 class="text-right">
+                  <i class="fa fa-repeat f-left"></i
+                  ><span class="px-2"
+                    >{{ intense_words.overview.num_intense_words}}</span
+                  >
+                </h2>
+                <p class="m-b-0">
+                  Intense Words per post<span class="f-right"
+                    >{{ intense_words.overview.intense_words_per_post}}</span
+                  >
+                </p>
+                <p class="m-b-0">
+                  Unique Intense Words<span class="f-right"
+                    >{{ intense_words.overview.unique_intense_words }}</span
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      <div
+        class="col-md-12 mt-3"
+        style="
+          height: 600px;
+          overflow-y: scroll;
+          max-width: 870px;
+          overflow-x: scroll;
+        "
+      >
+        {% if knowDf %}
+        <a
+          class="btn btn-outline-secondary mb-2 mt-2"
+          href="{% url 'report' %}"
+        >
+          View Data Profiling Report
+        </a>
+        {{ knowDf | safe }} {% endif %}
+      </div>
     </div>
+  </div>
 </div>
-{% endblock pageContent %}
-
-{% block javascript %}
+{% endblock pageContent %} {% block javascript %}
 <script>
+  function openLoader() {
+    document.getElementById("loadingModal").style.display = "block";
+  }
+</script>
+<script>
+  const jsonData = {{ json|safe }};
+  console.log(jsonData);
 
-    function openLoader() {
-        document.getElementById("loadingModal").style.display = "block";
+
+  function createLineChart(jsonData) {
+      var ctx = document.getElementById('myChart').getContext('2d');
+      var labels = jsonData.map(function(obj) {
+          return obj["result.name"];
+      });
+      var data = jsonData.map(function(obj) {
+          return obj["resultScore"];
+      });
+      var chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+          labels: labels,
+          datasets: [{
+              label: 'Knowledge Graph query result score',
+              data: data,
+              borderColor: 'blue',
+              fill: false
+          }]
+          },
+          options: {
+          hover: {
+              mode: 'nearest',
+              intersect: true
+          },
+          tooltips: {
+              mode: 'index',
+              intersect: false
+          },
+          scales: {
+              xAxes: [{
+                  ticks: {
+                  callback: function(value, index, values) {
+                      if (value.length > 7) {
+                      return value.substr(0, 7) + '...';
+                      } else {
+                      return value;
+                      }
+                  }
+                  },
+                  display: true,
+                  scaleLabel: {
+                      display: true,
+                      labelString: 'Result Name'
+                  }
+              }],
+              yAxes: [{
+              display: true,
+              scaleLabel: {
+                  display: true,
+                  labelString: 'Knowledge Graph Score'
+              }
+              }]
+          },
+          plugins:{
+              title: {
+                      display: true,
+                      text: 'Knowledge Graph Score Chart',
+                      font: {
+                      size: 18
+                      }
+                  }
+          }
+          }
+      });
+  }
+  const top5 = jsonData.slice(0,10);
+  createLineChart(top5);
+
+  function createBarChart(jsonData) {
+      var ctx = document.getElementById('lineChart').getContext('2d');
+      var labels = jsonData.map(function(obj) {
+          return obj["result.@type"];
+      });
+      labels = labels.flat();
+      const counts = labels.reduce((acc, value) => {
+      if (value in acc) {
+          acc[value]++;
+      } else {
+          acc[value] = 1;
       }
-    
+      return acc;
+      }, {});
+      labels = Object.keys(counts);
+      var data = Object.values(counts);
+
+      // Define the chart data
+      var data = {
+      labels: labels,
+      datasets: [{
+          label: 'Mostly Repeated entity type',
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 1,
+          data: data
+      }]
+      };
+
+      // Create the chart
+      var myChart = new Chart(ctx, {
+      type: 'bar',
+      data: data,
+      options: {
+          scales: {
+          yAxes: [{
+              ticks: {
+              beginAtZero: true
+              }
+          }],
+          xAxes: [
+              {
+                  ticks: {
+                  autoSkip: true,
+                  maxTicksLimit: 10,
+                  fontSize: 12, // Set the font size to 12px
+                  },
+              },
+          ],
+
+          }
+      }
+      });
+  }
+
+  // Call the function to create the chart
+  createBarChart(jsonData);
 </script>
-<script>
-    const jsonData = {{ json|safe }};
-    console.log(jsonData);
-
-
-    function createLineChart(jsonData) {
-        var ctx = document.getElementById('myChart').getContext('2d');
-        var labels = jsonData.map(function(obj) {
-            return obj["result.name"];
-        });
-        var data = jsonData.map(function(obj) {
-            return obj["resultScore"];
-        });
-        var chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-            labels: labels,
-            datasets: [{
-                label: 'Knowledge Graph query result score',
-                data: data,
-                borderColor: 'blue',
-                fill: false
-            }]
-            },
-            options: {
-            hover: {
-                mode: 'nearest',
-                intersect: true
-            },
-            tooltips: {
-                mode: 'index',
-                intersect: false
-            },
-            scales: {
-                xAxes: [{
-                    ticks: {
-                    callback: function(value, index, values) {
-                        if (value.length > 7) {
-                        return value.substr(0, 7) + '...';
-                        } else {
-                        return value;
-                        }
-                    }
-                    },
-                    display: true,
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Result Name'
-                    }
-                }],
-                yAxes: [{
-                display: true,
-                scaleLabel: {
-                    display: true,
-                    labelString: 'Knowledge Graph Score'
-                }
-                }]
-            },
-            plugins:{
-                title: {
-                        display: true,
-                        text: 'Knowledge Graph Score Chart',
-                        font: {
-                        size: 18
-                        }
-                    }
-            }
-            }
-        });
-    }
-    const top5 = jsonData.slice(0,10);
-    createLineChart(top5);
-
-    function createBarChart(jsonData) {
-        var ctx = document.getElementById('lineChart').getContext('2d');
-        var labels = jsonData.map(function(obj) {
-            return obj["result.@type"];
-        });
-        labels = labels.flat();
-        const counts = labels.reduce((acc, value) => {
-        if (value in acc) {
-            acc[value]++;
-        } else {
-            acc[value] = 1;
-        }
-        return acc;
-        }, {});
-        labels = Object.keys(counts);
-        var data = Object.values(counts);
-
-        // Define the chart data
-        var data = {
-        labels: labels,
-        datasets: [{
-            label: 'Mostly Repeated entity type',
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 1,
-            data: data
-        }]
-        };
-
-        // Create the chart
-        var myChart = new Chart(ctx, {
-        type: 'bar',
-        data: data,
-        options: {
-            scales: {
-            yAxes: [{
-                ticks: {
-                beginAtZero: true
-                }
-            }],
-            xAxes: [
-                {
-                    ticks: {
-                    autoSkip: true,
-                    maxTicksLimit: 10,
-                    fontSize: 12, // Set the font size to 12px
-                    },
-                },
-            ],
-            
-            }
-        }
-        });
-    }
-
-    // Call the function to create the chart
-    createBarChart(jsonData);
-
-</script>
-
-
 
 {% endblock javascript %}
