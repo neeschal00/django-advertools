@@ -4,7 +4,17 @@ from ydata_profiling import ProfileReport
 from django.core.cache import cache
 
 import pandas as pd
-from advertools import crawl_headers, crawl, crawllogs_to_df
+from advertools import (
+    crawl_headers,
+    crawl,
+    crawllogs_to_df,
+    extract_intense_words,
+    extract_hashtags,
+    extract_mentions,
+    extract_numbers,
+    extract_questions,
+    extract_urls,
+)
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 import json
@@ -68,6 +78,11 @@ def serpCrawlHeaders(group_id, links: list):
     df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
 
     analyzeCrawlLogs.delay(group_id, "headers")
+
+    # listCol = df[df["body_text"].notna()]
+    # listCol = listCol["body_text"].to_list()
+    # analysis.delay(group_id,listCol)
+
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "headers crawled"}
     )
@@ -98,9 +113,14 @@ def serpCrawlFull(group_id, links: list):
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "full crawled"}
     )
-    df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
+    df = pd.read_json("output/serp_crawl_output.jl", lines=True)
     task_idr = analyzeCrawlLogs.delay(group_id, "full")
-    print("main id" + task_idr.id)
+    # print("main id" + task_idr.id)
+
+    # print(df)
+    listCol = df[df["body_text"].notna()]
+    listCol = listCol["body_text"].to_list()
+    analyzeContent.delay(group_id,listCol,"Body Content Analysis")
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "crawlRead", "task_id": task_id}
@@ -168,3 +188,49 @@ def analyzeCrawlLogs(group_id, type):
             "logs_dt": logsDf,
         },
     }
+
+
+@shared_task
+def analyzeContent(group_id, content: list,title="Overview Analysis"):
+    task_id = analyzeContent.request.id
+    print("Analyze Content")
+    print(task_id)
+    # try:
+    listCol = list(content)
+    urls = extract_urls(listCol)
+
+    mentions = extract_mentions(listCol)
+
+    questions = extract_questions(listCol)
+
+    numbers = extract_numbers(listCol)
+
+    hashtags = extract_hashtags(listCol)
+
+    intense_words = extract_intense_words(
+        listCol, min_reps=3
+    )  # minimum repertition of words 3
+
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id,
+        {"type": "analysisComplete", "task_id": task_id, "task_name": "contentAnalysis"},
+    )
+    return {
+        "status":"completed",
+        "result":{
+            "title":title,
+            "urls": urls,
+            "mentions": mentions,
+            "questions": questions,
+            "numbers": numbers,
+            "hashtags": hashtags,
+            "intense_words": intense_words,
+        }
+    }
+    # except Exception as e:
+    #     return {
+    #         "status":"failed",
+    #         "result": {
+    #             "message": e
+    #         }
+    #     }

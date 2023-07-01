@@ -1,420 +1,366 @@
-{% extends "base.html" %}
-{% load static %}
-
-
-{% block css %}
-
-{% endblock css %}
-
-{% load crispy_forms_tags %}
-{% block pageContent %}
+{% extends "base.html" %} {% load static %} {% block css %} {% endblock css %}
+{% load crispy_forms_tags %} {% block pageContent %}
 <div class="container">
-    <div class="container">
-        <div class="row d-flex justify-content-center">
-            <div class="col-md-6">
-                <form method="post" id="crawlf" onsubmit="openLoader()">
-                    {% csrf_token %}
-                    <fieldset class="form-group">
-                        <legend class="border-bottom mb-4 main-t">Crawl Urls</legend>
-                        {{ form|crispy }}
-                    </fieldset>
-                    <div class="form-group">
-                        <button id="submitb" class="btn btn-outline-info" type="submit" onclick="disableButton()">
-                            Crawl links
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <div id="loadingModal" class="col-md-7 mt-2" style="display: none;">
-                <div class="mt-2">
-                  <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                  Loading...
-                </div>
-            </div>
-
-            {% if overview %}
-            <div class="col-md-12 mt-3">
-                <div class="row justify-content-between">
-                    <div class="col-md-6">
-                        <div class="card bg-primary text-white">
-                            <div class="container m-2">
-                                <h5 class="h5 card-title fw-bold">Latency Overview</h5>
-
-                                <div class="card-body">
-                                    <b>Average Download Latency:</b> {{ describe.download_latency.mean|floatformat:4 }} sec.
-                                </div>
-                                <div class="card-body">
-                                    <b>Max Download Latency:</b> {{ describe.download_latency.max|floatformat:4 }} sec.
-                                </div>
-                                <div class="card-body">
-                                    <b>Minimum Download Latency:</b> {{ describe.download_latency.min|floatformat:4 }} sec.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card bg-success text-white">
-                            <div class="container m-2">
-                                <h5 class="h5 card-title fw-bold">Size Overview</h5>
-                                <div class="card-body">
-                                    <b>Average Size of Content:</b> {{ describe.size.mean|floatformat:1 }} bytes.
-                                </div>
-                                <div class="card-body">
-                                    <b>Max Size of Content:</b> {{ describe.size.max|floatformat:1 }} bytes.
-                                </div>
-                                <div class="card-body">
-                                    <b>Minimum Size of Content:</b> {{ describe.size.min|floatformat:1 }} bytes.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            {% endif %}
-            <div class="col-md-4 mt-2">
-                <canvas id="donutChart"></canvas>
-            </div>
-            <div class="col-md-4 mt-2">
-                <canvas id="pieChart"></canvas>
-            </div>
-            <div class="col-md-4 mt-2">
-                <canvas id="donutChart1"></canvas>
-            </div>
-
-            <div class="col-md-10 mt-3">
-                <canvas id="lineChart" class="mt-2"></canvas>
-            </div>
-            <div class="col-md-12 mt-3" style="max-height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
-                {% if logsDf %}
-                    <h3 class="h3"> Logs Dataframe </h3>
-                    {{ logsDf | safe }}
-                {% endif %}
-            </div>
-            <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
-                {% if crawlDf %}
-                    <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
-                        View Data Profiling Report
-                    </a>
-                    {{ crawlDf | safe }}
-                {% endif %}
-            </div>
-
+  <div class="container">
+    <div class="row d-flex justify-content-center">
+      <div class="col-md-6">
+        <form method="post" id="crawlf" onsubmit="openLoader()">
+          {% csrf_token %}
+          <fieldset class="form-group">
+            <legend class="border-bottom mb-4 main-t">Crawl Urls</legend>
+            {{ form|crispy }}
+          </fieldset>
+          <div class="form-group">
+            <button
+              id="submitb"
+              class="btn btn-outline-info"
+              type="submit"
+              onclick="disableButton()"
+            >
+              Crawl links
+            </button>
+          </div>
+        </form>
+      </div>
+      <div id="loadingModal" class="col-md-7 mt-2" style="display: none">
+        <div class="mt-2">
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
         </div>
+      </div>
+
+      {% if overview %}
+      
+      <div class="col-md-12 mt-3">
+        <div class="row justify-content-between">
+          <div class="col-md-6">
+            <div class="card bg-primary text-white">
+              <div class="container m-2">
+                <h5 class="h5 card-title fw-bold">Latency Overview</h5>
+
+                <div class="card-body">
+                  <b>Average Download Latency:</b> {{ describe.download_latency.mean|floatformat:4 }} sec.
+                </div>
+                <div class="card-body">
+                  <b>Max Download Latency:</b> {{ describe.download_latency.max|floatformat:4 }} sec.
+                </div>
+                <div class="card-body">
+                  <b>Minimum Download Latency:</b> {{ describe.download_latency.min|floatformat:4 }} sec.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card bg-success text-white">
+              <div class="container m-2">
+                <h5 class="h5 card-title fw-bold">Size Overview</h5>
+                <div class="card-body">
+                  <b>Average Size of Content:</b> {{ describe.size.mean|floatformat:1 }} bytes.
+                </div>
+                <div class="card-body">
+                  <b>Max Size of Content:</b> {{ describe.size.max|floatformat:1}} bytes.
+                </div>
+                <div class="card-body">
+                  <b>Minimum Size of Content:</b> {{describe.size.min|floatformat:1 }} bytes.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="col-md-6 mt-2">
+        <canvas id="pieChart"></canvas>
+      </div>
+      <div class="col-md-6 mt-2">
+        <canvas id="donutChart1"></canvas>
+      </div>
+
+      <div class="col-md-10 mt-3">
+        <canvas id="lineChart" class="mt-2"></canvas>
+      </div>
+      <div
+        class="col-md-12 mt-3"
+        style="
+          max-height: 500px;
+          overflow-y: scroll;
+          max-width: 870px;
+          overflow-x: scroll;
+        "
+      >
+        {% if logsDf %}
+        <h3 class="h3">Logs Dataframe</h3>
+        {{ logsDf | safe }} {% endif %}
+      </div>
+
+      {% if analysis %}
+
+      <div class="col-md-12 mt-4">
+        <div class="row d-flex justify-content-center" id="dynamicContent">
+        </div>
+      </div>
+      {% endif %}
+      <div
+        class="col-md-12 mt-3"
+        style="
+          height: 600px;
+          overflow-y: scroll;
+          max-width: 870px;
+          overflow-x: scroll;
+        "
+      >
+        {% if crawlDf %}
+        <a
+          class="btn btn-outline-secondary mb-2 mt-2"
+          href="{% url 'report' %}"
+        >
+          View Data Profiling Report
+        </a>
+        {{ crawlDf | safe }} {% endif %}
+      </div>
     </div>
+  </div>
 </div>
-{% endblock pageContent %}
-
-{% block javascript %}
+{% endblock pageContent %} {% block javascript %}
 <script>
+  function openLoader() {
+    document.getElementById("loadingModal").style.display = "block";
+  }
+</script>
 
-    function openLoader() {
-        document.getElementById("loadingModal").style.display = "block";
+<script>
+  function disableButton() {
+      var button = document.getElementById('submitb');
+      button.disabled = true; // Disable the button
+
+      var form = document.getElementById('crawlf');
+      form.submit(); // Submit the form
+  }
+
+
+  const logsMessage = {{ logs_message|safe }};
+  console.log(logsMessage);
+
+  function createDonutChart1(jsonData) {
+      var ctx = document.getElementById('donutChart1').getContext('2d');
+      var labels = Object.keys(jsonData);
+      // console.log(labels)
+      var length = labels.length;
+
+      var data = Object.values(jsonData);
+
+      var colors = generateRandomColors(length);
+      // Define the chart data
+      var data = {
+      labels: labels,
+      datasets: [{
+          label: 'Message Received',
+          backgroundColor: colors,
+          data: data
       }
-    
+  ]
+      };
+
+      // Create the chart
+      var donutChart = new Chart(document.getElementById('donutChart1'), {
+          type: 'doughnut',
+          data: data,
+          options: {
+              cutoutPercentage: 70, // Adjust the size of the hole in the middle (optional)
+              responsive: true,
+              plugins: {
+                  afterDraw: function(chart) {
+                      var width = chart.chart.width;
+                      var height = chart.chart.height;
+                      var ctx = chart.chart.ctx;
+
+                      ctx.restore();
+                      var fontSize = (height / 114).toFixed(2);
+                      ctx.font = fontSize + "em sans-serif";
+                      ctx.textBaseline = "middle";
+
+                      var text = "Status Frequencies";
+                      var textX = Math.round((width - ctx.measureText(text).width) / 2);
+                      var textY = height / 2;
+
+                      ctx.fillText(text, textX, textY);
+                      ctx.save();
+                  },
+                  title: {
+                      display: true,
+                      text: 'Types of Messages in Logs',
+                      font: {
+                      size: 18
+                      }
+                  }
+              }
+          }
+      });
+  }
+  createDonutChart1(logsMessage)
+  // Call the function to create the chart
+  // const top5 = jsonData.slice(0,5);
+
+  function createPieChart(jsonData){
+      var ctx = document.getElementById('pieChart').getContext('2d');
+      var labels = Object.keys(jsonData);
+      // console.log(labels)
+      var length = labels.length;
+
+      var data = Object.values(jsonData);
+
+
+      var colors = generateRandomColors(length);
+      // Define the chart data
+      var data = {
+      labels: labels,
+      datasets: [{
+          label: 'Message Received',
+          backgroundColor: colors,
+          data: data
+      }
+  ]
+      };
+
+      // Create the chart
+      var donutChart = new Chart(document.getElementById('pieChart'), {
+          type: 'pie',
+          data: data,
+          options: {
+              cutoutPercentage: 70, // Adjust the size of the hole in the middle (optional)
+              responsive: true,
+              plugins: {
+                  afterDraw: function(chart) {
+                      var width = chart.chart.width;
+                      var height = chart.chart.height;
+                      var ctx = chart.chart.ctx;
+
+                      ctx.restore();
+                      var fontSize = (height / 114).toFixed(2);
+                      ctx.font = fontSize + "em sans-serif";
+                      ctx.textBaseline = "middle";
+
+                      var text = "Status Frequencies";
+                      var textX = Math.round((width - ctx.measureText(text).width) / 2);
+                      var textY = height / 2;
+
+                      ctx.fillText(text, textX, textY);
+                      ctx.save();
+                  },
+                  title: {
+                      display: true,
+                      text: 'Middlewares in Logs',
+                      font: {
+                      size: 18
+                      }
+                  }
+              }
+          }
+      });
+  }
+
+  const logsMiddleware = {{ logs_mi|safe }};
+  console.log(logsMessage);
+  createPieChart(logsMiddleware);
+
+  const jsonData = {{ json|safe }};
+  console.log(jsonData);
+
+  function create2axes(jsonData) {
+      var ctx = document.getElementById('lineChart').getContext('2d');
+      var labels = jsonData.map(function(obj,index) {
+          var url = obj["url"];
+          return index;
+      });
+      var data1 = jsonData.map(function(obj) {
+          return obj["size"];
+      });
+      var data2 = jsonData.map(function(obj) {
+          return obj["download_latency"];
+      });
+
+      var chartData = {
+          labels: labels,
+          datasets: [
+          {
+              type: 'bar',
+              label: 'Size(bytes) of Page content',
+              backgroundColor: 'rgba(255, 99, 132, 0.2)',
+              borderColor: 'rgba(255, 99, 132, 1)',
+              borderWidth: 1,
+              yAxisID: 'bar-y-axis',
+              data: data1,
+          },
+          {
+              type: 'line',
+              label: 'Latency of loading the content',
+              backgroundColor: 'rgba(54, 162, 235, 0.2)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
+              yAxisID: 'line-y-axis',
+              data: data2,
+          },
+          ],
+      };
+
+      var chartOptions = {
+          scales: {
+              xAxes: [{
+              ticks: {
+                  // autoSkip: true,
+                  callback: function (value) {
+                      if (value.length > 18) {
+                          return value.substr(0, 18) + "..."; // truncate and add ellipsis
+                      } else {
+                          return value;
+                      }
+                  },
+              }
+              }],
+          'bar-y-axis': {
+              type: 'linear',
+              position: 'left',
+              ticks: {
+              beginAtZero: true,
+
+              },
+          },
+          'line-y-axis': {
+              type: 'linear',
+              position: 'right',
+              ticks: {
+              beginAtZero: true,
+              },
+          },
+
+          },
+          plugins:{
+              title: {
+                      display: true,
+                      text: 'Latency Chart for top 5',
+                      font: {
+                      size: 18
+                      }
+                  }
+          }
+      };
+
+      var myChart = new Chart(ctx, {
+          type: 'bar',
+          data: chartData,
+          options: chartOptions,
+      });
+
+  }
+
+  // Call the function to create the chart
+  const top5 = jsonData.slice(0,5);
+  create2axes(top5);
 </script>
-
-<script>
-    function disableButton() {
-        var button = document.getElementById('submitb');
-        button.disabled = true; // Disable the button
-
-        var form = document.getElementById('crawlf');
-        form.submit(); // Submit the form
-    }
-
-
-    const statusJ = {{ statusJ|safe }};
-    console.log(statusJ);
-
-    
-
-    function createDonutChart(jsonData) {
-        var ctx = document.getElementById('donutChart').getContext('2d');
-        var labels = jsonData.status;
-        // console.log(labels)
-        var length = Object.keys(labels).length;
-
-        var data = jsonData.percentage;
-        var data2 = jsonData.frequency;
-
-        var colors = generateRandomColors(length);
-        // Define the chart data
-        var data = {
-        labels: labels,
-        datasets: [{
-            label: 'percentage Status',
-            backgroundColor: colors,
-            data: data
-        },
-        {
-            label: 'frequency Status',
-            backgroundColor: colors,
-            data: data2
-        }
-    ]
-        };
-
-        // Create the chart
-        var donutChart = new Chart(document.getElementById('donutChart'), {
-            type: 'doughnut',
-            data: data,
-            options: {
-                cutoutPercentage: 70, // Adjust the size of the hole in the middle (optional)
-                responsive: true,
-                plugins: {
-                    afterDraw: function(chart) {
-                        var width = chart.chart.width;
-                        var height = chart.chart.height;
-                        var ctx = chart.chart.ctx;
-
-                        ctx.restore();
-                        var fontSize = (height / 114).toFixed(2);
-                        ctx.font = fontSize + "em sans-serif";
-                        ctx.textBaseline = "middle";
-
-                        var text = "Status Frequencies";
-                        var textX = Math.round((width - ctx.measureText(text).width) / 2);
-                        var textY = height / 2;
-
-                        ctx.fillText(text, textX, textY);
-                        ctx.save();
-                    },
-                    title: {
-                        display: true,
-                        text: 'Status Code Chart',
-                        font: {
-                        size: 18
-                        }
-                    }
-                }
-            }
-        });
-    }
-    // Call the function to create the chart
-    // const top5 = jsonData.slice(0,5);
-    createDonutChart(statusJ);
-
-    const logsMessage = {{ logs_message|safe }};
-    console.log(logsMessage);
-
-    function createDonutChart1(jsonData) {
-        var ctx = document.getElementById('donutChart1').getContext('2d');
-        var labels = Object.keys(jsonData);
-        // console.log(labels)
-        var length = labels.length;
-
-        var data = Object.values(jsonData);
-        
-        var colors = generateRandomColors(length);
-        // Define the chart data
-        var data = {
-        labels: labels,
-        datasets: [{
-            label: 'Message Received',
-            backgroundColor: colors,
-            data: data
-        }
-    ]
-        };
-
-        // Create the chart
-        var donutChart = new Chart(document.getElementById('donutChart1'), {
-            type: 'doughnut',
-            data: data,
-            options: {
-                cutoutPercentage: 70, // Adjust the size of the hole in the middle (optional)
-                responsive: true,
-                plugins: {
-                    afterDraw: function(chart) {
-                        var width = chart.chart.width;
-                        var height = chart.chart.height;
-                        var ctx = chart.chart.ctx;
-
-                        ctx.restore();
-                        var fontSize = (height / 114).toFixed(2);
-                        ctx.font = fontSize + "em sans-serif";
-                        ctx.textBaseline = "middle";
-
-                        var text = "Status Frequencies";
-                        var textX = Math.round((width - ctx.measureText(text).width) / 2);
-                        var textY = height / 2;
-
-                        ctx.fillText(text, textX, textY);
-                        ctx.save();
-                    },
-                    title: {
-                        display: true,
-                        text: 'Types of Messages in Logs',
-                        font: {
-                        size: 18
-                        }
-                    }
-                }
-            }
-        });
-    }
-    createDonutChart1(logsMessage)
-    // Call the function to create the chart
-    // const top5 = jsonData.slice(0,5);
-
-    function createPieChart(jsonData){
-        var ctx = document.getElementById('pieChart').getContext('2d');
-        var labels = Object.keys(jsonData);
-        // console.log(labels)
-        var length = labels.length;
-
-        var data = Object.values(jsonData);
-        
-
-        var colors = generateRandomColors(length);
-        // Define the chart data
-        var data = {
-        labels: labels,
-        datasets: [{
-            label: 'Message Received',
-            backgroundColor: colors,
-            data: data
-        }
-    ]
-        };
-
-        // Create the chart
-        var donutChart = new Chart(document.getElementById('pieChart'), {
-            type: 'pie',
-            data: data,
-            options: {
-                cutoutPercentage: 70, // Adjust the size of the hole in the middle (optional)
-                responsive: true,
-                plugins: {
-                    afterDraw: function(chart) {
-                        var width = chart.chart.width;
-                        var height = chart.chart.height;
-                        var ctx = chart.chart.ctx;
-
-                        ctx.restore();
-                        var fontSize = (height / 114).toFixed(2);
-                        ctx.font = fontSize + "em sans-serif";
-                        ctx.textBaseline = "middle";
-
-                        var text = "Status Frequencies";
-                        var textX = Math.round((width - ctx.measureText(text).width) / 2);
-                        var textY = height / 2;
-
-                        ctx.fillText(text, textX, textY);
-                        ctx.save();
-                    },
-                    title: {
-                        display: true,
-                        text: 'Middlewares in Logs',
-                        font: {
-                        size: 18
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    const logsMiddleware = {{ logs_mi|safe }};
-    console.log(logsMessage);
-    createPieChart(logsMiddleware);
-
-    const jsonData = {{ json|safe }};
-    console.log(jsonData);
-
-    function create2axes(jsonData) {
-        var ctx = document.getElementById('lineChart').getContext('2d');
-        var labels = jsonData.map(function(obj,index) {
-            var url = obj["url"];
-            return index;
-        });
-        var data1 = jsonData.map(function(obj) {
-            return obj["size"];
-        });
-        var data2 = jsonData.map(function(obj) {
-            return obj["download_latency"];
-        });
-
-        var chartData = {
-            labels: labels,
-            datasets: [
-            {
-                type: 'bar',
-                label: 'Size(bytes) of Page content',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1,
-                yAxisID: 'bar-y-axis',
-                data: data1,
-            },
-            {
-                type: 'line',
-                label: 'Latency of loading the content',
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1,
-                yAxisID: 'line-y-axis',
-                data: data2,
-            },
-            ],
-        };
-
-        var chartOptions = {
-            scales: {
-                xAxes: [{
-                ticks: {
-                    // autoSkip: true,
-                    callback: function (value) {
-                        if (value.length > 18) {
-                            return value.substr(0, 18) + "..."; // truncate and add ellipsis
-                        } else {
-                            return value;
-                        }
-                    },
-                }
-                }],
-            'bar-y-axis': {
-                type: 'linear',
-                position: 'left',
-                ticks: {
-                beginAtZero: true,
-
-                },
-            },
-            'line-y-axis': {
-                type: 'linear',
-                position: 'right',
-                ticks: {
-                beginAtZero: true,
-                },
-            },
-            
-            },
-            plugins:{
-                title: {
-                        display: true,
-                        text: 'Latency Chart for top 5',
-                        font: {
-                        size: 18
-                        }
-                    }
-            }
-        };
-
-        var myChart = new Chart(ctx, {
-            type: 'bar',
-            data: chartData,
-            options: chartOptions,
-        });
-    
-    }
-
-    // Call the function to create the chart
-    const top5 = jsonData.slice(0,5);
-    create2axes(top5);
-</script>
-
-
 
 {% endblock javascript %}

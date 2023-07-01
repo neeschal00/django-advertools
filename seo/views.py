@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render
 from django.http import HttpResponseRedirect, JsonResponse
 from advertools import (
     robotstxt_to_df,
@@ -28,7 +28,7 @@ from decouple import config
 from django.contrib import messages
 
 # from celery.result import AsyncResult
-from seo.tasks import generateReport, serpCrawlFull, serpCrawlHeaders
+from seo.tasks import generateReport, serpCrawlFull, serpCrawlHeaders, analyzeContent
 import os, json
 import logging
 import validators
@@ -395,6 +395,7 @@ def analyzeCrawlLogs():
 
 def carwlLinks(request):
     overview = False
+    analysis = False
     if request.method == "POST":
         form = Crawl(request.POST)
         if form.is_valid():
@@ -466,6 +467,8 @@ def carwlLinks(request):
                         .describe()
                         .loc[["mean", "max", "min"]]
                     )
+                    print(describe)
+                    # describe = describe.to_dict()
                 except KeyError:
                     return render(
                         request,
@@ -479,15 +482,19 @@ def carwlLinks(request):
                             "json": jsonD,
                         },
                     )
-                status = crawlDf["status"].value_counts()
-                status = pd.DataFrame(
-                    {"frequency": status, "percentage": status / len(crawlDf) * 100}
-                )
-                status.reset_index(inplace=True)
-                status.columns = ["status", "frequency", "percentage"]
 
                 overview = True
+                
+               
+                listCol = crawlDf[crawlDf["body_text"].notna()]
 
+                listCol = listCol["body_text"].to_list()
+
+                analyzeContent.delay(task_id,listCol,"Crawl Body Response Analysis")
+                
+                analysis = True
+
+                    
                 return render(
                     request,
                     "seo/crawl.html",
@@ -495,10 +502,10 @@ def carwlLinks(request):
                         **logsAnalysis,
                         "form": form,
                         "describe": describe.to_dict(),
-                        "statusJ": status.to_json(),
                         "crawlDf": crawlDf.to_html(
                             classes="table table-striped", justify="center"
                         ),
+                        "analysis":analysis,
                         "json": jsonD,
                         "overview": overview,
                     },
@@ -559,6 +566,7 @@ def serpCrawl(request):
             domains_df.columns = ["displayLink", "frequency", "percentage"]
 
             rank_df = serpDf[["searchTerms", "displayLink", "rank", "link"]].head(10)
+
 
             rank_df.rename(columns={"displayLink": "domain"}, inplace=True)
             rank_df = rank_df.reset_index(drop=True).to_html(
