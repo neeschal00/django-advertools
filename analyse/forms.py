@@ -58,5 +58,5 @@ class DatasetExtract(forms.ModelForm):
 
 class DatasetSelect(forms.Form):
     file_title = forms.ModelChoiceField(queryset=DatasetFile.objects.all().reverse())
-    column_name = forms.MultipleChoiceField(choices=[])
+    column_name = forms.ChoiceField(choices=[])
 

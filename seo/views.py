@@ -297,19 +297,7 @@ def knowledgeGraph(request):
                 listCol = knowDf[knowDf["result.detailedDescription.articleBody"].notna()]
 
                 listCol = listCol["result.detailedDescription.articleBody"].to_list()
-                urls = extract_urls(listCol)
-
-                mentions = extract_mentions(listCol)
-
-                questions = extract_questions(listCol)
-
-                numbers = extract_numbers(listCol)
-
-                hashtags = extract_hashtags(listCol)
-
-                intense_words = extract_intense_words(
-                    listCol, min_reps=3
-                )  # minimum repertition of words 3
+                
 
                 submission = True
                 generateReport.delay(
@@ -318,6 +306,7 @@ def knowledgeGraph(request):
 
                 jsonD = knowDf.to_json(orient="records")
                 analysis = True
+                analyzeContent.delay("test",listCol,"KG article body Analysis")
                 return render(
                     request,
                     "seo/knowledgeG.html",
@@ -329,12 +318,6 @@ def knowledgeGraph(request):
                         "json": jsonD,
                         "analysis": analysis,
                         "submission": submission,
-                        "urls": urls,
-                        "mentions": mentions,
-                        "questions": questions,
-                        "numbers": numbers,
-                        "hashtags": hashtags,
-                        "intense_words": intense_words,
                     },
                 )
 
@@ -469,12 +452,16 @@ def carwlLinks(request):
                     )
                     print(describe)
                     # describe = describe.to_dict()
+
+
                 except KeyError:
+                    analysis=True
                     return render(
                         request,
                         "seo/crawl.html",
                         {
                             **logsAnalysis,
+                            'analysis':analysis,
                             "form": form,
                             "crawlDf": crawlDf.to_html(
                                 classes="table table-striped", justify="center"

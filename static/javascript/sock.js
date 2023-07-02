@@ -362,9 +362,9 @@ if (random_id) {
 
     if (message.type === "analysisComplete" && message.task_name === "contentAnalysis") {
       console.log("Analysis complete");
-      console.log(message.task_id);
+      // console.log(message.task_id);
       var url = "/api/analysis/" + message.task_id + "/";
-      console.log(url);
+      // console.log(url);
       fetch(url)
         .then((response) => response.json())
         .then((data) => {
@@ -373,7 +373,7 @@ if (random_id) {
           if(data.status === "completed"){
             const result = data.result;
 
-            console.log(result);
+            // console.log(result);
 
             generateDynamicContent(result);
           }
@@ -388,13 +388,13 @@ if (random_id) {
 
     if (message.type === "crawlRead") {
       console.log("Crawl Read");
-      console.log(message.task_id);
+      // console.log(message.task_id);
       var url = "/api/result/" + message.task_id + "/";
       console.log(url);
       fetch(url)
         .then((response) => response.json())
         .then((data) => {
-          console.log(data.status);
+          // console.log(data.status);
           // const content = JSON.parse(data);
           const element = document.getElementById("testResp");
           element.innerHTML = data.result.crawlDf;
@@ -407,9 +407,9 @@ if (random_id) {
         });
     }
 
-    if (message.type == "data_converted") {
-        window.alert(message.result);
-    }
+    // if (message.type == "data_converted") {
+    //     window.alert(message.result);
+    // }
 
     // Handle the received message as needed
   };

@@ -88,144 +88,25 @@
       <div class="col-md-10">
         <canvas id="lineChart" class="mt-3"></canvas>
       </div>
+      
       {% if analysis %}
 
       <div class="col-md-12 mt-4">
-        <div class="row d-flex justify-content-center">
-          <h2 class="h2 mb-2 text-center">Description Analysis Overview</h2>
-          <div class="col-md-4 col-xl-4">
-            <div class="card bg-c-green order-card">
-              <div class="card-block">
-                <h6 class="m-b-20">URLs found</h6>
-                <h2 class="text-right">
-                  <i class="fa fa-link f-left"></i
-                  ><span class="px-2">{{ urls.overview.num_urls }}</span>
-                </h2>
-                <p class="m-b-0">
-                  Urls per post<span class="f-right"
-                    >{{ urls.overview.urls_per_post }}</span
-                  >
-                </p>
-                <p class="m-b-0">
-                  Unique Urls<span class="f-right"
-                    >{{ urls.overview.unique_urls }}</span
-                  >
-                </p>
-              </div>
+        <div class="row d-flex justify-content-center" id="dynamicContent">
+            <div id="loadingModal" class="col-md-7 mt-2">
+                <div class="mt-2">
+                    <span
+                    class="spinner-grow spinner-grow-sm"
+                    role="status"
+                    aria-hidden="true"
+                    ></span>
+                    Loading...
+                </div>
             </div>
-          </div>
-          <div class="col-md-4 col-xl-4">
-            <div class="card bg-c-yellow order-card">
-              <div class="card-block">
-                <h6 class="m-b-20">Mentions found</h6>
-                <h2 class="text-right">
-                  <i class="fa fa-quote-left f-left"></i
-                  ><span class="px-2">{{ mentions.overview.num_mentions}}</span>
-                </h2>
-                <p class="m-b-0">
-                  Mentions per post<span class="f-right"
-                    >{{ mentions.overview.mentions_per_post}}</span
-                  >
-                </p>
-                <p class="m-b-0">
-                  Unique Mentions<span class="f-right"
-                    >{{ mentions.overview.unique_mentions }}</span
-                  >
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4 col-xl-4">
-            <div class="card bg-c-pink order-card">
-              <div class="card-block">
-                <h6 class="m-b-20">Questions found</h6>
-                <h2 class="text-right">
-                  <i class="fa fa-question f-left"></i
-                  ><span class="px-2"
-                    >{{ questions.overview.num_question_marks}}</span
-                  >
-                </h2>
-                <p class="m-b-0">
-                  Questions per post<span class="f-right"
-                    >{{ questions.overview.question_marks_per_post}}</span
-                  >
-                </p>
-                <p class="m-b-0">
-                  Unique Questions<span class="f-right"
-                    >{{ questions.overview.unique_question_marks }}</span
-                  >
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4 col-xl-4">
-            <div class="card bg-c-blue order-card">
-              <div class="card-block">
-                <h6 class="m-b-20">Hashtags found</h6>
-                <h2 class="text-right">
-                  <i class="fa fa-hashtag f-left"></i
-                  ><span class="px-2">{{ hashtags.overview.num_hashtags}}</span>
-                </h2>
-                <p class="m-b-0">
-                  Hashtags per post<span class="f-right"
-                    >{{ hashtags.overview.hashtags_per_post}}</span
-                  >
-                </p>
-                <p class="m-b-0">
-                  Unique Hashtags<span class="f-right"
-                    >{{ hashtags.overview.unique_hashtags }}</span
-                  >
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4 col-xl-4">
-            <div class="card bg-c-green order-card">
-              <div class="card-block">
-                <h6 class="m-b-20">Numbers found</h6>
-                <h2 class="text-right">
-                  <i class="fa fa-arrow-up f-left"></i
-                  ><span class="px-2">{{ numbers.overview.num_numbers}}</span>
-                </h2>
-                <p class="m-b-0">
-                  Numbers per post<span class="f-right"
-                    >{{ numbers.overview.numbers_per_post}}</span
-                  >
-                </p>
-                <p class="m-b-0">
-                  Unique Numbers<span class="f-right"
-                    >{{ numbers.overview.unique_numbers }}</span
-                  >
-                </p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-4 col-xl-4">
-            <div class="card bg-c-yellow order-card">
-              <div class="card-block">
-                <h6 class="m-b-20">Intense Words found</h6>
-                <h2 class="text-right">
-                  <i class="fa fa-repeat f-left"></i
-                  ><span class="px-2"
-                    >{{ intense_words.overview.num_intense_words}}</span
-                  >
-                </h2>
-                <p class="m-b-0">
-                  Intense Words per post<span class="f-right"
-                    >{{ intense_words.overview.intense_words_per_post}}</span
-                  >
-                </p>
-                <p class="m-b-0">
-                  Unique Intense Words<span class="f-right"
-                    >{{ intense_words.overview.unique_intense_words }}</span
-                  >
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       {% endif %}
+      
       <div
         class="col-md-12 mt-3"
         style="

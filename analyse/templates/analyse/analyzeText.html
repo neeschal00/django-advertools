@@ -243,18 +243,27 @@
 
 <script>
 
+
     $('id_file_title').on('change', function (e) {
         var optionSelected = $("option:selected", this);
         var valueSelected = this.value;
-        var url = "";
+        var url = "/api/"+valueSelected+"/";
         fetch(url)
         .then((response) => response.json())
         .then((data) => {
           console.log(data.status);
           // const content = JSON.parse(data);
-          const element = document.getElementById("testResp");
-          element.innerHTML = data.result.crawlDf;
-          applyDataTablesFormatting(element);
+          const element = document.getElementById("id_column_name");
+
+          let html = `<option value selected>------</option>`;
+          
+          data.result.forEach(column=>{
+            html+= `<option value="${column}"selected>${column}/option>`
+          })
+
+          element.innerHTML = html;
+
+        //   applyDataTablesFormatting(element);
           // initializeDatatables();
         })
 
