@@ -194,7 +194,7 @@ def analyzeCrawlLogs(group_id, type):
 def analyzeContent(group_id, content: list,title="Overview Analysis"):
     task_id = analyzeContent.request.id
     print("Analyze Content")
-    print(task_id)
+    # print(task_id)
     # try:
     listCol = list(content)
     urls = extract_urls(listCol)

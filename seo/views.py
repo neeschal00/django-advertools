@@ -19,7 +19,7 @@ from advertools import (
     extract_questions,
     extract_urls,
 )
-from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl, SERPCrawl
+from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl, SERPCrawl, SeoAnalyzeForm
 
 from decouple import config
 
@@ -579,3 +579,15 @@ def serpCrawl(request):
         # print(SERP_GOOG_VALID_VALS)
         form = SERPCrawl()
         return render(request, "seo/serpCrawl.html", {"form": form})
+
+
+
+
+def seoAnalysis(request):
+    form = SeoAnalyzeForm()
+
+    if request.method == "POST":
+        pass
+    else:
+        return render(request,"seo/seoAnalysis.html",{"form":form})
+

@@ -199,66 +199,69 @@ def getDataset(request):
 def dataSetAnalysis(request):
     submission = False
 
+    form = DatasetSelect()
     if request.method == "POST":
-        form = DatasetSelect(request.POST)
-        # print(form)
-        if form.is_valid():
-            form_data = form.cleaned_data
+        # print(form.cleaned_data)
 
-            dataset_val = form_data["file_title"]
+        form_data = request.POST
 
-            column_name = form_data["column_name"]
-            try:
-                df = pd.read_csv(dataset_val.file_field)
-                listCol = df[column_name.strip()].to_list()
+        dataset_val = form_data.get("file_title")
 
-                urls = extract_urls(listCol)
+        column_name = form_data.get("column_name")
 
-                mentions = extract_mentions(listCol)
+        try:
+            dataset_val = DatasetFile.objects.get(id=int(dataset_val))
 
-                questions = extract_questions(listCol)
+            df = pd.read_csv(dataset_val.file_field.path)
+            # print(df)
+            df.dropna(subset=[column_name], inplace=True)
+            # listCol = df[df[column_name].notna()]
+            listCol = df[column_name].to_list()
+            # print(listCol)
 
-                numbers = extract_numbers(listCol)
+            urls = extract_urls(listCol)
+            mentions = extract_mentions(listCol)
+            questions = extract_questions(listCol)
+            numbers = extract_numbers(listCol)
+            hashtags = extract_hashtags(listCol)
+            intense_words = extract_intense_words(
+                listCol, min_reps=3
+            )  # minimum repertition of words 3
 
-                hashtags = extract_hashtags(listCol)
+            submission = True
 
-                intense_words = extract_intense_words(
-                    listCol, min_reps=3
-                )  # minimum repertition of words 3
+            return render(
+                request,
+                "analyse/analyzeText.html",
+                {
+                    "form": form,
+                    "textDf": df.to_html(
+                        classes="table table-striped text-center", justify="center"
+                    ),
+                    "submission": submission,
+                    "urls": urls,
+                    "mentions": mentions,
+                    "questions": questions,
+                    "numbers": numbers,
+                    "hashtags": hashtags,
+                    "intense_words": intense_words,
+                },
+            )
+        except Exception as e:
+            print(e)
+            messages.warning(request, e)
+            return render(
+                request,
+                "analyse/analyzeText.html",
+                {
+                    "form": form,
+                    "textDf": df.to_html(
+                    classes="table table-striped text-center", justify="center"
+                ),
+                },
+            )
 
-                submission = True
-
-                return render(
-                    request,
-                    "analyse/analyzeText.html",
-                    {
-                        "form": form,
-                        "textDf": df.to_html(
-                            classes="table table-striped text-center", justify="center"
-                        ),
-                        "submission": submission,
-                        "urls": urls,
-                        "mentions": mentions,
-                        "questions": questions,
-                        "numbers": numbers,
-                        "hashtags": hashtags,
-                        "intense_words": intense_words,
-                    },
-                )
-            except Exception as e:
-                messages.warning(request, "Unable to analyze the particular column")
-                return render(
-                    request,
-                    "analyse/analyzeText.html",
-                    {
-                        "form": form,
-                    },
-                )
-        else:
-            # print(form.cleaned_data)
-            return HttpResponse("form invalid")
     else:
-        form = DatasetSelect()
         return render(
             request,
             "analyse/analyzeText.html",

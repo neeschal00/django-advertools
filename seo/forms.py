@@ -156,3 +156,7 @@ class SERPCrawl(SerpGoogle):
         super().__init__(*args, **kwargs)
         self.helper.layout[1].append("limit")
         self.helper.layout[1].append("headers_only")
+
+
+class SeoAnalyzeForm(forms.Form):
+    url = forms.CharField(widget=forms.TextInput(attrs={"class":"form-control","placeholder":"Enter the URL to analyze"}))

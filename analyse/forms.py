@@ -57,6 +57,6 @@ class DatasetExtract(forms.ModelForm):
 
 
 class DatasetSelect(forms.Form):
-    file_title = forms.ModelChoiceField(queryset=DatasetFile.objects.all().reverse())
-    column_name = forms.ChoiceField(choices=[])
+    file_title = forms.ModelChoiceField(queryset=DatasetFile.objects.all().order_by('-id'))
+    column_name = forms.ChoiceField(choices=[("---","---")])
 

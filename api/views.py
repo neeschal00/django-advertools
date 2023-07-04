@@ -31,6 +31,7 @@ def getCsvColumns(request, pid):
     try:
         csv_file = pd.read_csv(csv_path)
         header = csv_file.columns.to_list()
+        header.pop(0)
         return JsonResponse({"result": header})
     except Exception as e:
         return JsonResponse({"result": []})

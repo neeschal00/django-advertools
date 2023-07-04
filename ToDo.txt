@@ -1,6 +1,11 @@
-### dynamic form select in analyse app from uploaded  
 ### remove unnecessary code 
 ### execution analysis for the crawled content from serp
+### for the above execution analysislook into the feature of seo analysis.
 
+Features:
+- Keywords
+-- remove stop words and general words from content to get only keywords that can be essential in SEO
+- Meta tags analysis.
+-- analyze the meta tags 
 
 # chart js 
