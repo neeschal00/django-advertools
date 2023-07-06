@@ -2,8 +2,10 @@ from celery import shared_task
 import os
 from ydata_profiling import ProfileReport
 from django.core.cache import cache
+from collections import Counter
 
 import pandas as pd
+import re
 from advertools import (
     crawl_headers,
     crawl,
@@ -14,6 +16,7 @@ from advertools import (
     extract_numbers,
     extract_questions,
     extract_urls,
+    stopwords,
 )
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -234,3 +237,56 @@ def analyzeContent(group_id, content: list,title="Overview Analysis"):
     #             "message": e
     #         }
     #     }
+
+@shared_task
+def get_keywords(group_id,url):
+    crawl(
+                url_list=[url],
+                output_file="output/crawl_output.jl",
+                custom_settings={"LOG_FILE": "logs/crawlLogs/keywords.log"},
+                )
+    crawlDf = pd.read_json("output/crawl_output.jl",lines=True)
+    body_text = crawlDf["body_text"][0].lower()
+    pattern = r'[^a-zA-Z0-9@\s]'
+    body_text = re.sub(pattern,"",body_text)
+    for text in stopwords["english"]:
+        body_text = body_text.replace(" "+text.lower()+" ","")
+    keywords = body_text.split()
+    keywords = Counter(keywords)
+    print(dict(keywords))
+    return {
+        "status": "success",
+        "keywords": dict(keywords)
+    }
+
+
+
+@shared_task
+def titleAnalysis(title = None):
+    if title:
+        lengthT = len(title)
+        if lengthT > 50 and lengthT < 70:
+            return {
+                "status": "success",
+                "title": title,
+                "length": lengthT,
+                "appropriate": True,
+                "description": f"The title is set and the length being {lengthT} is appropriate for title length which must be approx. 50-70 chars long."
+            }
+        else:
+            return {
+                "status": "success",
+                "title": title,
+                "length": lengthT,
+                "appropriate": False,
+                "description": f"The title is set and the length being {lengthT} is not appropriate for title length which must be approx. 50-70 chars long."
+            }
+    else:
+        return {
+                "status": "failed",
+                "title": title,
+                "length": None,
+                "appropriate": False,
+                "description": f"The title is not set and title length which must be approx. 50-70 chars long."
+            }
+

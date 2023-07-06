@@ -1,0 +1,6 @@
+Limitations observed in the application or libraries 
+
+## advertools has no track of javscript, css or external files that are loaded in the browser content 
+(fact: you need browser running to track those so can't display those in the analysis)
+
+## Since there is no appropriate benchmarking score for content all the values are set approximately for the websites
