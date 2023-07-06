@@ -373,13 +373,9 @@ if (random_id) {
           if(data.status === "completed"){
             const result = data.result;
 
-            // console.log(result);
-
             generateDynamicContent(result);
           }
-          // const content = JSON.parse(data);
-
-          // initializeDatatables();
+          
         })
         .catch((error) => {
           console.error("Error:", error);
@@ -406,10 +402,37 @@ if (random_id) {
           console.error("Error:", error);
         });
     }
+    if (message.type === "getKeywords") {
+      console.log(message.result)
+      console.log("Analysis complete");
+
+      var url = "/api/keywords/" + message.task_id + "/";
+      // console.log(url);
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data.status);
+          
+          if(data.status === "success"){
+            const result = data.keywords;
+
+            const element = document.getElementById("keywords-view");
+            html = '';
+            for (var value in result){
+              html += `<li class="list-group-item">${value} : ${result[value]}</li>`;
+            } 
+            element.innerHTML = html;
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
 
     // if (message.type == "data_converted") {
     //     window.alert(message.result);
     // }
+
     if (message.type === "task_completed") {
       console.log(message.result)
     }

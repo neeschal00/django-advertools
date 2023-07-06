@@ -241,7 +241,7 @@ def analyzeContent(group_id, content: list,title="Overview Analysis"):
 @shared_task
 def get_keywords(group_id,body_text):
 
-    task_id = get_keywords.request.id()
+    task_id = get_keywords.request.id
     body_text = body_text.lower()
     pattern = r'[^a-zA-Z0-9@\s]'
     body_text = re.sub(pattern,"",body_text)
@@ -249,7 +249,7 @@ def get_keywords(group_id,body_text):
         body_text = body_text.replace(" "+text.lower()+" ","")
     keywords = body_text.split()
     keywords = dict(Counter(keywords))
-    keywords = sorted(keywords.items(),key=lambda x: x[1],reverse=True)
+    keywords = sorted(keywords.items(),key=lambda x: x[1])[::-1]
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "getKeywords", "task_id": task_id}
     )

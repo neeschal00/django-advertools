@@ -23,6 +23,16 @@ def getAnalysisTaskResponse(request, task_id):
             {"error": "task failed task failed or task-id Not found"}, status=404
         )
 
+def getKeywords(request, task_id):
+    task_resp = AsyncResult(id=task_id)
+    if task_resp.state == "SUCCESS":
+        data = task_resp.get()
+        return JsonResponse(data)
+    else:
+        return JsonResponse(
+            {"error": "task failed task failed or task-id Not found"}, status=404
+        )
+
 
 def getCsvColumns(request, pid):
     dataset = DatasetFile.objects.get(id=pid)

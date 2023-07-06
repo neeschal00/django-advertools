@@ -591,9 +591,8 @@ def seoAnalysis(request):
         if form.is_valid():
             url = form.cleaned_data["url"]
             group_id = "test"
-
             runCrawler.delay(group_id,url)
-            # crawlDf = 
+            return render(request,"seo/seoAnalysis.html",{"form":form})
     else:
         return render(request,"seo/seoAnalysis.html",{"form":form})
 
