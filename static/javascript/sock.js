@@ -410,6 +410,9 @@ if (random_id) {
     // if (message.type == "data_converted") {
     //     window.alert(message.result);
     // }
+    if (message.type === "task_completed") {
+      console.log(message.result)
+    }
 
     // Handle the received message as needed
   };

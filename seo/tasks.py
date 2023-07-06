@@ -239,21 +239,20 @@ def analyzeContent(group_id, content: list,title="Overview Analysis"):
     #     }
 
 @shared_task
-def get_keywords(group_id,url):
-    crawl(
-                url_list=[url],
-                output_file="output/crawl_output.jl",
-                custom_settings={"LOG_FILE": "logs/crawlLogs/keywords.log"},
-                )
-    crawlDf = pd.read_json("output/crawl_output.jl",lines=True)
-    body_text = crawlDf["body_text"][0].lower()
+def get_keywords(group_id,body_text):
+
+    task_id = get_keywords.request.id()
+    body_text = body_text.lower()
     pattern = r'[^a-zA-Z0-9@\s]'
     body_text = re.sub(pattern,"",body_text)
     for text in stopwords["english"]:
         body_text = body_text.replace(" "+text.lower()+" ","")
     keywords = body_text.split()
-    keywords = Counter(keywords)
-    print(dict(keywords))
+    keywords = dict(Counter(keywords))
+    keywords = sorted(keywords.items(),key=lambda x: x[1],reverse=True)
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id, {"type": "getKeywords", "task_id": task_id}
+    )
     return {
         "status": "success",
         "keywords": dict(keywords)
@@ -289,4 +288,55 @@ def titleAnalysis(title = None):
                 "appropriate": False,
                 "description": f"The title is not set and title length which must be approx. 50-70 chars long."
             }
+
+@shared_task
+def metaDescripton(description):
+    if description:
+        lengthT = len(description)
+        if lengthT > 150 and lengthT < 170:
+            return {
+                "status": "success",
+                "description": description,
+                "length": lengthT,
+                "appropriate": True,
+                "description": f"The description is set and the length being {lengthT} is appropriate for description length which must be approx. 150-170 chars long."
+            }
+        else:
+            return {
+                "status": "success",
+                "description": description,
+                "length": lengthT,
+                "appropriate": False,
+                "description": f"The description is set and the length being {lengthT} is not appropriate for description length which must be approx. 150-170 chars long."
+            }
+    else:
+        return {
+                "status": "failed",
+                "description": description,
+                "length": None,
+                "appropriate": False,
+                "description": f"The description is not set and description length which must be approx. 150-170 chars long."
+            }
+
+@shared_task
+def runCrawler(group_id,url):
+
+    custom_settings = {
+        "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+        "LOG_FILE": "logs/crawlLogs/output_file.log",
+    }
+    crawlDf = crawl(
+            url,
+            output_file="output/seo_crawler.jl",
+            follow_links=False,
+            custom_settings=custom_settings,
+        )
+    
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id, {"type": "task_completed", "result": "Crawling Completed"}
+    )
+    crawlDf = pd.read_json("output/seo_crawler.jl",lines=True)
+    
+    body_text = crawlDf["body_text"][0]
+    get_keywords.delay(group_id,body_text)
 

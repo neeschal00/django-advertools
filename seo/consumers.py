@@ -86,3 +86,13 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
                 }
             )
         )
+    
+    async def getKeywords(self, event):
+        task_id = event["task_id"]
+
+        # Send task completion notification to the client
+        await self.send(
+            text_data=json.dumps(
+                {"type": "getKeywords", "result": "Keywords completed", "task_id": task_id}
+            )
+        )

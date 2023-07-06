@@ -28,7 +28,7 @@ from decouple import config
 from django.contrib import messages
 
 # from celery.result import AsyncResult
-from seo.tasks import generateReport, serpCrawlFull, serpCrawlHeaders, analyzeContent
+from seo.tasks import generateReport, serpCrawlFull, serpCrawlHeaders, analyzeContent, runCrawler
 import os, json
 import logging
 import validators
@@ -585,9 +585,15 @@ def serpCrawl(request):
 
 def seoAnalysis(request):
     form = SeoAnalyzeForm()
-
+    hTitles = ["h1","h2","h3","h4","h6"]
     if request.method == "POST":
-        pass
+        form = SeoAnalyzeForm(request.POST)
+        if form.is_valid():
+            url = form.cleaned_data["url"]
+            group_id = "test"
+
+            runCrawler.delay(group_id,url)
+            # crawlDf = 
     else:
         return render(request,"seo/seoAnalysis.html",{"form":form})
 
