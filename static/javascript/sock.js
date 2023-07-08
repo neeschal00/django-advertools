@@ -382,6 +382,78 @@ if (random_id) {
         });
     }
 
+    if (message.type === "analysisComplete" && message.task_name === "titleAnalysis") {
+      console.log("Analysis complete");
+      // console.log(message.task_id);
+      var url = "/api/analysis/" + message.task_id + "/";
+      // console.log(url);
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data.status);
+          
+          if(data.status === "success"){
+            const result = data.result;
+            console.log(result);
+            const element = document.getElementById("titleAnalysis");
+            element.innerHTML = `
+              <h3 class="text-secondary">Title Analysis</h3>
+              <p>Title length is ${result.length}</p>
+              <h5 class="text-primary">${result.title}</h5>
+              <p>${result.description}</p>
+              <p><span class="fw-bold">Keywords found: </span> ${result.keywords.join(", ")} </p>
+            `;
+            
+          }
+          
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
+
+
+    if (message.type === "analysisComplete" && message.task_name === "metaDescripton") {
+      console.log("Analysis complete");
+      // console.log(message.task_id);
+      var url = "/api/analysis/" + message.task_id + "/";
+      // console.log(url);
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data.status);
+          
+          if(data.status === "success"){
+            const result = data.result;
+            console.log(result);
+            const element = document.getElementById("metaAnalysis");
+            if (result.keywords){
+              html = `
+                <h3 class="text-secondary">Meta Description Analysis</h3>
+                <p>Description length is ${result.length} </p>
+                <p class="text-primary fw-bold">${result.description_meta}</p>
+                <p>${result.description}</p>
+                <p><span class="fw-bold">Keywords found: </span> ${result.keywords.join(", ")} </p>
+              `;
+            }
+            else{
+              html = `
+              <h3 class="text-secondary">Meta Description Analysis</h3>
+              <p>Description length is ${result.length} </p>
+              <p class="text-primary fw-bold">${result.description_meta}</p>
+              <p>${result.description}</p>
+            `;
+            }
+            
+            element.innerHTML = html
+          }
+          
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
+
     if (message.type === "crawlRead") {
       console.log("Crawl Read");
       // console.log(message.task_id);
@@ -415,13 +487,21 @@ if (random_id) {
           
           if(data.status === "success"){
             const result = data.keywords;
-
+            // console.log(result);
+            const firstTwe = result.slice(0, 20);
+            // const sortedData = Object.entries(result).sort(function(a, b) {
+            //   return b[1] - a[1];
+            // });
+            // console.log(sortedData);
             const element = document.getElementById("keywords-view");
-            html = '';
-            for (var value in result){
-              html += `<li class="list-group-item">${value} : ${result[value]}</li>`;
+            html = '<h3 class="text-secondary fw-bold">Keywords</h3>';
+            for (var value in firstTwe){
+              // console.log(value);
+              html += `<li class="list-group-item">${result[value][0]} : ${result[value][1]} <span style="float:right;">See in <a class="text-end text-primary text-decoration-none" href="https://trends.google.com/trends/explore?date=now%201-d&geo=US&q=${result[value][0].trim()}&hl=en" target="_blank">Google Trends</a></span></li>`;
             } 
             element.innerHTML = html;
+            document.getElementById("loadingModal").style.display = "none";
+            document.querySelector('button[type="submit"]').disabled = false;
           }
         })
         .catch((error) => {
