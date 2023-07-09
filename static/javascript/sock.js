@@ -357,7 +357,7 @@ if (random_id) {
           
           toast.innerHTML = `
           <div class="toast-header">
-            <img src="..." class="rounded me-2" alt="..." />
+            <img src="..." class="rounded me-2" alt="info" />
             <strong class="me-auto">Analaysis Complete</strong>
             <small>few seconds ago</small>
             <button
@@ -537,7 +537,7 @@ if (random_id) {
     if (message.type === "task_completed") {
       toast.innerHTML = `
             <div class="toast-header">
-              <img src="..." class="rounded me-2" alt="..." />
+              <img src="static/images/infor2.png" class="rounded me-2 img img-fluid" alt="info" />
               <strong class="me-auto">Task Completed</strong>
               <small>Just Now</small>
               <button
@@ -552,6 +552,41 @@ if (random_id) {
       $('#liveToast').toast('show');
     }
 
+    if (message.type === "data_converted") {
+      toast.innerHTML = `
+            <div class="toast-header">
+              <img src="static/images/infor2.png" class="rounded me-2 img img-fluid" alt="info" />
+              <strong class="me-auto text-primary">Profiling Reprt Completed</strong>
+              <small>Just Now</small>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="toast"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="toast-body">${message.result}</div>
+            `;
+      $('#liveToast').toast('show');
+    }
+
+    if (message.type === "report_failed") {
+      toast.innerHTML = `
+            <div class="toast-header">
+              <span class="fw-bold text-danger">Eror: X</span>
+              <strong class="me-auto text-danger">Profiling Report Failed</strong>
+              <small>Just Now</small>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="toast"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="toast-body">${message.result}</div>
+            `;
+      $('#liveToast').toast('show');
+    }
     // Handle the received message as needed
   };
 
