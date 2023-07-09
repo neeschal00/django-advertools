@@ -305,10 +305,12 @@ if (random_id) {
   var socket = new WebSocket(
     "ws://" + window.location.host + "/ws/group/" + random_id + "/"
   );
-
+  
+  let toast = document.getElementById("liveToast");
   // Event handler for successful connection
   socket.onopen = function (event) {
     console.log("WebSocket connection established");
+
 
     // You can perform any necessary actions after the connection is established
   };
@@ -352,6 +354,22 @@ if (random_id) {
           const element = document.getElementById("analysisResp");
           element.innerHTML = data.result.logs_dt;
           applyDataTablesFormatting(element);
+          
+          toast.innerHTML = `
+          <div class="toast-header">
+            <img src="..." class="rounded me-2" alt="..." />
+            <strong class="me-auto">Analaysis Complete</strong>
+            <small>few seconds ago</small>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="toast"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="toast-body">Completed for Types of Middleware logs</div>
+          `;
+          $('#liveToast').toast('show');
           // initializeDatatables();
         })
         .catch((error) => {
@@ -374,6 +392,8 @@ if (random_id) {
             const result = data.result;
 
             generateDynamicContent(result);
+            
+            
           }
           
         })
@@ -404,6 +424,7 @@ if (random_id) {
               <p><span class="fw-bold">Keywords found: </span> ${result.keywords.join(", ")} </p>
             `;
             
+           
           }
           
         })
@@ -514,7 +535,21 @@ if (random_id) {
     // }
 
     if (message.type === "task_completed") {
-      console.log(message.result)
+      toast.innerHTML = `
+            <div class="toast-header">
+              <img src="..." class="rounded me-2" alt="..." />
+              <strong class="me-auto">Task Completed</strong>
+              <small>Just Now</small>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="toast"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="toast-body">${message.result}</div>
+            `;
+      $('#liveToast').toast('show');
     }
 
     // Handle the received message as needed

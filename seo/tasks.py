@@ -156,8 +156,8 @@ def serpReadDf(group_id, type: str):
 @shared_task
 def analyzeCrawlLogs(group_id, type):
     task_id = analyzeCrawlLogs.request.id
-    print("analyze crawl logs")
-    print(task_id)
+    # print("analyze crawl logs")
+    # print(task_id)
     if type == "headers":
         logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/headerCrawl.log")
     else:
