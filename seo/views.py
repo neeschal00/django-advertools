@@ -20,8 +20,8 @@ from advertools import (
     extract_urls,
 )
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl, SERPCrawl, SeoAnalyzeForm
-
-from decouple import config
+import os
+# from decouple import config
 
 # from advertools import SERP_GOOG_VALID_VALS
 # from ydata_profiling import ProfileReport
@@ -210,8 +210,8 @@ def searchEngineResults(request):
                 if gl or country or language or rights:
                     params = {
                         "q": query,
-                        "cx": config("CX"),
-                        "key": config("KEY"),
+                        "cx": os.environ.get("CX"),
+                        "key": os.environ.get("KEY"),
                     }
                     if gl:
                         params["gl"] = gl
@@ -224,7 +224,7 @@ def searchEngineResults(request):
 
                     serpDf = serp_goog(**params)
                 else:
-                    serpDf = serp_goog(q=query, cx=config("CX"), key=config("KEY"))
+                    serpDf = serp_goog(q=query, cx=os.environ.get("CX"), key=os.environ.get("KEY"))
 
             except Exception as e:
                 print(e)
@@ -285,11 +285,11 @@ def knowledgeGraph(request):
             limit = form.cleaned_data["limit"]
             if limit:
                 knowDf = knowledge_graph(
-                    query=query, key=config("KEY"), languages=languages, limit=limit
+                    query=query, key=os.environ.get("KEY"), languages=languages, limit=limit
                 )
             else:
                 knowDf = knowledge_graph(
-                    query=query, key=config("KEY"), languages=languages
+                    query=query, key=os.environ.get("KEY"), languages=languages
                 )
             analysis = False
             try:
@@ -522,8 +522,8 @@ def serpCrawl(request):
             if gl or country or language or rights:
                 params = {
                     "q": query,
-                    "cx": config("CX"),
-                    "key": config("KEY"),
+                    "cx": os.environ.get("CX"),
+                    "key": os.environ.get("KEY"),
                 }
                 if gl:
                     params["gl"] = gl
@@ -536,7 +536,7 @@ def serpCrawl(request):
 
                 serpDf = serp_goog(**params)
             else:
-                serpDf = serp_goog(q=query, cx=config("CX"), key=config("KEY"))
+                serpDf = serp_goog(q=query, cx=os.environ.get("CX"), key=os.environ.get("KEY"))
 
             links = serpDf["link"].to_list()
 

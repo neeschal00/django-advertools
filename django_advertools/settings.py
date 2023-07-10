@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 import dotenv
+# from decouple import config
 
 dotenv.load_dotenv()
 
@@ -28,7 +29,7 @@ SECRET_KEY = "django-insecure--q3ja9e($2v$6e--yq3sjmkzsup24hzj9l5a7&$9w0r#62u3p%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(",")
 
 
 # Application definition
@@ -125,6 +126,11 @@ LOGGING = {
             "filename": os.path.join(BASE_DIR, "logs/debug.log"),
             "formatter": "verbose",
         },
+        'celery': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, "logs/celery.log"),
+            'formatter': 'verbose',
+        },
     },
     "formatters": {
         "verbose": {
@@ -152,6 +158,10 @@ LOGGING = {
             "handlers": ["console", "file"],  
             "level": "INFO",
             "propagate": False,
+        },
+        'celery': {
+            'handlers': ['console','file'],
+            'level': 'INFO',
         },
     },
 }
