@@ -82,9 +82,7 @@ def serpCrawlHeaders(group_id, links: list):
 
     analyzeCrawlLogs.delay(group_id, "headers")
 
-    # listCol = df[df["body_text"].notna()]
-    # listCol = listCol["body_text"].to_list()
-    # analysis.delay(group_id,listCol)
+   
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "headers crawled"}
@@ -390,11 +388,22 @@ def runCrawler(group_id,url):
         "group_" + group_id, {"type": "task_completed", "result": "Crawling Completed"}
     )
     crawlDf = pd.read_json("output/seo_crawler.jl",lines=True)
-    
+    content_size = str(int(crawlDf["size"][0])/1000)
+    latency = crawlDf["download_latency"][0]
     body_text = crawlDf["body_text"][0]
+
     get_keywords.delay(group_id,body_text)
 
     titleAnalysis.delay(group_id,crawlDf["title"][0])
     desc = crawlDf["meta_desc"][0] if crawlDf["meta_desc"][0] else ""
     metaDescripton.delay(group_id,desc)
+
+    return {
+        "status":"success",
+        "result":{
+            "content_size": content_size,
+            "latency": latency,
+        }
+    }
+
 

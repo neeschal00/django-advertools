@@ -7,6 +7,8 @@ deployment:
  - /bin/cp -R generateAds $DEPLOYPATH
  - /bin/cp -R api $DEPLOYPATH
  - /bin/cp -R media $DEPLOYPATH
+ - /bin/cp -R logs $DEPLOYPATH
+ - /bin/cp -R output $DEPLOYPATH
  - /bin/cp -R seo $DEPLOYPATH
  - /bin/cp -R static $DEPLOYPATH
  - /bin/cp -R templates $DEPLOYPATH
