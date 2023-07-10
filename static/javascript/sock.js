@@ -143,7 +143,7 @@ function createPieChart(
 function generateDynamicContent(data) {
   // Get the container element
   var container = document.getElementById('dynamicContent');
-  console.log(container);
+  // console.log(container);
 
   // Create the HTML content
   var html = ``;
@@ -299,12 +299,52 @@ function generateDynamicContent(data) {
   container.innerHTML = html;
 }
 
+function createToast(type,heading,message){
+  let toast = document.getElementById("liveToast");
+  if (!type){
+    toast.innerHTML = `
+    <div class="toast-header">
+      <img src="${infoImg}" class="rounded me-2 img img-fluid" width="24px" height="24px" alt="info" />
+      <strong class="me-auto">${heading}</strong>
+      <small>few seconds ago</small>
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+    <div class="toast-body">${message}</div>
+    `;
+  }
+  if (type === "error"){
+    toast.innerHTML = `
+    <div class="toast-header">
+      <span class="fw-bold text-danger">Eror: X</span>
+      <strong class="me-auto text-danger">${heading}</strong>
+      <small>Just Now</small>
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="toast"
+        aria-label="Close"
+      ></button>
+    </div>
+    <div class="toast-body">${message}</div>
+    `;
+  }
+
+  $('#liveToast').toast('show');
+}
+
 
 if (random_id) {
   // Create the WebSocket connection
   var socket = new WebSocket(
     "ws://" + window.location.host + "/ws/group/" + random_id + "/"
   );
+
+  
   
   let toast = document.getElementById("liveToast");
   // Event handler for successful connection
@@ -318,9 +358,7 @@ if (random_id) {
   // Event handler for receiving messages
   socket.onmessage = function (event) {
     var message = JSON.parse(event.data);
-    // console.log(message);
-    // console.log(typeof message)
-    // console.log(message.type);
+    
     if (message.task_id) {
       console.log("Task id: "+message.task_id);
     }
@@ -334,9 +372,7 @@ if (random_id) {
       fetch(url)
         .then((response) => response.json())
         .then((data) => {
-          // console.log(data.status);
-          // console.log(data);
-          // const content = JSON.parse(data);
+          
 
           createDonutChart(
             data.result.logs_message,
@@ -354,22 +390,7 @@ if (random_id) {
           const element = document.getElementById("analysisResp");
           element.innerHTML = data.result.logs_dt;
           applyDataTablesFormatting(element);
-          
-          toast.innerHTML = `
-          <div class="toast-header">
-            <img src="..." class="rounded me-2" alt="info" />
-            <strong class="me-auto">Analaysis Complete</strong>
-            <small>few seconds ago</small>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="toast"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="toast-body">Completed for Types of Middleware logs</div>
-          `;
-          $('#liveToast').toast('show');
+          createToast("","Analysis Complete","Completed for types of Middleware logs");
           // initializeDatatables();
         })
         .catch((error) => {
@@ -483,8 +504,7 @@ if (random_id) {
       fetch(url)
         .then((response) => response.json())
         .then((data) => {
-          // console.log(data.status);
-          // const content = JSON.parse(data);
+        
           const element = document.getElementById("testResp");
           element.innerHTML = data.result.crawlDf;
           applyDataTablesFormatting(element);
@@ -535,57 +555,18 @@ if (random_id) {
     // }
 
     if (message.type === "task_completed") {
-      toast.innerHTML = `
-            <div class="toast-header">
-              <img src="static/images/infor2.png" class="rounded me-2 img img-fluid" alt="info" />
-              <strong class="me-auto">Task Completed</strong>
-              <small>Just Now</small>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="toast"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="toast-body">${message.result}</div>
-            `;
-      $('#liveToast').toast('show');
+      createToast("","Task Complete",message.result)
+      
     }
 
     if (message.type === "data_converted") {
-      toast.innerHTML = `
-            <div class="toast-header">
-              <img src="static/images/infor2.png" class="rounded me-2 img img-fluid" alt="info" />
-              <strong class="me-auto text-primary">Profiling Reprt Completed</strong>
-              <small>Just Now</small>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="toast"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="toast-body">${message.result}</div>
-            `;
-      $('#liveToast').toast('show');
+      createToast("","Profiling Report Completed",message.result)
     }
 
     if (message.type === "report_failed") {
-      toast.innerHTML = `
-            <div class="toast-header">
-              <span class="fw-bold text-danger">Eror: X</span>
-              <strong class="me-auto text-danger">Profiling Report Failed</strong>
-              <small>Just Now</small>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="toast"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="toast-body">${message.result}</div>
-            `;
-      $('#liveToast').toast('show');
+      createToast("error","Profiling Report Failed",message.result)
+      var profileBtn = document.getElementById("profile-report");
+      profileBtn.disabled = True;
     }
     // Handle the received message as needed
   };
@@ -593,7 +574,5 @@ if (random_id) {
   // Event handler for connection close
   socket.onclose = function (event) {
     console.log("WebSocket connection closed");
-
-    // You can perform any necessary actions after the connection is closed
   };
 }

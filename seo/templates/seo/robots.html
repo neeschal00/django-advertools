@@ -55,7 +55,9 @@
             <div id="filterContainer" class="mt-1"></div>
             <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll;">
                 {% if roboDf %}
-                    <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
+                    <a class="btn btn-outline-secondary mb-2 mt-2"
+                    id="profile-report"
+                     href="{% url 'report' %}">
                         View Data Profiling Report
                     </a>
                     {{ roboDf | safe }}

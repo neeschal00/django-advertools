@@ -43,7 +43,7 @@
             
             <div class="col-md-12 mt-3" style="height: 600px; overflow-y: scroll; max-width:870px;overflow-x: scroll;">
                 {% if serpDf %}
-                    <a class="btn btn-outline-secondary mb-2 mt-2" href="{% url 'report' %}">
+                    <a class="btn btn-outline-secondary mb-2 mt-2" id="profile-report" href="{% url 'report' %}">
                         View Data Profiling Report
                     </a>
                     {{ serpDf | safe }}

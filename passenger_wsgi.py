@@ -1,0 +1,1 @@
+from django_advertools.wsgi import application
