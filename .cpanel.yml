@@ -1,7 +1,7 @@
 ---
 deployment:
  tasks:
- - export DEPLOYPATH=/home/tnhlabsc/django-advertools/
+ - export DEPLOYPATH=/home/tnhlabsc/advertools.smartmgr.com/
  - /bin/cp -R django_advertools $DEPLOYPATH
  - /bin/cp -R analyse $DEPLOYPATH
  - /bin/cp -R generateAds $DEPLOYPATH
