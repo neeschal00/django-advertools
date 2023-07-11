@@ -12,6 +12,11 @@ __pycache__/
 *.pyo
 *.pyd
 
+.ipynb_checkpoints 
+
+
+# celery 
+celerybeat-schedule.* 
 
 *.bak
 .vscode/
