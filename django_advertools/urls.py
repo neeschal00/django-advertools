@@ -40,10 +40,10 @@ urlpatterns = [
     path("report/get/", getReport, name="getReport"),
     path("report/", serveReport, name="report"),
     path("select2/", include("django_select2.urls")),
-    path("generate/", include("generateAds.urls")),
     path("analyse/", include("analyse.urls")),
     path("seo/", include("seo.urls")),
     path("api/", include("api.urls")),
+    path("generate/", include("generateAds.urls")),
     path("admin/", admin.site.urls),
 ]
 

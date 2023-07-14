@@ -1,6 +1,6 @@
 from celery import shared_task
 import os
-from ydata_profiling import ProfileReport
+# from ydata_profiling import ProfileReport
 from django.core.cache import cache
 from collections import Counter
 
@@ -33,12 +33,13 @@ def generateReport(group_id, df, minimal=False, title="Profile Report"):
 
     # try:
     if minimal:
-        profile = ProfileReport(load_df, minimal=True, title=title)
+        # profile = ProfileReport(load_df, minimal=True, title=title)
+        profile = "lol"
     else:
-        profile = ProfileReport(load_df, minimal=False, title=title)
-
+        # profile = ProfileReport(load_df, minimal=False, title=title)
+        profile = "lol"
     try:
-        profile.to_file(os.path.join("templates", "report.html"))
+        # profile.to_file(os.path.join("templates", "report.html"))
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id,
             {

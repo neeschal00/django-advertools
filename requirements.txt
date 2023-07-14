@@ -108,7 +108,6 @@ python-decouple==3.8
 python-dotenv==1.0.0
 pytz==2023.3
 PyWavelets==1.4.1
-pywin32==306
 PyYAML==6.0
 pyzmq==25.0.2
 queuelib==1.6.2
@@ -132,7 +131,6 @@ tornado==6.3.1
 tqdm==4.65.0
 traitlets==5.9.0
 Twisted==22.10.0
-twisted-iocpsupport==1.0.3
 twython==3.9.1
 txaio==23.1.1
 typeguard==2.13.3
