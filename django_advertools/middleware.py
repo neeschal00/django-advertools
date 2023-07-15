@@ -1,5 +1,7 @@
 from django.template.response import TemplateResponse
-
+# middleware.py
+from django.conf import settings
+from django.http import HttpResponse
 
 class LoaderMiddleware(object):
     def __init__(self, get_response):
@@ -15,3 +17,17 @@ class LoaderMiddleware(object):
             response.context_data["show_loader"] = request.show_loader
             del request.show_loader
         return response
+
+
+
+class CustomCookieMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def process_request(self, request):
+        if 'custom_cookie' not in request.COOKIES:
+            response = HttpResponse()
+            response.set_cookie('custom_cookie', 'cookie_value')
+            return response
+
+        return self.get_response(request)
