@@ -1,4 +1,5 @@
 from celery import shared_task
+import logging
 import os
 from ydata_profiling import ProfileReport
 from django.core.cache import cache
@@ -24,11 +25,12 @@ import json
 
 channel_layer = get_channel_layer()
 
+logger = logging.getLogger(__name__)
 
 @shared_task
 def generateReport(group_id, df, minimal=False, title="Profile Report"):
     task_id = generateReport.request.id
-    print("taks id in generateReport " + task_id)
+    logger.info("Socket Id"+group_id+"task id in generateReport " + task_id)
     load_df = pd.read_json(df)
 
     # try:
@@ -38,6 +40,7 @@ def generateReport(group_id, df, minimal=False, title="Profile Report"):
         profile = ProfileReport(load_df, minimal=False, title=title)
     try:
         profile.to_file(os.path.join("templates", "report.html"))
+        logger.info("Socket Id"+group_id+" Profile report generated for task " + task_id)
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id,
             {
@@ -48,7 +51,8 @@ def generateReport(group_id, df, minimal=False, title="Profile Report"):
         return "Report Has been generated successfully"
 
     except Exception as e:
-        print(e)
+        # print(e)
+        logger.info("Socket Id"+group_id+" "+e+" for task " + task_id)
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id, {"type": "report_failed"}
         )
@@ -69,6 +73,7 @@ def serpCrawlHeaders(group_id, links: list):
         if os.path.exists("output/serp_crawl_headers_output.jl"):
             os.remove("output/serp_crawl_headers_output.jl")
     except PermissionError:
+        logger.info("Socket Id"+group_id+" The output file is being used ")
         return False
 
     crawl_headers(
@@ -78,6 +83,8 @@ def serpCrawlHeaders(group_id, links: list):
     )
     # serpReadDf.delay(group_id, "headers")
     df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
+
+    logger.info("Socket Id"+group_id+" Crawl Headers complete")
 
     analyzeCrawlLogs.delay(group_id, "headers")
 
@@ -110,14 +117,14 @@ def serpCrawlFull(group_id, links: list):
         output_file="output/serp_crawl_output.jl",
         custom_settings={"LOG_FILE": "logs/crawlLogs/fullCrawl.log"},
     )
+    logger.info("Socket Id"+group_id+" Crawl Full complete")
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "full crawled"}
     )
     df = pd.read_json("output/serp_crawl_output.jl", lines=True)
     task_idr = analyzeCrawlLogs.delay(group_id, "full")
-    # print("main id" + task_idr.id)
-
-    # print(df)
+    
+    logger.info("Socket Id"+group_id+" Read crawl output for task "+ task_id)
     listCol = df[df["body_text"].notna()]
     listCol = listCol["body_text"].to_list()
     analyzeContent.delay(group_id,listCol,"Body Content Analysis")
@@ -143,6 +150,7 @@ def serpReadDf(group_id, type: str):
 
     data = df.to_json(orient="records")
     # print(type(data))
+    logger.info("Socket Id"+group_id+" Read cawl output")
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "data_converted", "result": data}
     )
@@ -159,6 +167,8 @@ def analyzeCrawlLogs(group_id, type):
         logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/headerCrawl.log")
     else:
         logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/fullCrawl.log")
+    
+    logger.info("Socket Id"+group_id+" Crawl Logs load complete")
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "Crawl logs loaded"}
     )
@@ -170,10 +180,7 @@ def analyzeCrawlLogs(group_id, type):
         classes="table table-primary table-striped text-center", justify="center"
     )
 
-    # logsDf = logsDf.replace(
-    #     'class="dataframe table"',
-    #     'class="table table-primary table-striped text-center"',
-    # )
+    logger.info("Socket Id"+group_id+" Analysis of crawl logs complete")
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id,
         {"type": "analysisComplete", "task_id": task_id, "task_name": "crawlLogs"},
@@ -195,45 +202,47 @@ def analyzeContent(group_id, content: list,title="Overview Analysis"):
     task_id = analyzeContent.request.id
     print("Analyze Content")
     # print(task_id)
-    # try:
-    listCol = list(content)
-    urls = extract_urls(listCol)
+    try:
+        listCol = list(content)
+        urls = extract_urls(listCol)
 
-    mentions = extract_mentions(listCol)
+        mentions = extract_mentions(listCol)
 
-    questions = extract_questions(listCol)
+        questions = extract_questions(listCol)
 
-    numbers = extract_numbers(listCol)
+        numbers = extract_numbers(listCol)
 
-    hashtags = extract_hashtags(listCol)
+        hashtags = extract_hashtags(listCol)
 
-    intense_words = extract_intense_words(
-        listCol, min_reps=3
-    )  # minimum repertition of words 3
+        intense_words = extract_intense_words(
+            listCol, min_reps=3
+        )  # minimum repertition of words 3
 
-    async_to_sync(channel_layer.group_send)(
-        "group_" + group_id,
-        {"type": "analysisComplete", "task_id": task_id, "task_name": "contentAnalysis"},
-    )
-    return {
-        "status":"completed",
-        "result":{
-            "title":title,
-            "urls": urls,
-            "mentions": mentions,
-            "questions": questions,
-            "numbers": numbers,
-            "hashtags": hashtags,
-            "intense_words": intense_words,
+        logger.info("Socket Id"+group_id+" Content analysis complete")
+        async_to_sync(channel_layer.group_send)(
+            "group_" + group_id,
+            {"type": "analysisComplete", "task_id": task_id, "task_name": "contentAnalysis"},
+        )
+        return {
+            "status":"completed",
+            "result":{
+                "title":title,
+                "urls": urls,
+                "mentions": mentions,
+                "questions": questions,
+                "numbers": numbers,
+                "hashtags": hashtags,
+                "intense_words": intense_words,
+            }
         }
-    }
-    # except Exception as e:
-    #     return {
-    #         "status":"failed",
-    #         "result": {
-    #             "message": e
-    #         }
-    #     }
+    except Exception as e:
+        logger.info("Socket Id"+group_id + " analysis failed: "+str(e))
+        return {
+            "status":"failed",
+            "result": {
+                "message": e
+            }
+        }
 
 @shared_task
 def get_keywords(group_id,body_text):
@@ -252,6 +261,8 @@ def get_keywords(group_id,body_text):
     keywords = body_text.split()
     keywords = dict(Counter(keywords))
     keywords = sorted(keywords.items(),key=lambda x: x[1])[::-1]
+
+    logger.info("Socket Id"+group_id+" Keywords Retrieved")
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "getKeywords", "task_id": task_id}
     )
@@ -275,9 +286,11 @@ def titleAnalysis(group_id,title = None):
         for text in stopwords["english"]:
             keywords = keywords.replace(" "+text.lower()+" "," ")
         keywords = keywords.split()
+        logger.info("Socket Id"+group_id+" Title analysis complete")
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"titleAnalysis"}
         )
+
         if lengthT > 50 and lengthT < 70:
             return {
                 "status": "success",
@@ -301,6 +314,7 @@ def titleAnalysis(group_id,title = None):
                 }
             }
     else:
+        logger.info("Socket Id"+group_id+" Content analysis complete")
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"titleAnalysis"}
         )
@@ -386,6 +400,7 @@ def runCrawler(group_id,url):
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "Crawling Completed"}
     )
+    logger.info("Socket Id"+group_id+" SEO crawl one complete")
     crawlDf = pd.read_json("output/seo_crawler.jl",lines=True)
     content_size = str(int(crawlDf["size"][0])/1000)
     latency = crawlDf["download_latency"][0]

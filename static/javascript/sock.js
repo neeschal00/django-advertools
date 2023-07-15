@@ -560,6 +560,7 @@ if (random_id) {
     }
 
     if (message.type === "data_converted") {
+      console.log("Report Generated")
       createToast("","Profiling Report Completed",message.result)
     }
 
@@ -568,6 +569,7 @@ if (random_id) {
       var profileBtn = document.getElementById("profile-report");
       profileBtn.disabled = True;
     }
+    console.log(message)
     // Handle the received message as needed
   };
 

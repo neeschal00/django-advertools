@@ -3,7 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 from django.contrib import messages
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect
 from advertools import (
     robotstxt_to_df,
     sitemap_to_df,
@@ -11,13 +11,7 @@ from advertools import (
     knowledge_graph,
     crawl,
     crawl_headers,
-    crawllogs_to_df,
-    extract_intense_words,
-    extract_hashtags,
-    extract_mentions,
-    extract_numbers,
-    extract_questions,
-    extract_urls,
+    crawllogs_to_df
 )
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl, SERPCrawl, SeoAnalyzeForm
 import os
@@ -89,9 +83,10 @@ def robotsToDf(request, filters=None):
 
             urls = list(map(configRobots, valid_urls))
             df = robotstxt_to_df(urls)
-            task_id = "test"
+            group_id = request.COOKIES.get('socket_id', None)
+            logger.info("Socket Is is "+ group_id)
             dynamic_title = "Robots.txt Data profile"
-            task_id = generateReport.delay(task_id, df.to_json(), False, dynamic_title)
+            task_id = generateReport.delay(group_id, df.to_json(), False, dynamic_title)
             # print("Task id in robots.txt "+ task_id.id)
             unique = None
             if "directive" in df:
@@ -145,8 +140,9 @@ def sitemapToDf(request):
                     request, "The url was not able to convert to a dataframe"
                 )
                 return render(request, "seo/sitemap.html", {"form": form})
-
-            generateReport.delay("test", df.to_json(), False, "Sitemap Data profile")
+            group_id = request.COOKIES.get('socket_id', None)
+            logger.info("Socket Is is "+ group_id)
+            generateReport.delay(group_id, df.to_json(), False, "Sitemap Data profile")
 
             jsonD = df.to_json(orient="records")
 
@@ -231,7 +227,9 @@ def searchEngineResults(request):
                 messages.warning(request, "Unable to make a query for invalid data")
                 return render(request, "seo/serpGoog.html", {"form": form})
 
-            generateReport.delay("test", serpDf.to_json(), False, "SERP Data profile")
+            group_id = request.COOKIES.get('socket_id', None)
+            logger.info("Socket Is is "+ group_id)
+            generateReport.delay(group_id, serpDf.to_json(), False, "SERP Data profile")
 
             domains_df = serpDf["displayLink"].value_counts()
             domains_df = pd.DataFrame(
@@ -300,13 +298,14 @@ def knowledgeGraph(request):
                 
 
                 submission = True
+                group_id = request.COOKIES.get('socket_id', None)
                 generateReport.delay(
-                    "test", knowDf.to_json(), False, "Knowledge Graph Data profile"
+                    group_id, knowDf.to_json(), False, "Knowledge Graph Data profile"
                 )
 
                 jsonD = knowDf.to_json(orient="records")
                 analysis = True
-                analyzeContent.delay("test",listCol,"KG article body Analysis")
+                analyzeContent.delay(group_id,listCol,"KG article body Analysis")
                 return render(
                     request,
                     "seo/knowledgeG.html",
@@ -325,8 +324,9 @@ def knowledgeGraph(request):
                 print(e)
                 messages.warning(request, "Unable to analyze the particular column")
                 submission = True
+                group_id = request.COOKIES.get('socket_id', None)
                 generateReport.delay(
-                    "test", knowDf.to_json(), False, "Knowledge Graph Data profile"
+                    group_id, knowDf.to_json(), False, "Knowledge Graph Data profile"
                 )
 
                 jsonD = knowDf.to_json(orient="records")
@@ -440,9 +440,9 @@ def carwlLinks(request):
             else:
                 jsonD = crawlDf.to_json(orient="records")
 
-                task_id = "test"
+                group_id = request.COOKIES.get('socket_id', None)
                 dynamic_title = "Crawl Data profile"
-                generateReport.delay(task_id, jsonD, True, dynamic_title)
+                generateReport.delay(group_id, jsonD, True, dynamic_title)
 
                 try:
                     describe = (
@@ -450,7 +450,7 @@ def carwlLinks(request):
                         .describe()
                         .loc[["mean", "max", "min"]]
                     )
-                    print(describe)
+                    # print(describe)
                     # describe = describe.to_dict()
 
 
@@ -477,7 +477,7 @@ def carwlLinks(request):
 
                 listCol = listCol["body_text"].to_list()
 
-                analyzeContent.delay(task_id,listCol,"Crawl Body Response Analysis")
+                analyzeContent.delay(group_id,listCol,"Crawl Body Response Analysis")
                 
                 analysis = True
 
@@ -540,10 +540,12 @@ def serpCrawl(request):
 
             links = serpDf["link"].to_list()
 
+            group_id = request.COOKIES.get('socket_id', None)
+
             if headers_only:
-                task_id = serpCrawlHeaders.delay("test", links)
+                task_id = serpCrawlHeaders.delay(group_id, links)
             else:
-                task_id = serpCrawlFull.delay("test", links)
+                task_id = serpCrawlFull.delay(group_id, links)
 
             domains_df = serpDf["displayLink"].value_counts()
             domains_df = pd.DataFrame(
@@ -590,7 +592,7 @@ def seoAnalysis(request):
         form = SeoAnalyzeForm(request.POST)
         if form.is_valid():
             url = form.cleaned_data["url"]
-            group_id = "test"
+            group_id = request.COOKIES.get('socket_id', None)
             runCrawler.delay(group_id,url)
             return render(request,"seo/seoAnalysis.html",{"form":form,
                                                           "processing": True})
