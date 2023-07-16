@@ -24,8 +24,21 @@ from django.views import View
 
 
 def index(request):
-    
+
     return render(request, "home.html")
+
+def reset_cookie(request):
+    response = redirect("home")
+    # Delete the existing cookie
+    print(request.COOKIES)
+    if 'socket_id' in request.COOKIES:
+        del request.COOKIES['socket_id']
+        response.delete_cookie(key='socket_id')
+    
+    # Set a new cookie with desired parameters
+    # response.set_cookie('cookie_name', 'new_value', max_age=3600)
+    
+    return response
 
 
 def serveReport(request):
@@ -40,6 +53,7 @@ urlpatterns = [
     path("", index, name="home"),
     path("report/get/", getReport, name="getReport"),
     path("report/", serveReport, name="report"),
+    path("reset/cookie/",reset_cookie,name="reset-cookie"),
     path("select2/", include("django_select2.urls")),
     path("analyse/", include("analyse.urls")),
     path("seo/", include("seo.urls")),

@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 @shared_task
 def generateReport(group_id, df, minimal=False, title="Profile Report"):
     task_id = generateReport.request.id
+    print(f"Socket ID received in socket is {group_id}")
     logger.info("Socket Id"+group_id+"task id in generateReport " + task_id)
     load_df = pd.read_json(df)
 

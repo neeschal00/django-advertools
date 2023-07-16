@@ -1,6 +1,20 @@
 // Replace <task_id> with the actual value
-var random_id = "test";
 
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i <ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
 // random_id = random_id();
 
 // For key value
@@ -337,6 +351,8 @@ function createToast(type,heading,message){
   $('#liveToast').toast('show');
 }
 
+var random_id = getCookie("socket_id");
+console.log("Socket Id is from sock.js "+ random_id);
 
 if (random_id) {
   // Create the WebSocket connection
@@ -358,7 +374,7 @@ if (random_id) {
   // Event handler for receiving messages
   socket.onmessage = function (event) {
     var message = JSON.parse(event.data);
-    
+    console.log(message);
     if (message.task_id) {
       console.log("Task id: "+message.task_id);
     }
@@ -569,7 +585,7 @@ if (random_id) {
       var profileBtn = document.getElementById("profile-report");
       profileBtn.disabled = True;
     }
-    console.log(message)
+    
     // Handle the received message as needed
   };
 
