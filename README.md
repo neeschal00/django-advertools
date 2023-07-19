@@ -159,8 +159,7 @@ Here's a step-by-step guide on how to achieve this using `tmux`:
     ```
 
     The above command runs celery and django in split terminal session using the tmux package
-    You can switch between the terminal with cmd **Ctrl + arrow Key Up/Down**
+    You can switch between the terminal with cmd **Ctrl + b + arrow Key Up/Down**
     
     Exit the session for using
     "Ctrl + d and b" on both 
-    
