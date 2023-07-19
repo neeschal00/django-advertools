@@ -84,3 +84,83 @@ if sys.platform == 'win32':
 ```
 flower -A core --port=5555
 ```
+
+# Deploy in VPS
+
+- Connect to VPS
+
+
+- Install Packages
+
+create a venv
+use the "install_venv_batch.sh" or install from requirements.txt
+if there is memory issue then the "install_venv_batch.sh" splits the requirements.txt file and install seperately in the venv
+
+- Install redis-server
+
+```
+sudo apt-get install redis-server
+```
+
+- Create an exception for port 8000
+ufw is a front-end for iptables and provides an easier way to manage firewall rules on Ubuntu and other Debian-based systems.
+```
+sudo ufw allow 8000
+```
+If not installed 
+```
+sudo apt update
+```
+**then**
+```
+sudo apt install ufw
+```
+and enable
+```
+sudo ufw enable
+```
+and check status
+```
+sudo ufw status
+```
+You can then re-run the ufw allow 8000 cmd
+
+
+- simply run the server in venv 
+```
+python manage.py runserver 0.0.0.0:8000
+```
+
+## Running Celery and Django from VPS using split terminal
+
+To run both Celery and the Django server from one terminal on your VPS (Virtual Private Server), you can use a tool like `tmux` or `screen`. These tools allow you to create multiple terminal sessions within a single terminal window, making it easy to manage multiple processes simultaneously.
+
+Here's a step-by-step guide on how to achieve this using `tmux`:
+
+1. **Install tmux (if not already installed)**:
+
+   If `tmux` is not installed on your VPS, you can install it using your package manager. For example, on Ubuntu, you can run:
+
+   ```bash
+   sudo apt update
+   sudo apt install tmux
+   ```
+
+2 **Run the Shell Script with tmux enabled which runs both simultaneously**:
+
+    Making the shell script executable 
+    ```
+    chmod +x run_application.sh
+    ```
+
+    Run the executable shell script
+    ```
+    ./run_application.sh
+    ```
+
+    The above command runs celery and django in split terminal session using the tmux package
+    You can switch between the terminal with cmd **Ctrl + arrow Key Up/Down**
+    
+    Exit the session for using
+    "Ctrl + d and b" on both 
+    
