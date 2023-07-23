@@ -1,0 +1,17 @@
+[Unit]
+Description=django advertools daemon
+After=network.target
+
+[Service]
+User=tactical
+Group=www-data
+WorkingDirectory=/home/tactical/django-advertools
+# Environment="PATH=/rmm/api/env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/home/tactical/django-advertools/venv/bin/python /home/tactical/django-advertools/venv/bin/daphne -b 0.0.0.0 -p 8001 django_advertool.asgi:application
+Restart=on-failure
+Restart=always
+RestartSec=3s
+
+[Install]
+WantedBy=multi-user.target
+

@@ -57,6 +57,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django_advertools.middleware.CustomCookieMiddleware',
+    'django_advertools.middleware.COOPMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
@@ -216,11 +217,15 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-CORS_ORIGIN_WHITELIST = [
-    "http://localhost:8000",
+STATICFILES_DIRS = [
+    BASE_DIR / 'static'
 ]
+
+# CORS_ORIGIN_WHITELIST = [
+#     "http://localhost:8000",
+# ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

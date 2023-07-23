@@ -125,6 +125,10 @@ sudo ufw status
 ```
 You can then re-run the ufw allow 8000 cmd
 
+***If ssl enabled need to also allow port 443 to accept request**
+```
+sudo ufw allow 443
+```
 
 - simply run the server in venv 
 ```
@@ -163,3 +167,26 @@ Here's a step-by-step guide on how to achieve this using `tmux`:
     
     Exit the session for using
     "Ctrl + d and b" on both 
+
+
+2 **Django_advertools configuration set cmd for nginx**:
+    
+    Create a configuration for django advertools.smartmgr.com
+    ```
+    sudo nano /etc/nginx/sites-available/advertools.smartmgr.com
+    ```
+    
+    create a linux based link using the cmd below so updates are synced for sites-available
+    ```
+    sudo ln -s /etc/nginx/sites-available/advertools.smartmgr.com /etc/nginx/sites-enabled/
+    ```
+    Restart the nginx
+    ```
+    sudo service nginx restart
+    ```
+
+
+3 **Create Services for linux using systemd**:
+
+
+4 **Configure the systemd application to run using nginx**:

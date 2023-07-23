@@ -1,0 +1,10 @@
+# create a service file that will exist in /etc/systemd/system
+
+[Unit]
+Description=gunicorn socket
+
+[Socket]
+ListenStream=/run/gunicorn.sock
+
+[Install]
+WantedBy=sockets.target

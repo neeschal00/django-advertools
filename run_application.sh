@@ -12,7 +12,7 @@ tmux send-keys -t my_session:0.0 'celery -A django_advertools worker -l info -P 
 
 # Commands to run in the second pane (Django server)
 tmux send-keys -t my_session:0.1 'source venv/bin/activate' C-m
-tmux send-keys -t my_session:0.1 'python manage.py runserver 0.0.0.0:8000' C-m
+tmux send-keys -t my_session:0.1 'daphne -b 0.0.0.0 -p 8000 django_advertools.asgi:application' C-m
 
 # Attach to the tmux session to view the output (optional)
 tmux attach-session -t my_session

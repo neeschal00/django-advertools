@@ -1,0 +1,17 @@
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+User=tactical
+Group=www-data
+WorkingDirectory=/home/tactical/django-advertools
+ExecStart=/home/tactical/django-advertools/venv/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/run/gunicorn.sock \
+          django_advertools.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
