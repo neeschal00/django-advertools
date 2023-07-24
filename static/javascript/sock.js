@@ -358,21 +358,13 @@ var isSecure = window.location.protocol === 'https:';
 console.log("Is secutr "+ isSecure);
 if (random_id) {
   // Create the WebSocket connection
-  if(isSecure){
-    // Create the WebSocket connection
-    var socket = new WebSocket(
-      "wss://" + window.location.host + "/ws/group/" + random_id + "/"
-    );
-  }
-  else{
-    // Create the WebSocket connection
-    var socket = new WebSocket(
-      "ws://" + window.location.host + "/ws/group/" + random_id + "/"
-    );
-  }
-
   
-  
+  // Create the WebSocket connection
+  var socketProtocol = (window.location.protocol === "https:") ? "wss:" : "ws:";
+  var socketURL = socketProtocol + "//" + window.location.host + "/ws/group/" + random_id + "/";
+  var socket = new WebSocket(
+    socketURL
+  );
   let toast = document.getElementById("liveToast");
   // Event handler for successful connection
   socket.onopen = function (event) {

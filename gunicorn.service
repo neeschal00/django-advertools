@@ -7,11 +7,11 @@ After=network.target
 User=tactical
 Group=www-data
 WorkingDirectory=/home/tactical/django-advertools
-ExecStart=/home/tactical/django-advertools/venv/bin/gunicorn \
-          --access-logfile - \
-          --workers 3 \
-          --bind unix:/run/gunicorn.sock \
-          django_advertools.wsgi:application
+ExecStart=/bin/bash -c 'source /home/tactical/django-advertools/.env && /home/tactical/django-advertools/venv/bin/gunicorn \
+       --access-logfile - \
+       --workers 3 \
+       --bind unix:/run/gunicorn.sock \
+       django_advertools.wsgi:application'
 
 [Install]
 WantedBy=multi-user.target

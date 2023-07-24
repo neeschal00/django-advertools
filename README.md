@@ -187,6 +187,104 @@ Here's a step-by-step guide on how to achieve this using `tmux`:
 
 
 3 **Create Services for linux using systemd**:
+Using systemd service and socket files allows a more robust way of starting and stopping the application server.
+The Gunicorn socket will be created at boot and will listen for connections. When a connection occurs, systemd will automatically start the Gunicorn process to handle the connection.
+
+the below is the gunicorn socket file
+```
+[Unit]
+Description=gunicorn socket
+
+[Socket]
+ListenStream=/run/gunicorn.sock
+
+[Install]
+WantedBy=sockets.target
+```
+
+Next a systemd service file is created for config
+
+```sudo nano /etc/systemd/system/gunicorn.service```
+Configure the path and project directory according to yours for eg. the below is for django advtools:
+```
+[Unit]
+Description=gunicorn daemon
+Requires=gunicorn.socket
+After=network.target
+
+[Service]
+User=tactical
+Group=www-data
+WorkingDirectory=/home/tactical/django-advertools
+ExecStart=/home/tactical/django-advertools/venv/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/run/gunicorn.sock \
+          django_advertools.wsgi:application
+
+[Install]
+WantedBy=multi-user.target
+```
+Once setup you need to start and enable the service to run
+```
+sudo systemctl start gunicorn.socket
+sudo systemctl enable gunicorn.socket
+```
+
+After the creation of daphne.service 
+```
+ sudo systemctl daemon-reload
+```
+and enable 
+```
+sudo systemctl start daphne.service
+```
+similarly lookup on the status of the service
+```
+ sudo systemctl status daphne.service
+
+```
 
 
 4 **Configure the systemd application to run using nginx**:
+Once the above gunicorn and daphne server is ran the below usage of asgi and wsgi in nginx is configured based on req. protocols and headers
+```
+server {
+    server_name advertools.smartmgr.com www.smartmgr.com;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location /static/ {
+        root /home/tactical/django-advertools/staticfiles;
+    }
+    
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:/run/gunicorn.sock;
+    }
+
+    location /ws/ {
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_redirect off;
+        proxy_pass http://0.0.0.0:8001;
+    }
+}
+```
+
+> **_NOTE:_**  If you are observing 404 not found for your staticfiles you must be having permission issues with nginx.
+
+**To Resolve the permission issues of nginx**
+Navigate to the directory you are observing the permission issue and list out the permission (typically add any path)
+```
+ls -l /path/to/your/django/project/staticfiles/ 
+```
+first chown (change owner)
+```
+ sudo chown -R nginx:nginx /home/tactical/django-advertools/staticfiles
+```
+add permission here 755- read write and execute perms
+```
+sudo chmod -R 755 /home/tactical/django-advertools/staticfiles
+```
+

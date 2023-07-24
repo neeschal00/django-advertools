@@ -6,4 +6,7 @@ Limitations observed in the application or libraries
 ## Since there is no appropriate benchmarking score for content all the values are set approximately for the websites
 
 ## Running different feature that involves file usage process is currently only limited to one user
- 
+
+
+
+##currently the nginx user might not be able to access the staticfiles because the ownerships is set to root

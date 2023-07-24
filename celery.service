@@ -1,0 +1,12 @@
+[Unit]
+Description=Celery Service
+After=network.target
+
+[Service]
+Type=forking
+User=tactical  
+WorkingDirectory=/home/tactical/django-advertools  
+ExecStart=/home/tactical/django-advertools/venv/bin/celery -A django_advertool worker -l info -P solo
+
+[Install]
+WantedBy=multi-user.target
