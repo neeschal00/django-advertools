@@ -205,6 +205,8 @@ WantedBy=sockets.target
 Next a systemd service file is created for config
 
 ```sudo nano /etc/systemd/system/gunicorn.service```
+
+> **_NOTE:_** Make Sure all the configurations and path match correctly.
 Configure the path and project directory according to yours for eg. the below is for django advtools:
 ```
 [Unit]
@@ -232,6 +234,7 @@ sudo systemctl enable gunicorn.socket
 ```
 
 After the creation of daphne.service 
+> **_NOTE:_** after creation or update daemon-reload should be executed (i.e. reload all the background processes running)
 ```
  sudo systemctl daemon-reload
 ```
@@ -287,4 +290,12 @@ add permission here 755- read write and execute perms
 ```
 sudo chmod -R 755 /home/tactical/django-advertools/staticfiles
 ```
+
+**Get the unix service created logs**
+Essential if any disruption occuring.
+In my case there was a service already running with daphne sock so had to stop that and disable in order to start the configured server.
+```
+sudo journalctl -u daphne.service
+```
+
 

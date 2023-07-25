@@ -7,11 +7,10 @@ User=tactical
 Group=www-data
 WorkingDirectory=/home/tactical/django-advertools
 # Environment="PATH=/rmm/api/env/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-ExecStart=/bin/bash -c 'source /home/tactical/django-advertools/.env && /home/tactical/django-advertools/venv/bin/daphne -b 0.0.0.0 -p 8001 django_advertool.asgi:application'
+ExecStart=/bin/bash -c 'source /home/tactical/django-advertools/.env && /home/tactical/django-advertools/venv/bin/daphne -b 0.0.0.0 -p 8001 django_advertools.asgi:application
 Restart=on-failure
 Restart=always
 RestartSec=3s
 
 [Install]
 WantedBy=multi-user.target
-
