@@ -34,11 +34,19 @@ def generateReport(group_id, df, minimal=False, title="Profile Report"):
     logger.info("Socket Id"+group_id+"task id in generateReport " + task_id)
     load_df = pd.read_json(df)
 
-    # try:
-    if minimal:
-        profile = ProfileReport(load_df, minimal=True, title=title)
-    else:
-        profile = ProfileReport(load_df, minimal=False, title=title)
+    try:
+        if minimal:
+            profile = ProfileReport(load_df, minimal=True, title=title)
+        else:
+            profile = ProfileReport(load_df, minimal=False, title=title)
+    except Exception as e:
+        print(e)
+        logger.info("Socket Id"+group_id+" "+e+" for task " + task_id)
+        async_to_sync(channel_layer.group_send)(
+            "group_" + group_id, {"type": "report_failed"}
+        )
+        return e
+
     try:
         profile.to_file(os.path.join("templates", "report.html"))
         logger.info("Socket Id"+group_id+" Profile report generated for task " + task_id)
@@ -52,7 +60,7 @@ def generateReport(group_id, df, minimal=False, title="Profile Report"):
         return "Report Has been generated successfully"
 
     except Exception as e:
-        # print(e)
+        print(e)
         logger.info("Socket Id"+group_id+" "+e+" for task " + task_id)
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id, {"type": "report_failed"}
