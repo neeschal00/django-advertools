@@ -24,6 +24,8 @@ This django wrapper utilizes the above mentioned tools and technologies in order
 
 ![plot](./sysdesign.png)
 
+https://s.icepanel.io/ihiMNSTckF5mby/W0xw
+
 ## How to run this project
 
 - Create .env file based on the sample.
