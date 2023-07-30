@@ -125,7 +125,7 @@ sudo ufw status
 ```
 You can then re-run the ufw allow 8000 cmd
 
-***If ssl enabled need to also allow port 443 to accept request**
+**If ssl enabled need to also allow port 443 to accept request**
 ```
 sudo ufw allow 443
 ```
@@ -135,41 +135,21 @@ sudo ufw allow 443
 python manage.py runserver 0.0.0.0:8000
 ```
 
-## Running Celery and Django from VPS using split terminal
+**ADD and generate SSL Certificate for the domains**
+Update the package Manager
+```
+sudo apt update
+```
+install the certbot requirement
+```
+sudo apt install certbot python3-certbot-nginx
+```
+Create SSL certificates for the domains
+```
+sudo certbot --nginx -d advertools.com -d www.advertools.com
+```
 
-To run both Celery and the Django server from one terminal on your VPS (Virtual Private Server), you can use a tool like `tmux` or `screen`. These tools allow you to create multiple terminal sessions within a single terminal window, making it easy to manage multiple processes simultaneously.
-
-Here's a step-by-step guide on how to achieve this using `tmux`:
-
-1. **Install tmux (if not already installed)**:
-
-   If `tmux` is not installed on your VPS, you can install it using your package manager. For example, on Ubuntu, you can run:
-
-   ```bash
-   sudo apt update
-   sudo apt install tmux
-   ```
-
-2 **Run the Shell Script with tmux enabled which runs both simultaneously**:
-
-    Making the shell script executable 
-    ```
-    chmod +x run_application.sh
-    ```
-
-    Run the executable shell script
-    ```
-    ./run_application.sh
-    ```
-
-    The above command runs celery and django in split terminal session using the tmux package
-    You can switch between the terminal with cmd **Ctrl + b + arrow Key Up/Down**
-    
-    Exit the session for using
-    "Ctrl + d and b" on both 
-
-
-2 **Django_advertools configuration set cmd for nginx**:
+1 **Django_advertools configuration set cmd for nginx**:
     
     Create a configuration for django advertools.smartmgr.com
     ```
@@ -186,7 +166,7 @@ Here's a step-by-step guide on how to achieve this using `tmux`:
     ```
 
 
-3 **Create Services for linux using systemd**:
+2 **Create Services for linux using systemd**:
 Using systemd service and socket files allows a more robust way of starting and stopping the application server.
 The Gunicorn socket will be created at boot and will listen for connections. When a connection occurs, systemd will automatically start the Gunicorn process to handle the connection.
 
@@ -249,17 +229,79 @@ similarly lookup on the status of the service
 ```
 
 
-4 **Configure the systemd application to run using nginx**:
+3 **Configure the systemd application to run using nginx**:
 Once the above gunicorn and daphne server is ran the below usage of asgi and wsgi in nginx is configured based on req. protocols and headers
 ```
-server {
-    server_name advertools.smartmgr.com www.smartmgr.com;
+#create upstream to reference the WS server and use it as a service in main server config
+upstream websocketS{
+    server 0.0.0.0:8001; #daphne server running port 8001
+}
 
-    location = /favicon.ico { access_log off; log_not_found off; }
+#main server configuration for http in default port 80 
+server {
+
+    if ($host = www.advertools.smartmgr.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = advertools.smartmgr.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name advertools.smartmgr.com www.advertools.smartmgr.com; #domain or ip based on req.
+
+    # static file configuration
     location /static/ {
-        root /home/tactical/django-advertools/staticfiles;
+        autoindex on;
+        alias /home/tactical/django-advertools/staticfiles/;
     }
-    
+
+    location /media/{
+        autoindex on;
+        alias /home/tactical/django-advertools/media/;
+    }
+
+    location / {
+        include proxy_params; #take reference of the proxy parameters existing in the nginx dir
+        proxy_pass http://unix:/run/gunicorn.sock;
+    }
+
+    location /ws/ {
+        proxy_http_version 1.1; #ws uses http 1.1
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $server_name;
+        proxy_pass http://websocketS;
+    }
+
+}
+
+#configuration with enabled https for port 443 with generratessl cretificate for the domains(server name)
+server {
+    listen 443 ssl;
+    server_name advertools.smartmgr.com www.advertools.smartmgr.com;
+    ssl_certificate /etc/letsencrypt/live/advertools.smartmgr.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/advertools.smartmgr.com/privkey.pem; # managed by Certbot
+
+
+    location /static/ {
+        autoindex on;
+        alias /home/tactical/django-advertools/staticfiles/;
+    }
+
+    location /media/{
+        autoindex on;
+        alias /home/tactical/django-advertools/media/;
+    }
+
+
     location / {
         include proxy_params;
         proxy_pass http://unix:/run/gunicorn.sock;
@@ -270,9 +312,17 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
         proxy_redirect off;
-        proxy_pass http://0.0.0.0:8001;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $server_name;
+        proxy_pass http://websocketS;
     }
+
+
 }
+
 ```
 
 > **_NOTE:_**  If you are observing 404 not found for your staticfiles you must be having permission issues with nginx.
@@ -299,3 +349,40 @@ sudo journalctl -u daphne.service
 ```
 
 
+**While deploying should always verify and use the path accoridngly**
+Since the Advertools uses the Subprocess library and the project uses VirtualEnv. And based on the observed issues of running the scrapy via subprocess the changes in the library file itself was to be made. for ther function crawl and crawl_headers in **spider.py** and **header_spider.py**
+
+
+
+## Running Celery and Django from VPS using split terminal
+
+To run both Celery and the Django server from one terminal on your VPS (Virtual Private Server), you can use a tool like `tmux` or `screen`. These tools allow you to create multiple terminal sessions within a single terminal window, making it easy to manage multiple processes simultaneously.
+
+Here's a step-by-step guide on how to achieve this using `tmux`:
+
+1. **Install tmux (if not already installed)**:
+
+   If `tmux` is not installed on your VPS, you can install it using your package manager. For example, on Ubuntu, you can run:
+
+   ```bash
+   sudo apt update
+   sudo apt install tmux
+   ```
+
+2 **Run the Shell Script with tmux enabled which runs both simultaneously**:
+
+    Making the shell script executable 
+    ```
+    chmod +x run_application.sh
+    ```
+
+    Run the executable shell script
+    ```
+    ./run_application.sh
+    ```
+
+    The above command runs celery and django in split terminal session using the tmux package
+    You can switch between the terminal with cmd **Ctrl + b + arrow Key Up/Down**
+    
+    Exit the session for using
+    "Ctrl + d and b" on both 

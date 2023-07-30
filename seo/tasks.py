@@ -139,7 +139,7 @@ def serpCrawlFull(group_id, links: list):
     analyzeContent.delay(group_id,listCol,"Body Content Analysis")
 
     async_to_sync(channel_layer.group_send)(
-        "group_" + group_id, {"type": "crawlRead", "task_id": task_id}
+        "group_" + group_id, {"type": "crawlRead", "task_id": task_id,"task_name":"serpCrawl"}
     )
     return {
         "status": "completed",
@@ -390,6 +390,8 @@ def metaDescripton(group_id,description):
 @shared_task
 def runCrawler(group_id,url):
 
+    task_id = runCrawler.request.id
+
     custom_settings = {
         "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
         "LOG_FILE": "logs/crawlLogs/output_file.log",
@@ -421,11 +423,24 @@ def runCrawler(group_id,url):
     desc = crawlDf["meta_desc"][0] if crawlDf["meta_desc"][0] else ""
     metaDescripton.delay(group_id,desc)
 
+    hTitles = ["h1","h2","h3","h4","h6"]
+
+    headings = {}
+
+    for title in hTitles:
+        if title in crawlDf.columns:
+            headings[title] = crawlDf[title].iloc[0].split("@@")
+
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id, {"type": "crawlRead", "task_id": task_id,"task_name":"seoCrawler"}
+    )
+
     return {
         "status":"success",
         "result":{
             "content_size": content_size,
             "latency": latency,
+            "headings": headings,
         }
     }
 

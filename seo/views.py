@@ -291,12 +291,10 @@ def knowledgeGraph(request):
                 )
             analysis = False
             try:
-                
+                knowDf = knowDf.sort_values(by="resultScore", ascending=False,inplace=True)
                 listCol = knowDf[knowDf["result.detailedDescription.articleBody"].notna()]
-
                 listCol = listCol["result.detailedDescription.articleBody"].to_list()
                 
-
                 submission = True
                 group_id = request.COOKIES.get('socket_id', None)
                 generateReport.delay(
@@ -321,7 +319,7 @@ def knowledgeGraph(request):
                 )
 
             except Exception as e:
-                print(e)
+                # print(e)
                 messages.warning(request, "Unable to analyze the particular column")
                 submission = True
                 group_id = request.COOKIES.get('socket_id', None)

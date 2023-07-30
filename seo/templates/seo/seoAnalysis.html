@@ -56,6 +56,25 @@
             <div class="col-md-10 mt-2" id="titleAnalysis" style="max-height: 320px; overflow-y: scroll;">
                 
             </div>
+            <div class="col-md-10 mt-2" id="headings" style="max-height: 320px; overflow-y: scroll;">
+                {% if processing %}
+                <h3 class="h3 text-secondar mt-2 mb-2">Heading Structure</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Heading Level</th>
+                            <th scope="col">Heading Structure</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+
+                    </tbody>
+
+                </table>
+                {% else %}
+                {% endif %}
+            </div>
+
 
         </div>
     </div>

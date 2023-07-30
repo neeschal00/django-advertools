@@ -7,6 +7,13 @@ venv/
 # any csv files
 *.csv
 
+#ignore templates report file which is generated
+templates/report.html
+templates/report2.html
+
+#ignore dbSQLite
+db.sqlite3
+
 __pycache__/
 *.pyc
 *.pyo

@@ -63,11 +63,12 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
 
     async def crawlRead(self, event):
         task_id = event["task_id"]
+        task_name = event["task_name"]
 
         # Send task completion notification to the client
         await self.send(
             text_data=json.dumps(
-                {"type": "crawlRead", "result": "Read crawled file", "task_id": task_id}
+                {"type": "crawlRead", "result": "Read crawled file", "task_id": task_id,"task_name":task_name}
             )
         )
 
