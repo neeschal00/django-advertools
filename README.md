@@ -26,6 +26,9 @@ This django wrapper utilizes the above mentioned tools and technologies in order
 
 https://s.icepanel.io/ihiMNSTckF5mby/W0xw
 
+**More Detailed Overview**
+![plot](./advertoolsArchitectureDark.png)
+
 ## How to run this project
 
 - Create .env file based on the sample.
