@@ -40,7 +40,7 @@ class SerpGoogle(forms.Form):
             attrs={
                 "rows": 5,
                 "cols": 40,
-                "placeholder": "Enter the search query(seperate with ',' if multiple)",
+                "placeholder": "Enter the search query(seperate with comma(',') if multiple search query) \nlike flights,tickets,barley",
                 "help_text": "Query you want to get results for",
             }
         )
@@ -100,7 +100,7 @@ class KnowledgeG(forms.Form):
             attrs={
                 "rows": 5,
                 "cols": 40,
-                "placeholder": "Enter the search query(seperate with ',' if multiple) like flights,tickets,barley",
+                "placeholder": "Enter the search query(seperate with comma(',') if multiple search query) \nlike flights,tickets,barley",
             }
         )
     )
@@ -116,7 +116,9 @@ class KnowledgeG(forms.Form):
         required=False,
     )
 
-    limit = forms.IntegerField(required=False, min_value=1)
+    limit = forms.IntegerField(required=False,
+                                min_value=1,
+                                help_text="Limits the number of entities to be returned. Maximum is 500. Default is 20")
 
 
 class Crawl(forms.Form):
@@ -134,8 +136,7 @@ class Crawl(forms.Form):
         required=False, help_text="Crawl all reachable links from page"
     )
 
-    headers_only = forms.BooleanField(required=False)
-
+    headers_only = forms.BooleanField(required=False, help_text="Crawl headers of urls only")
     pg_count = forms.IntegerField(
         required=False, min_value=1, max_value=10000, help_text="max crawlable pages"
     )

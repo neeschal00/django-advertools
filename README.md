@@ -24,11 +24,6 @@ This django wrapper utilizes the above mentioned tools and technologies in order
 
 ![plot](./sysdesign.png)
 
-https://s.icepanel.io/ihiMNSTckF5mby/W0xw
-
-**More Detailed Overview**
-![plot](./advertoolsArchitectureDark.png)
-
 ## How to run this project
 
 - Create .env file based on the sample.
@@ -356,6 +351,60 @@ sudo journalctl -u daphne.service
 
 **While deploying should always verify and use the path accoridngly**
 Since the Advertools uses the Subprocess library and the project uses VirtualEnv. And based on the observed issues of running the scrapy via subprocess the changes in the library file itself was to be made. for ther function crawl and crawl_headers in **spider.py** and **header_spider.py**
+
+
+## Running CI/CD Pipeline:
+Using the github actions with SSH Key.
+
+- Setup .github/workflows/CD.yml file 
+```
+# This is a basic workflow to help you get started with Actions
+
+name: Django CD
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Deploy using ssh
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port:  ${{ secrets.PORT }}
+        script: |
+          cd ~/django-advertools
+          git pull origin main
+          git status
+          sudo systemctl restart daphne
+          sudo systemctl restart gunicorn
+          sudo supervisorctl restart celery
+
+```
+
+- Go to github actions
+```
+# Github Secret location
+Settings -> Secrets -> Actions -> New repository secret
+
+SSH_PASSWORD = "Your Server password"
+HOST = "YOUR SERVER ADDRESS, example: 172.41.91.123" 
+USERNAME = "YOUR SERVER USERNAME, example: daniel"
+PORT = "Your server Port, example:22"
+```
+
 
 
 

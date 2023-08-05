@@ -523,11 +523,35 @@ if (random_id) {
       fetch(url)
         .then((response) => response.json())
         .then((data) => {
-        
-          const element = document.getElementById("testResp");
-          element.innerHTML = data.result.crawlDf;
-          applyDataTablesFormatting(element);
-          // initializeDatatables();
+
+          if (message.task_name == "serpCrawl"){
+            const element = document.getElementById("testResp");
+            element.innerHTML = data.result.crawlDf;
+            applyDataTablesFormatting(element);
+          }
+          if(message.task_name == "seoCrawler"){
+            console.log(data);
+            const tableElem = document.getElementById("tbody");
+
+            const headingData = data.result.headings;
+            const headingKeys = Object.keys(headingData);
+
+            htmlCont = "";
+            headingKeys.forEach(function(heading, index) {
+              let names = headingData[heading];
+              names.forEach(function(headingName,index){
+                htmlCont += `
+                <tr>
+                  <th scope="row">${heading}</th>
+                  <td>${headingName}</td>
+                </tr>
+                `
+              });
+            });
+
+            tableElem.innerHTML = htmlCont;
+          }
+          
         })
 
         .catch((error) => {

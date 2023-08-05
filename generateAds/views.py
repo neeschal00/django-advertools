@@ -97,22 +97,37 @@ def generateAds(request):
                             fallback=fallback,
                             max_len=max_len,
                         )
-                    except ValueError:
-                        messages.error(
+                    except Exception as e:
+                        
+                        messages.warning(
                             request,
                             "The template + fallback should be <= "
                             + str(max_len)
-                            + " if available",
+                            + " if available and add repleaceable slot of '{}'",
                         )
+                        
                         return redirect("advertisement")
+                        
+                    
                 else:
-                    generateLargeAds = ad_create(
-                        template=template,
-                        replacements=replacements,
-                        capitalize=capitalize,
-                        fallback=fallback,
-                        max_len=len(template) + 5,
-                    )
+                    try:
+                        generateLargeAds = ad_create(
+                            template=template,
+                            replacements=replacements,
+                            capitalize=capitalize,
+                            fallback=fallback,
+                            max_len=len(template) + 5,
+                        )
+                    except Exception as e:
+                        print(e)
+                        messages.warning(
+                            request,
+                            "The template + fallback should be <= "
+                            + str(max_len)
+                            + " if available or add only one replaceable slot '{}'"
+                        )
+                        
+                        return redirect("advertisement")
 
                 df = pd.DataFrame({"large_ads": generateLargeAds})
 

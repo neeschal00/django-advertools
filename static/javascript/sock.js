@@ -550,6 +550,27 @@ if (random_id) {
             });
 
             tableElem.innerHTML = htmlCont;
+
+            const contentElem = document.getElementById("contentDesc");
+
+            contentElem.innerHTML = `
+                <div class="col-md-6">
+                    <div class="card bg-primary text-white">
+                      <div class="container m-2">
+                        <h5 class="h5 card-title fw-bold">Content Load Overview</h5>
+                        <div class="card-body">
+                          <b>Download Latency:</b> ${data.result.latency} sec.
+                        </div>
+                        <div class="card-body">
+                          <b>Content Size:</b> ${data.result.content_size} Kb. and avg html size is of 33Kb.
+                        </div>
+                      </div>
+                    </div>
+                </div>
+            `
+
+
+
           }
           
         })

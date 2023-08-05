@@ -388,6 +388,25 @@ def metaDescripton(group_id,description):
             }
 
 @shared_task
+def readLogFile(group_id):
+    logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/output_file.log")
+
+    checkRobots = logsDf["url"][0]
+    status = logsDf["status"][0]
+    print(checkRobots)
+    robotsFound = "Robots.txt wasn't found"
+    if checkRobots.endswith("robots.txt") and (str(status) == "200"):
+        robotsFound = "Robots.txt was found "+ checkRobots
+
+    return {
+        "status":"success",
+        "result":{
+            "robots": robotsFound
+        }
+    }
+
+
+@shared_task
 def runCrawler(group_id,url):
 
     task_id = runCrawler.request.id
@@ -416,8 +435,13 @@ def runCrawler(group_id,url):
     content_size = str(int(crawlDf["size"][0])/1000)
     latency = crawlDf["download_latency"][0]
     body_text = crawlDf["body_text"][0]
+    crawled_dt = crawlDf["crawl_time"][0]
+    content_type = crawlDf["resp_headers_content-type"][0]
+    server = crawlDf["resp_headers_server"][0]
 
     get_keywords.delay(group_id,body_text)
+
+    readLogFile.delay(group_id)
 
     titleAnalysis.delay(group_id,crawlDf["title"][0])
     desc = crawlDf["meta_desc"][0] if crawlDf["meta_desc"][0] else ""
@@ -441,6 +465,8 @@ def runCrawler(group_id,url):
             "content_size": content_size,
             "latency": latency,
             "headings": headings,
+            "crawledOn": crawled_dt,
+            "contentType": content_type
         }
     }
 

@@ -29,7 +29,7 @@ from .forms import (
 from .utils import url_structure
 from .models import DatasetFile
 import pandas as pd
-from seo.tasks import generateReport, add
+
 
 
 def analyseUrl(request):
@@ -144,8 +144,7 @@ def overviewText(request):
                 df = word_frequency(valid_text, phrase_len=phrase_len, extra_info=True)
             else:
                 df = word_frequency(valid_text, extra_info=True)
-            if not df.empty:
-                generateReport.delay(df.to_json(), title="KText Overview profile")
+            
             messages.success(request, "text Overview generated")
 
             # df = pd.DataFrame.from_dict(df,orient='index')

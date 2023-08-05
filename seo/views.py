@@ -226,6 +226,8 @@ def searchEngineResults(request):
                 print(e)
                 messages.warning(request, "Unable to make a query for invalid data")
                 return render(request, "seo/serpGoog.html", {"form": form})
+            
+            serpDf = serpDf.sort_values(by="rank")
 
             group_id = request.COOKIES.get('socket_id', None)
             logger.info("Socket Is is "+ group_id)
@@ -274,11 +276,13 @@ def knowledgeGraph(request):
         if form.is_valid():
             query = form.cleaned_data["query"]
             query = list(map(str.strip, query.split(",")))
+            query = list(filter(None, query))
             languages = form.cleaned_data["languages"]
 
             languages = (
                 list(map(str.strip, languages.split(","))) if languages else None
             )
+            languages = list(filter(None, languages))
 
             limit = form.cleaned_data["limit"]
             if limit:
@@ -291,7 +295,7 @@ def knowledgeGraph(request):
                 )
             analysis = False
             try:
-                knowDf = knowDf.sort_values(by="resultScore", ascending=False,inplace=True)
+                knowDf = knowDf.sort_values(by="resultScore", ascending=False)
                 listCol = knowDf[knowDf["result.detailedDescription.articleBody"].notna()]
                 listCol = listCol["result.detailedDescription.articleBody"].to_list()
                 
@@ -319,8 +323,8 @@ def knowledgeGraph(request):
                 )
 
             except Exception as e:
-                # print(e)
-                messages.warning(request, "Unable to analyze the particular column")
+                print(e)
+                messages.warning(request, "Unable to analyze the particular column articleBody")
                 submission = True
                 group_id = request.COOKIES.get('socket_id', None)
                 generateReport.delay(
@@ -538,6 +542,7 @@ def serpCrawl(request):
 
             links = serpDf["link"].to_list()
 
+            serpDf = serpDf.sort_values(by="rank")
             group_id = request.COOKIES.get('socket_id', None)
 
             if headers_only:
