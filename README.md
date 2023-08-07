@@ -24,6 +24,9 @@ This django wrapper utilizes the above mentioned tools and technologies in order
 
 ![plot](./sysdesign.png)
 
+**More Detailed Overview**
+![plot](./advertoolsArchitectureDark.png)
+
 ## How to run this project
 
 - Create .env file based on the sample.
