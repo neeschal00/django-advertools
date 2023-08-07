@@ -9,4 +9,5 @@ urlpatterns = [
     path("crawl/", views.carwlLinks, name="crawl"),
     path("serpCrawl/", views.serpCrawl, name="serp-crawl"),
     path("Analyze/", views.seoAnalysis, name="seo-analyze"),
+    path("site-audit/", views.siteAudit, name="site-audit"),
 ]

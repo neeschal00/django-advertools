@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block css %}
+
+{% endblock css %}
+
+{% load crispy_forms_tags %}
+{% block pageContent %}
+<div class="container">
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-10 col-sm-12 mb-2 mt-2">
+                <form method="post" onsubmit="openLoader()">
+                    {% csrf_token %}
+                    <fieldset class="form-group">
+                        <legend class="border-bottom mb-4 main-t">SEO Analyzer</legend>
+                        {{ form|crispy }}
+                    </fieldset>
+                    <div class="form-group">
+                        {% if processing %}
+                            <button class="btn btn-outline-info" type="submit" disabled>
+                                Analyse Url
+                            </button>
+                        {% else %}
+                            <button class="btn btn-outline-info" type="submit">
+                                Analyse Url
+                            </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+            {% if processing %}
+                <div id="loadingModal" class="col-md-7 mt-2" style="display: block;">
+                    <div class="mt-2">
+                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                    Loading...
+                    </div>
+                </div>
+            {% else %}
+                <div id="loadingModal" class="col-md-7 mt-2" style="display: none;">
+                    <div class="mt-2">
+                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                    Loading...
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="col-md-10 mt-2" id="contentDesc" style="max-height: 320px; overflow-y: scroll;">
+                
+            </div>
+            
+            <div class="col-md-10 col-sm-12 mt-2 mb-2" style="max-height: 320px; overflow-y: scroll;">
+                <ul class="list-group list-group-numbered" id="keywords-view"></ul>
+            </div>
+            <div class="col-md-10 mt-2" id="metaAnalysis" style="max-height: 320px; overflow-y: scroll;">
+                
+            </div>
+            <div class="col-md-10 mt-2" id="titleAnalysis" style="max-height: 320px; overflow-y: scroll;">
+                
+            </div>
+            <div class="col-md-10 mt-2" id="headings" style="max-height: 320px; overflow-y: scroll;">
+                {% if processing %}
+                <h3 class="h3 text-secondar mt-2 mb-2">Heading Structure</h3>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Heading Level</th>
+                            <th scope="col">Heading Structure</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+
+                    </tbody>
+
+                </table>
+                {% else %}
+                {% endif %}
+            </div>
+
+
+        </div>
+    </div>
+</div>
+{% endblock pageContent %}
+
+{% block javascript %}
+<script>
+    function openLoader() {
+        document.getElementById("loadingModal").style.display = "block";
+      }
+</script>
+
+{% endblock javascript %}

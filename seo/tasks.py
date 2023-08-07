@@ -11,13 +11,17 @@ from advertools import (
     crawl_headers,
     crawl,
     crawllogs_to_df,
+    robotstxt_to_df,
+    robotstxt_test,
     extract_intense_words,
     extract_hashtags,
     extract_mentions,
     extract_numbers,
+    sitemap_to_df,
     extract_questions,
     extract_urls,
     stopwords,
+    url_to_df
 )
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -391,13 +395,19 @@ def metaDescripton(group_id,description):
 def readLogFile(group_id):
     logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/output_file.log")
 
+    task_id = readLogFile.request.id
+
     checkRobots = logsDf["url"][0]
     status = logsDf["status"][0]
     print(checkRobots)
     robotsFound = "Robots.txt wasn't found"
     if checkRobots.endswith("robots.txt") and (str(status) == "200"):
         robotsFound = "Robots.txt was found "+ checkRobots
+        robotsDf = robotstxt_to_df(checkRobots)
 
+    async_to_sync(channel_layer.group_send)(
+            "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":""}
+        )
     return {
         "status":"success",
         "result":{
@@ -439,6 +449,7 @@ def runCrawler(group_id,url):
     content_type = crawlDf["resp_headers_content-type"][0]
     server = crawlDf["resp_headers_server"][0]
 
+
     get_keywords.delay(group_id,body_text)
 
     readLogFile.delay(group_id)
@@ -467,6 +478,160 @@ def runCrawler(group_id,url):
             "headings": headings,
             "crawledOn": crawled_dt,
             "contentType": content_type
+        }
+    }
+
+
+@shared_task
+def robotsTxtAn(group_id,robots_url,url_list):
+
+    robots_df = robotstxt_to_df(robots_url)
+    test_df = robotstxt_test(robots_df, user_agents=['Googlebot'],urls=url_list)
+    blocked_pages = test_df[test_df['can_fetch'] == False]
+
+    if "directive" in robots_df:
+        unique_counts = robots_df["directive"].value_counts()
+
+        new_Df = pd.DataFrame(
+            {
+                "frequency": unique_counts,
+                "percentage": unique_counts / len(robots_df) * 100,
+            }
+        )
+        new_Df.reset_index(inplace=True)
+        new_Df.columns = ["directive", "frequency", "percentage"]
+
+        unique = new_Df.to_dict()
+
+    rValue = {
+        "status":"success",
+        "result":{
+            "robotsDf": robots_df.to_dict(),
+            "testResult": test_df.to_dict(),
+            "blocked_pages": blocked_pages.to_dict(),
+            "diective":{
+                "uniqueCounts": dict(unique_counts),
+                "uniqueCalculations": unique
+            }
+        }
+    }
+
+    return rValue
+
+@shared_task
+def sitemapAna(group_id,sitemap_url,url_list):
+    sitemap_df = sitemap_to_df(sitemap_url)
+    missing_pages = set(url_list) - set(sitemap_df['loc'])
+    overview = sitemap_df["loc"].describe()
+
+    check_http = sitemap_df[["loc"]].copy()
+
+    check_http["https"] = list(
+        map(lambda x: x.startswith("https"), check_http["loc"])
+    )
+
+    unique_counts = check_http["https"].value_counts()
+
+    new_Df = pd.DataFrame(
+        {
+            "frequency": unique_counts,
+            "percentage": unique_counts / len(check_http) * 100,
+        }
+    )
+    new_Df.reset_index(inplace=True)
+    new_Df.columns = ["https", "frequency", "percentage"]
+
+    unique = new_Df.to_json()
+
+    rValue = {
+        "status":"success",
+        "result":{
+            "sitemapDf": sitemap_df.to_dict(),
+            "missingPages": missing_pages,
+            "overview": overview.to_dict(),
+            "diective":{
+                "uniqueCounts": dict(unique_counts),
+                "uniqueCalculations": unique
+            }
+        }
+    }
+    print(rValue)
+    return rValue
+
+
+@shared_task
+def siteAud(group_id,url):
+
+    task_id = siteAud.request.id
+
+    custom_settings = {
+        "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
+        "LOG_FILE": "logs/crawlLogs/output_file.log",
+        "CLOSESPIDER_PAGECOUNT": 1000
+    }
+    try:
+        if os.path.exists("logs/crawlLogs/output_file.log"):
+            os.remove("logs/crawlLogs/output_file.log")
+        if os.path.exists("output/seo_crawler.jl"):
+            os.remove("output/seo_crawler.jl")
+    except PermissionError:
+        return False
+    crawlDf = crawl(
+            url,
+            output_file="output/seo_crawler.jl",
+            follow_links=True,
+            custom_settings=custom_settings,
+        )
+    
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id, {"type": "task_completed", "result": "Crawling Completed"}
+    )
+    logger.info("Socket Id"+group_id+" SEO crawl one complete")
+    crawlDf = pd.read_json("output/seo_crawler.jl",lines=True)
+
+
+    url_list = crawlDf["url"]
+    print(url_list)
+    print(url_list.to_list())
+
+    url_df = url_to_df(urls=url_list)
+    print(url_df)
+
+    robots_url = url_df["scheme"][0]+"://"+url_df["netloc"][0]+"/robots.txt"
+
+    robotsTxtAn.delay(group_id,robots_url,url_list)
+
+
+    # Review sitemap
+    sitemap_url = url_df["scheme"][0]+"://"+url_df["netloc"][0]+"/sitemap.xml"
+    
+    sitemapAna.delay(group_id,sitemap_url,url_list)
+    
+    # Analyze text
+    # pages['word_count'] = pages['text'].apply(lambda x: len(x.split()))
+    # pages['keywords'] = extract_keywords(pages['text'])
+    # pages['keywords_density'] = pages['keywords'].apply(lambda x:
+    # len(x)/pages['word_count'])
+    # pages['readable'] = pages['text'].apply(text_readability)
+    # # Stopwords analysis
+    # common_words = get_common_words(pages['text'], 100, stopwords)
+    # wordcloud = WordCloud().generate(' '.join(pages['text']))
+    # # Metadata checks
+    # pages['title_length'] = pages['title'].apply(len)
+    # pages['desc_length'] = pages['meta_description'].apply(len)
+    # pages['canonical'] = pages['url'] == pages['canonical_link']
+    # # Link analysis
+    # broken_links_df = adv.link_status(pages['url'], pages['links'])
+    # internal_links = get_internal_links(pages['links'])
+
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id, {"type": "crawlRead", "task_id": task_id,"task_name":"seoCrawler"}
+    )
+
+    return {
+        "status":"success",
+        "result":{
+            
         }
     }
 

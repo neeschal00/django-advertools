@@ -161,3 +161,4 @@ class SERPCrawl(SerpGoogle):
 
 class SeoAnalyzeForm(forms.Form):
     url = forms.CharField(widget=forms.TextInput(attrs={"class":"form-control","placeholder":"Enter the URL to analyze"}))
+

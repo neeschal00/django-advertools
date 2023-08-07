@@ -11,7 +11,8 @@ from advertools import (
     knowledge_graph,
     crawl,
     crawl_headers,
-    crawllogs_to_df
+    crawllogs_to_df,
+    stopwords
 )
 from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl, SERPCrawl, SeoAnalyzeForm
 import os
@@ -22,7 +23,12 @@ import os
 from django.contrib import messages
 
 # from celery.result import AsyncResult
-from seo.tasks import generateReport, serpCrawlFull, serpCrawlHeaders, analyzeContent, runCrawler
+from seo.tasks import (generateReport, 
+                       serpCrawlFull, 
+                       serpCrawlHeaders, 
+                       analyzeContent, 
+                       runCrawler,
+                       siteAud)
 import os, json
 import logging
 import validators
@@ -602,3 +608,17 @@ def seoAnalysis(request):
     else:
         return render(request,"seo/seoAnalysis.html",{"form":form})
 
+
+def siteAudit(request):
+    form = SeoAnalyzeForm()
+
+    if request.method == "POST":
+        form = SeoAnalyzeForm(request.POST)
+        if form.is_valid():
+            url = form.cleaned_data["url"]
+            group_id = request.COOKIES.get('socket_id', None)
+            siteAud.delay(group_id,url)
+            return render(request,"seo/siteAudit.html",{"form":form,
+                                                          "processing": True})
+    else:
+        return render(request,"seo/siteAudit.html",{"form":form})

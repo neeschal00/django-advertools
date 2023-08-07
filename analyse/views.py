@@ -43,8 +43,10 @@ def analyseUrl(request):
             decode = form.cleaned_data["decode"]
 
             df = url_to_df(urls=urls, decode=decode)
-
-            figure = url_structure(df).to_html()
+            try:
+                figure = url_structure(df).to_html()
+            except KeyError:
+                figure = None
 
             return render(
                 request,
