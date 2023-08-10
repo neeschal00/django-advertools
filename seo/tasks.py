@@ -484,7 +484,8 @@ def runCrawler(group_id,url):
 
 @shared_task
 def robotsTxtAn(group_id,robots_url,url_list):
-
+    print(group_id)
+    print("RRobots entered")
     robots_df = robotstxt_to_df(robots_url)
     test_df = robotstxt_test(robots_df, user_agents=['Googlebot'],urls=url_list)
     blocked_pages = test_df[test_df['can_fetch'] == False]
@@ -520,6 +521,8 @@ def robotsTxtAn(group_id,robots_url,url_list):
 
 @shared_task
 def sitemapAna(group_id,sitemap_url,url_list):
+    print(group_id)
+    print("siteap entered")
     sitemap_df = sitemap_to_df(sitemap_url)
     missing_pages = set(url_list) - set(sitemap_df['loc'])
     overview = sitemap_df["loc"].describe()
@@ -591,20 +594,20 @@ def siteAud(group_id,url):
 
 
     url_list = crawlDf["url"]
-    print(url_list)
-    print(url_list.to_list())
+    # print(url_list)
+    # print(url_list.to_list())
 
     url_df = url_to_df(urls=url_list)
-    print(url_df)
+    # print(url_df)
 
     robots_url = url_df["scheme"][0]+"://"+url_df["netloc"][0]+"/robots.txt"
-
+    print(robots_url)
     robotsTxtAn.delay(group_id,robots_url,url_list)
 
 
     # Review sitemap
     sitemap_url = url_df["scheme"][0]+"://"+url_df["netloc"][0]+"/sitemap.xml"
-    
+    print(sitemap_url)
     sitemapAna.delay(group_id,sitemap_url,url_list)
     
     # Analyze text
