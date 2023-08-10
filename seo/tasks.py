@@ -25,7 +25,14 @@ from advertools import (
 )
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-import json
+from seo.utils import (
+    extract_stopwords,
+    extract_words,
+    extract_keywords,
+    text_readability,
+    get_word_count,
+    syllable_count
+)
 
 channel_layer = get_channel_layer()
 
@@ -590,7 +597,7 @@ def siteAud(group_id,url):
         "group_" + group_id, {"type": "task_completed", "result": "Crawling Completed"}
     )
     logger.info("Socket Id"+group_id+" SEO crawl one complete")
-    crawlDf = pd.read_json("output/seo_crawler.jl",lines=True)
+    pages = pd.read_json("output/seo_crawler.jl",lines=True)
 
 
     url_list = crawlDf["url"]
@@ -610,22 +617,35 @@ def siteAud(group_id,url):
     print(sitemap_url)
     sitemapAna.delay(group_id,sitemap_url,url_list)
     
-    # Analyze text
-    # pages['word_count'] = pages['text'].apply(lambda x: len(x.split()))
-    # pages['keywords'] = extract_keywords(pages['text'])
-    # pages['keywords_density'] = pages['keywords'].apply(lambda x:
-    # len(x)/pages['word_count'])
-    # pages['readable'] = pages['text'].apply(text_readability)
-    # # Stopwords analysis
-    # common_words = get_common_words(pages['text'], 100, stopwords)
-    # wordcloud = WordCloud().generate(' '.join(pages['text']))
-    # # Metadata checks
-    # pages['title_length'] = pages['title'].apply(len)
-    # pages['desc_length'] = pages['meta_description'].apply(len)
-    # pages['canonical'] = pages['url'] == pages['canonical_link']
-    # # Link analysis
-    # broken_links_df = adv.link_status(pages['url'], pages['links'])
-    # internal_links = get_internal_links(pages['links'])
+    ## Creation of Columns based based on functionalities
+
+    ### Word Count and text readability of the body text found in html generated content
+    pages['word_count'] = pages['body_text'].apply(get_word_count)
+    pages['readability'] = pages['body_text'].apply(text_readability)
+
+    ### Create a seperate column with list of keywords and list of stopwords 
+    pages['keywords'] = pages['body_text'].apply(extract_keywords)
+    keywords = pages['keywords'].sum()
+    keywords = dict(Counter(keywords))
+    
+    pages['common_words'] = pages["body_text"].apply(extract_stopwords)
+    common_words = pages['common_words'].sum()
+    common_words = dict(Counter(common_words))
+
+
+    # Get character counts of SEO desc , title
+    pages["title"] = pages["title"].fillna(" ")
+    pages['title_length'] = pages['title'].apply(len)
+
+
+    pages["meta_desc"] = pages["meta_desc"].fillna(" ")
+    pages['desc_length'] = pages['meta_desc'].apply(len)
+    meta_desc = pages["meta_desc"].describe()
+    desc_length = pages["desc_length"].describe()
+
+    #check if canonical is equal to canonical link
+    pages['canonical'] = pages['canonical'].fillna(" ")
+    pages['canonical_link'] = pages['url'] == pages['canonical']
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "crawlRead", "task_id": task_id,"task_name":"seoCrawler"}
@@ -635,6 +655,17 @@ def siteAud(group_id,url):
         "status":"success",
         "result":{
             
+            "audit": {
+                "body": {
+                    "wordCount": pages["word_count"],
+                    "readability": pages["readability"],
+                    "keywords": keywords,
+                    "commonWords": common_words,
+                },
+                "head":{
+                    # "meta_desc": 
+                }
+            }
         }
     }
 

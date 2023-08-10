@@ -12,6 +12,8 @@ This Project utilizies the library named **Advertools** https://advertools.readt
 - Celery
 - flower
 - Pandas
+- nltk
+- bash scripts (chmod + )
 - Y Data Profiling
 - Data Tables Jquery
 - Select2 js lib
