@@ -31,7 +31,6 @@ from .models import DatasetFile
 import pandas as pd
 
 
-
 def analyseUrl(request):
     if request.method == "POST":
         form = AnalyseUrls(request.POST)
@@ -146,7 +145,7 @@ def overviewText(request):
                 df = word_frequency(valid_text, phrase_len=phrase_len, extra_info=True)
             else:
                 df = word_frequency(valid_text, extra_info=True)
-            
+
             messages.success(request, "text Overview generated")
 
             # df = pd.DataFrame.from_dict(df,orient='index')
@@ -257,8 +256,8 @@ def dataSetAnalysis(request):
                 {
                     "form": form,
                     "textDf": df.to_html(
-                    classes="table table-striped text-center", justify="center"
-                ),
+                        classes="table table-striped text-center", justify="center"
+                    ),
                 },
             )
 

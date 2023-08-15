@@ -116,9 +116,11 @@ class KnowledgeG(forms.Form):
         required=False,
     )
 
-    limit = forms.IntegerField(required=False,
-                                min_value=1,
-                                help_text="Limits the number of entities to be returned. Maximum is 500. Default is 20")
+    limit = forms.IntegerField(
+        required=False,
+        min_value=1,
+        help_text="Limits the number of entities to be returned. Maximum is 500. Default is 20",
+    )
 
 
 class Crawl(forms.Form):
@@ -136,9 +138,14 @@ class Crawl(forms.Form):
         required=False, help_text="Crawl all reachable links from page"
     )
 
-    headers_only = forms.BooleanField(required=False, help_text="Crawl headers of urls only")
+    headers_only = forms.BooleanField(
+        required=False, help_text="Crawl headers of urls only"
+    )
     pg_count = forms.IntegerField(
-        required=False, min_value=1, max_value=10000, help_text="max crawlable pages"
+        required=False,
+        min_value=1,
+        max_value=10000,
+        help_text="max crawlable pages(i.e. default=100)",
     )
 
 
@@ -160,5 +167,8 @@ class SERPCrawl(SerpGoogle):
 
 
 class SeoAnalyzeForm(forms.Form):
-    url = forms.CharField(widget=forms.TextInput(attrs={"class":"form-control","placeholder":"Enter the URL to analyze"}))
-
+    url = forms.CharField(
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Enter the URL to analyze"}
+        )
+    )

@@ -31,53 +31,99 @@
                     </div>
                 </form>
             </div>
+            
+            
             {% if processing %}
-                <div id="loadingModal" class="col-md-7 mt-2" style="display: block;">
-                    <div class="mt-2">
-                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                    Loading...
+            <div class="col-md-10 mt-2" style="max-height: 320px; overflow-y: scroll;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Latency Overview</h4>
+                        <div>
+                            <p><b>Average Latency of Crawled Content: </b> {{ context.result.audit.overview.latency.mean }}</p>
+                            <p><b>Max Latency of Crawled Content: </b> {{ context.result.audit.overview.latency.max }}</p>
+                            <p><b>Min Latency of Crawled Content: </b> {{ context.result.audit.overview.latency.min }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Content Size Overview</h4>
+                        <div>
+                            <p><b>Average Content Size of Crawled Content: </b> {{ context.result.audit.overview.content_size.mean }}</p>
+                            <p><b>Max Content Size of Crawled Content: </b> {{ context.result.audit.overview.content_size.max }}</p>
+                            <p><b>Min Content Size of Crawled Content: </b> {{ context.result.audit.overview.content_size.min }}</p>
+                        </div>
                     </div>
                 </div>
-            {% else %}
-                <div id="loadingModal" class="col-md-7 mt-2" style="display: none;">
-                    <div class="mt-2">
-                    <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
-                    Loading...
-                    </div>
-                </div>
-            {% endif %}
-
-            <div class="col-md-10 mt-2" id="contentDesc" style="max-height: 320px; overflow-y: scroll;">
-                
             </div>
             
+            
+            <div class="col-md-10 mt-2" id="contentDesc" style="max-height: 320px; overflow-y: scroll;">
+                <h3 class="h3 text-primary">Head Analyse</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Meta Description</h4>
+                        <div>
+                            Length Overview
+                            <p><b>Average Length of Meta Description: </b> {{ context.result.audit.head.meta_desc.length_overview.mean }}</p>
+                            <p><b>Max Length of Meta Description: </b> {{ context.result.audit.head.meta_desc.length_overview.max }}</p>
+                            <p><b>Min Length of Meta Description: </b> {{ context.result.audit.head.meta_desc.length_overview.min }}</p>
+                        </div>
+                        <div>
+                            <p><b>Missing Meta Descriptions in urls count: </b> {{ context.result.audit.head.meta_desc.missing.count }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Title Description</h4>
+                        <div>
+                            Length Overview
+                            <p><b>Average Length of Title: </b> {{ context.result.audit.head.title.length_overview.mean }}</p>
+                            <p><b>Max Length of Title: </b> {{ context.result.audit.head.title.length_overview.max }}</p>
+                            <p><b>Min Length of Title: </b> {{ context.result.audit.head.title.length_overview.min }}</p>
+                        </div>
+                        <div>
+                            <p><b>Missing Title in urls count: </b> {{ context.result.audit.head.title.missing.count }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Canonical Overview</h4>
+                        <div>
+                            <p><b>Missing canonical Url count </b> {{ context.result.audit.head.canonical.missing.count }}</p>
+                            <p><b>Canonical url similarity count to main url: </b> {{ context.result.audit.head.canonical.similar.count }}</p>
+                            <p><b>Canonical url different count to main url: </b> {{ context.result.audit.head.canonical.different.count }}</p>
+                        </div>
+                        <div>
+                            <p><b>Missing Meta Descriptions in urls count: </b> {{ context.result.audit.head.meta_desc.missing.count }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            
             <div class="col-md-10 col-sm-12 mt-2 mb-2" style="max-height: 320px; overflow-y: scroll;">
-                <ul class="list-group list-group-numbered" id="keywords-view"></ul>
-            </div>
-            <div class="col-md-10 mt-2" id="metaAnalysis" style="max-height: 320px; overflow-y: scroll;">
-                
-            </div>
-            <div class="col-md-10 mt-2" id="titleAnalysis" style="max-height: 320px; overflow-y: scroll;">
-                
-            </div>
-            <div class="col-md-10 mt-2" id="headings" style="max-height: 320px; overflow-y: scroll;">
-                {% if processing %}
-                <h3 class="h3 text-secondar mt-2 mb-2">Heading Structure</h3>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th scope="col">Heading Level</th>
-                            <th scope="col">Heading Structure</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody">
+                <h3 class="h3 text-secondary">Keywords</h3>
+                <ul class="list-group list-group-numbered" id="keywords-view">
+                    {% for key, value in context.result.audit.body.keywords.items %}
+                        <li class="list-group-item">keyword <b>{{ key.0 }}</b> appeared {{ key.1 }} times</li>
+                    {% endfor %}
 
-                    </tbody>
-
-                </table>
-                {% else %}
-                {% endif %}
+                </ul>
             </div>
+            <div class="col-md-10 col-sm-12 mt-2 mb-2" style="max-height: 320px; overflow-y: scroll;">
+                <h3 class="h3 text-secondary">Stopwords/Commonwords</h3>
+                <ul class="list-group list-group-numbered" id="keywords-view">
+                    {% for key, value in context.result.audit.body.commonWords.items %}
+                        <li class="list-group-item">Common Words <b>{{ key }}</b> appeared on {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-10 mt-2" style="max-height: 320px; overflow-y: scroll;">
+                <h3 class="h3 text-secondary mt-1">Broken Links</h3>
+                <ul class="list-group list-group-numbered">
+                    {% for link in context.result.audit.links.broken_links %}
+                        <li class="list-group-item"><a href="{{ link }}" target="_blank" class="">{{ link }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
 
 
         </div>

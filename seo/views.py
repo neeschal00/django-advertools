@@ -12,23 +12,38 @@ from advertools import (
     crawl,
     crawl_headers,
     crawllogs_to_df,
-    stopwords
+    url_to_df,
+    stopwords,
 )
-from .forms import RobotsTxt, Sitemap, SerpGoogle, KnowledgeG, Crawl, SERPCrawl, SeoAnalyzeForm
+from .forms import (
+    RobotsTxt,
+    Sitemap,
+    SerpGoogle,
+    KnowledgeG,
+    Crawl,
+    SERPCrawl,
+    SeoAnalyzeForm,
+)
 import os
+
 # from decouple import config
+from collections import Counter
+from .utils import *
+from .seoTasks.audit import audit
 
 # from advertools import SERP_GOOG_VALID_VALS
 # from ydata_profiling import ProfileReport
 from django.contrib import messages
 
 # from celery.result import AsyncResult
-from seo.tasks import (generateReport, 
-                       serpCrawlFull, 
-                       serpCrawlHeaders, 
-                       analyzeContent, 
-                       runCrawler,
-                       siteAud)
+from seo.tasks import (
+    generateReport,
+    serpCrawlFull,
+    serpCrawlHeaders,
+    analyzeContent,
+    runCrawler,
+    siteAud,
+)
 import os, json
 import logging
 import validators
@@ -89,8 +104,8 @@ def robotsToDf(request, filters=None):
 
             urls = list(map(configRobots, valid_urls))
             df = robotstxt_to_df(urls)
-            group_id = request.COOKIES.get('socket_id', None)
-            logger.info("Socket Is is "+ group_id)
+            group_id = request.COOKIES.get("socket_id", None)
+            logger.info("Socket Is is " + group_id)
             dynamic_title = "Robots.txt Data profile"
             task_id = generateReport.delay(group_id, df.to_json(), False, dynamic_title)
             # print("Task id in robots.txt "+ task_id.id)
@@ -146,8 +161,8 @@ def sitemapToDf(request):
                     request, "The url was not able to convert to a dataframe"
                 )
                 return render(request, "seo/sitemap.html", {"form": form})
-            group_id = request.COOKIES.get('socket_id', None)
-            logger.info("Socket Is is "+ group_id)
+            group_id = request.COOKIES.get("socket_id", None)
+            logger.info("Socket Is is " + group_id)
             generateReport.delay(group_id, df.to_json(), False, "Sitemap Data profile")
 
             jsonD = df.to_json(orient="records")
@@ -226,17 +241,19 @@ def searchEngineResults(request):
 
                     serpDf = serp_goog(**params)
                 else:
-                    serpDf = serp_goog(q=query, cx=os.environ.get("CX"), key=os.environ.get("KEY"))
+                    serpDf = serp_goog(
+                        q=query, cx=os.environ.get("CX"), key=os.environ.get("KEY")
+                    )
 
             except Exception as e:
                 print(e)
                 messages.warning(request, "Unable to make a query for invalid data")
                 return render(request, "seo/serpGoog.html", {"form": form})
-            
+
             serpDf = serpDf.sort_values(by="rank")
 
-            group_id = request.COOKIES.get('socket_id', None)
-            logger.info("Socket Is is "+ group_id)
+            group_id = request.COOKIES.get("socket_id", None)
+            logger.info("Socket Is is " + group_id)
             generateReport.delay(group_id, serpDf.to_json(), False, "SERP Data profile")
 
             domains_df = serpDf["displayLink"].value_counts()
@@ -250,7 +267,8 @@ def searchEngineResults(request):
 
             rank_df.rename(columns={"displayLink": "domain"}, inplace=True)
             rank_df = rank_df.reset_index(drop=True).to_html(
-                classes="table table-primary table-striped text-center", justify="center"
+                classes="table table-primary table-striped text-center",
+                justify="center",
             )
 
             # rank_df = rank_df.replace(
@@ -293,7 +311,10 @@ def knowledgeGraph(request):
             limit = form.cleaned_data["limit"]
             if limit:
                 knowDf = knowledge_graph(
-                    query=query, key=os.environ.get("KEY"), languages=languages, limit=limit
+                    query=query,
+                    key=os.environ.get("KEY"),
+                    languages=languages,
+                    limit=limit,
                 )
             else:
                 knowDf = knowledge_graph(
@@ -302,18 +323,20 @@ def knowledgeGraph(request):
             analysis = False
             try:
                 knowDf = knowDf.sort_values(by="resultScore", ascending=False)
-                listCol = knowDf[knowDf["result.detailedDescription.articleBody"].notna()]
+                listCol = knowDf[
+                    knowDf["result.detailedDescription.articleBody"].notna()
+                ]
                 listCol = listCol["result.detailedDescription.articleBody"].to_list()
-                
+
                 submission = True
-                group_id = request.COOKIES.get('socket_id', None)
+                group_id = request.COOKIES.get("socket_id", None)
                 generateReport.delay(
                     group_id, knowDf.to_json(), False, "Knowledge Graph Data profile"
                 )
 
                 jsonD = knowDf.to_json(orient="records")
                 analysis = True
-                analyzeContent.delay(group_id,listCol,"KG article body Analysis")
+                analyzeContent.delay(group_id, listCol, "KG article body Analysis")
                 return render(
                     request,
                     "seo/knowledgeG.html",
@@ -330,9 +353,11 @@ def knowledgeGraph(request):
 
             except Exception as e:
                 print(e)
-                messages.warning(request, "Unable to analyze the particular column articleBody")
+                messages.warning(
+                    request, "Unable to analyze the particular column articleBody"
+                )
                 submission = True
-                group_id = request.COOKIES.get('socket_id', None)
+                group_id = request.COOKIES.get("socket_id", None)
                 generateReport.delay(
                     group_id, knowDf.to_json(), False, "Knowledge Graph Data profile"
                 )
@@ -351,12 +376,10 @@ def knowledgeGraph(request):
                         "analysis": analysis,
                     },
                 )
-            
 
     else:
         form = KnowledgeG()
         return render(request, "seo/knowledgeG.html", {"form": form})
-
 
 
 from .utils import delete_existing_files
@@ -448,7 +471,7 @@ def carwlLinks(request):
             else:
                 jsonD = crawlDf.to_json(orient="records")
 
-                group_id = request.COOKIES.get('socket_id', None)
+                group_id = request.COOKIES.get("socket_id", None)
                 dynamic_title = "Crawl Data profile"
                 generateReport.delay(group_id, jsonD, True, dynamic_title)
 
@@ -461,15 +484,14 @@ def carwlLinks(request):
                     # print(describe)
                     # describe = describe.to_dict()
 
-
                 except KeyError:
-                    analysis=True
+                    analysis = True
                     return render(
                         request,
                         "seo/crawl.html",
                         {
                             **logsAnalysis,
-                            'analysis':analysis,
+                            "analysis": analysis,
                             "form": form,
                             "crawlDf": crawlDf.to_html(
                                 classes="table table-striped", justify="center"
@@ -479,17 +501,15 @@ def carwlLinks(request):
                     )
 
                 overview = True
-                
-               
+
                 listCol = crawlDf[crawlDf["body_text"].notna()]
 
                 listCol = listCol["body_text"].to_list()
 
-                analyzeContent.delay(group_id,listCol,"Crawl Body Response Analysis")
-                
+                analyzeContent.delay(group_id, listCol, "Crawl Body Response Analysis")
+
                 analysis = True
 
-                    
                 return render(
                     request,
                     "seo/crawl.html",
@@ -500,7 +520,7 @@ def carwlLinks(request):
                         "crawlDf": crawlDf.to_html(
                             classes="table table-striped", justify="center"
                         ),
-                        "analysis":analysis,
+                        "analysis": analysis,
                         "json": jsonD,
                         "overview": overview,
                     },
@@ -544,12 +564,14 @@ def serpCrawl(request):
 
                 serpDf = serp_goog(**params)
             else:
-                serpDf = serp_goog(q=query, cx=os.environ.get("CX"), key=os.environ.get("KEY"))
+                serpDf = serp_goog(
+                    q=query, cx=os.environ.get("CX"), key=os.environ.get("KEY")
+                )
 
             links = serpDf["link"].to_list()
 
             serpDf = serpDf.sort_values(by="rank")
-            group_id = request.COOKIES.get('socket_id', None)
+            group_id = request.COOKIES.get("socket_id", None)
 
             if headers_only:
                 task_id = serpCrawlHeaders.delay(group_id, links)
@@ -565,10 +587,10 @@ def serpCrawl(request):
 
             rank_df = serpDf[["searchTerms", "displayLink", "rank", "link"]].head(10)
 
-
             rank_df.rename(columns={"displayLink": "domain"}, inplace=True)
             rank_df = rank_df.reset_index(drop=True).to_html(
-                classes="table table-primary table-striped text-center", justify="center"
+                classes="table table-primary table-striped text-center",
+                justify="center",
             )
 
             return render(
@@ -583,7 +605,7 @@ def serpCrawl(request):
                     "processing": True,
                     "domains_df": domains_df.to_json(orient="records"),
                     "rankDf": rank_df,
-                }
+                },
             )
 
     else:
@@ -592,21 +614,20 @@ def serpCrawl(request):
         return render(request, "seo/serpCrawl.html", {"form": form})
 
 
-
-
 def seoAnalysis(request):
     form = SeoAnalyzeForm()
-    hTitles = ["h1","h2","h3","h4","h6"]
+    hTitles = ["h1", "h2", "h3", "h4", "h6"]
     if request.method == "POST":
         form = SeoAnalyzeForm(request.POST)
         if form.is_valid():
             url = form.cleaned_data["url"]
-            group_id = request.COOKIES.get('socket_id', None)
-            runCrawler.delay(group_id,url)
-            return render(request,"seo/seoAnalysis.html",{"form":form,
-                                                          "processing": True})
+            group_id = request.COOKIES.get("socket_id", None)
+            runCrawler.delay(group_id, url)
+            return render(
+                request, "seo/seoAnalysis.html", {"form": form, "processing": True}
+            )
     else:
-        return render(request,"seo/seoAnalysis.html",{"form":form})
+        return render(request, "seo/seoAnalysis.html", {"form": form})
 
 
 def siteAudit(request):
@@ -616,9 +637,170 @@ def siteAudit(request):
         form = SeoAnalyzeForm(request.POST)
         if form.is_valid():
             url = form.cleaned_data["url"]
-            group_id = request.COOKIES.get('socket_id', None)
-            siteAud.delay(group_id,url)
-            return render(request,"seo/siteAudit.html",{"form":form,
-                                                          "processing": True})
+            group_id = request.COOKIES.get("socket_id", None)
+            custom_settings = {
+                "USER_AGENT": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+                "LOG_FILE": "logs/crawlLogs/output_file.log",
+                "CLOSESPIDER_PAGECOUNT": 1000,
+            }
+            try:
+                if os.path.exists("logs/crawlLogs/output_file.log"):
+                    os.remove("logs/crawlLogs/output_file.log")
+                if os.path.exists("output/seo_crawler.jl"):
+                    os.remove("output/seo_crawler.jl")
+            except PermissionError:
+                return False
+            crawlDf = crawl(
+                url,
+                output_file="output/seo_crawler.jl",
+                follow_links=True,
+                custom_settings=custom_settings,
+            )
+
+            logger.info("Socket Id" + group_id + " SEO crawl one complete")
+            pages = pd.read_json("output/seo_crawler.jl", lines=True)
+
+            url_list = pages["url"]
+            # print(url_list)
+            # print(url_list.to_list())
+
+            url_df = url_to_df(urls=url_list)
+            # print(url_df)
+
+            robots_url = (
+                url_df["scheme"][0] + "://" + url_df["netloc"][0] + "/robots.txt"
+            )
+            print(robots_url)
+            # robotsTxtAn.delay(group_id,robots_url,url_list)
+
+            # Review sitemap
+            sitemap_url = (
+                url_df["scheme"][0] + "://" + url_df["netloc"][0] + "/sitemap.xml"
+            )
+            print(sitemap_url)
+            # sitemapAna.delay(group_id,sitemap_url,url_list)
+
+            ## Creation of Columns based based on functionalities
+
+            ### Word Count and text readability of the body text found in html generated content
+            pages["word_count"] = pages["body_text"].apply(get_word_count)
+            pages["readability"] = pages["body_text"].apply(text_readability)
+
+            ### Create a seperate column with list of keywords and list of stopwords
+            pages["keywords"] = pages["body_text"].apply(extract_keywords)
+            keywords = pages["keywords"].sum()
+            keywords = dict(Counter(keywords))
+
+            pages["common_words"] = pages["body_text"].apply(extract_stopwords)
+            common_words = pages["common_words"].sum()
+            common_words = dict(Counter(common_words))
+
+            # Get character counts of SEO desc , title
+            pages["title"] = pages["title"].fillna(" ")
+            pages["title_length"] = pages["title"].apply(len)
+
+            missing_title = pages[(pages["title"].isna())]["url"].to_list()
+            title_length = pages["title_length"].describe().to_dict()
+
+            latency = pages["download_latency"].describe().to_dict()
+            content_size = pages["size"].describe().to_dict()
+
+            pages["meta_desc"] = pages["meta_desc"].fillna(" ")
+            pages["desc_length"] = pages["meta_desc"].apply(len)
+
+            missing_meta_desc = pages[(pages["meta_desc"].isna())]["url"].to_list()
+            desc_length = pages["desc_length"].describe().to_dict()
+
+            # check if canonical is equal to canonical link
+            pages["canonical"] = pages["canonical"].fillna(" ")
+            missing_canonical = pages[(pages["canonical"].isna())]["url"].to_list()
+            pages["canonical_link"] = pages["url"] == pages["canonical"]
+            condition1 = pages["canonical_link"] == False
+            condition2 = pages["canonical"] != " "
+
+            filtered_canonical = pages[condition1 & condition2]
+            filtered_canonical = filtered_canonical[["url", "canonical"]]
+
+            filtered_canonical_sim = pages[pages["canonical_link"] == True]
+            filtered_canonical_sim = filtered_canonical_sim[["url", "canonical"]]
+
+            broken_links = pages[(pages["status"] >= 400)]["url"].to_list()
+
+            context = {
+                "status": "success",
+                "result": {
+                    "audit": {
+                        "body": {
+                            "wordCount": pages["word_count"],
+                            "readability": pages["readability"],
+                            "keywords": keywords,
+                            "commonWords": common_words,
+                        },
+                        "head": {
+                            "meta_desc": {
+                                "length_overview": desc_length,
+                                "missing": {
+                                    "urls": missing_meta_desc,
+                                    "count": len(missing_meta_desc),
+                                },
+                            },
+                            "title": {
+                                "length_overview": title_length,
+                                "missing": {
+                                    "urls": missing_title,
+                                    "count": len(missing_title),
+                                },
+                            },
+                            "canonical": {
+                                "missing": {
+                                    "urls": missing_canonical,
+                                    "count": len(missing_canonical),
+                                },
+                                "similar": {
+                                    "values": filtered_canonical_sim.reset_index(
+                                        drop=True
+                                    ).to_dict(),
+                                    "count": len(filtered_canonical_sim),
+                                },
+                                "different": {
+                                    "values": filtered_canonical.reset_index(
+                                        drop=True
+                                    ).to_dict(),
+                                    "count": len(filtered_canonical),
+                                },
+                            },
+                        },
+                        "links": {
+                            "broken_links": broken_links,
+                        },
+                        "overview": {
+                            "latency": latency,
+                            "content_size": content_size,
+                        },
+                    }
+                },
+            }
+            return render(
+                request,
+                "seo/siteAudit.html",
+                {"form": form, "processing": True, "context": context},
+            )
     else:
-        return render(request,"seo/siteAudit.html",{"form":form})
+        return render(request, "seo/siteAudit.html", {"form": form})
+
+
+def siteAuditv2(request):
+    form = SeoAnalyzeForm()
+    hTitles = ["h1", "h2", "h3", "h4", "h6"]
+    if request.method == "POST":
+        form = SeoAnalyzeForm(request.POST)
+        if form.is_valid():
+            url = form.cleaned_data["url"]
+            group_id = request.COOKIES.get("socket_id", None)
+
+            audit.delay(group_id, url)
+            return render(
+                request, "seo/siteAudit2.html", {"form": form, "processing": True}
+            )
+    else:
+        return render(request, "seo/siteAudit2.html", {"form": form})
