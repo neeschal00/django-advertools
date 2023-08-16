@@ -167,11 +167,11 @@ def bodyTextAnalysis(group_id, body_text):
     pages["keywords"] = pages["body_text"].apply(extract_keywords)
 
     keywords = pages["keywords"].sum()
-    keywords = dict(Counter(keywords))
+    keywords = dict(Counter(keywords).most_common())
 
     pages["common_words"] = pages["body_text"].apply(extract_stopwords)
     common_words = pages["common_words"].sum()
-    common_words = dict(Counter(common_words))
+    common_words = dict(Counter(common_words).most_common())
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id,
@@ -278,7 +278,7 @@ def audit(group_id, url):
     filtered_canonical_sim = pages[pages["canonical_link"] == True]
     filtered_canonical_sim = filtered_canonical_sim[["url", "canonical"]]
 
-    broken_links = pages[~(pages["status"] >= 400)]["url"].to_list()
+    broken_links = pages[(pages["status"] >= 400)]["url"].to_list()
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id,

@@ -497,7 +497,9 @@
       var infoImg = "{% static 'images/infor2.png' %}"
     </script>
 
-    <script src="{% static 'javascript/sock.js' %}"></script>
+    <script src="{% static 'javascript/analysisModule.js' %}" type="module"></script>
+
+    <script src="{% static 'javascript/sock.js' %}" type="module"></script>
 
     {% block javascript %} {% endblock javascript %}
   </body>

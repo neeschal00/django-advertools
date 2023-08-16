@@ -1,4 +1,7 @@
 // Replace <task_id> with the actual value
+import { dualLineChart } from "./analysisModule.js";
+
+
 
 function getCookie(cname) {
   let name = cname + "=";
@@ -514,6 +517,174 @@ if (random_id) {
           console.error("Error:", error);
         });
     }
+
+    if (message.type === "analysisComplete" && message.task_name === "audit") {
+      console.log("Audit complete");
+      document.getElementById("loadingModal").style.display = "none";
+      var url = "/api/analysis/" + message.task_id + "/";
+
+      fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        if(data.status === "success"){
+          
+          const overview = data.result.audit.overview;
+          const brokenlinks = data.result.audit.links["broken_links"];
+          const head = data.result.audit.head;
+
+          console.log(JSON.stringify(data));
+
+          console.log(brokenlinks);
+          const elemOverview = document.querySelector("#overview .row");
+          const elemBrokenLinks = document.getElementById("broken-links");
+          const keys = Object.keys(overview);
+          
+          var html = ``;
+          keys.forEach((key)=>{
+            // console.log(key);
+            // console.log(overview[key]);
+            let unit = "bytes";
+            let type = "content"
+            let bg = "bg-primary"
+            if(key === "latency"){
+              unit = "seconds";
+              type = "downloaded content";
+              bg = "bg-success"
+            }
+             html += `
+               <div class="col-md-6">
+                <div class="card ${bg} text-white">
+                  <div class="container m-2">
+                    <h5 class="h5 card-title fw-bold">${key} Overview</h5>
+                    <div class="card-body">
+                      <b>Average ${key} of ${type}:</b> ${ overview[key].mean.toFixed(3) } ${unit}.
+                    </div>
+                    <div class="card-body">
+                      <b>Max ${key} of ${type}:</b> ${ overview[key].max.toFixed(3)} ${unit}.
+                    </div>
+                    <div class="card-body">
+                      <b>Minimum ${key} of ${type}:</b>  ${ overview[key].min.toFixed(3)} ${unit}.
+                    </div>
+                  </div>
+                </div>
+              </div>
+             `
+          })
+          elemOverview.innerHTML = html;
+
+          let linkHtml = `<h5 class="h5 text-primary">${brokenlinks.length} Broken Links were found</h5>`;
+          if( brokenlinks.length > 1){
+            brokenlinks.forEach((value) =>{
+              
+              linkHtml +=`
+                <li class="list-group-item"><a href="${value}" class="text-decoration-none">${value}</a></li>
+              `
+            });
+
+          }
+
+          elemBrokenLinks.innerHTML = linkHtml;
+
+          document.getElementById("meta-overview").innerHTML = `
+          <div class="card bg-primary text-white">
+            <div class="container m-2">
+              <h5 class="h5 card-title fw-bold">Meta Description Length Overview</h5>
+              <div class="card-body">
+                <b>Average length of Description:</b> ${ head["meta_desc"]["length_overview"].mean.toFixed(2) } characters.
+              </div>
+              <div class="card-body">
+                <b>Max length of Description:</b> ${ head["meta_desc"]["length_overview"].max.toFixed(2)} characters.
+              </div>
+              <div class="card-body">
+                <b>Minimum length of Description:</b>  ${ head["meta_desc"]["length_overview"].min.toFixed(2)} characters.
+              </div>
+            </div>
+          </div>
+          `;
+
+          let missingMeta = `<h5 class="h5 text-primary">Missing Meta Description in total ${head["meta_desc"]["missing"]["count"]}<h5>`;
+          
+          head["meta_desc"]["missing"]["urls"].forEach((value) => {
+            missingMeta += ` <li class="list-group-item"><a href="${value}" class="text-decoration-none">${value}</a></li>
+            `
+          })
+
+          document.getElementById("meta-missing").innerHTML = missingMeta;
+
+          document.getElementById("titleAnalysis").innerHTML = `
+          <h4 class="h4 text-primary">Title was missing in ${head["title"]["missing"]["count"]} out of ${head["title"]["length_overview"]["count"]}</h4>
+          <div class="col-md-6">
+            <div class="card bg-primary text-white">
+              <div class="container m-2">
+                <h5 class="h5 card-title fw-bold">Title Length Overview</h5>
+                <div class="card-body">
+                  <b>Average length of Title:</b> ${ head["title"]["length_overview"].mean.toFixed(2) } characters.
+                </div>
+                <div class="card-body">
+                  <b>Max length of Title:</b> ${ head["title"]["length_overview"].max.toFixed(2)} characters.
+                </div>
+                <div class="card-body">
+                  <b>Minimum length of Title:</b>  ${ head["title"]["length_overview"].min.toFixed(2)} characters.
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          `;
+
+          document.getElementById("canonicalAnalysis").innerHTML = `
+          <h4 class="h4 text-primary">Canonical Links was missing in ${head["canonical"]["missing"]["count"]} out of ${head["title"]["length_overview"]["count"]}</h4>
+          <p class="p">Canonical Links were different in <b>${head["canonical"]["different"]["count"]}</b> and similar in <b>${head["canonical"]["similar"]["count"]}</b></p>
+          `;
+          
+        }
+      });
+    }
+
+    if (message.type === "analysisComplete" && message.task_name === "bodyTextAnalysis") {
+      console.log("Body Text Analysis complete");
+      document.getElementById("loadingModal").style.display = "none";
+      var url = "/api/analysis/" + message.task_id + "/";
+
+      fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        if(data.status === "success"){
+          console.log(data);
+          const body = data.result.body;
+          const keywords = body["keywords"];
+          console.log(keywords);
+          const firstTwe = Object.fromEntries(Object.entries(keywords).slice(0, 20));
+            // const sortedData = Object.entries(result).sort(function(a, b) {
+            //   return b[1] - a[1];
+            // });
+            // console.log(sortedData);
+          const element = document.getElementById("keywords-view");
+
+          let html = '<h3 class="text-secondary fw-bold">Keywords</h3>';
+          for (var value in firstTwe){
+            // console.log(value);
+            html += `<li class="list-group-item">${value} : ${keywords[value]} <span style="float:right;">See in <a class="text-end text-primary text-decoration-none" href="https://trends.google.com/trends/explore?date=now%201-d&geo=US&q=${value.trim()}&hl=en" target="_blank">Google Trends</a></span></li>`;
+          } 
+          element.innerHTML = html;
+
+          const commonWords = body["commonWords"];
+          // console.log(commonWords);
+          const cfirstTwe = Object.fromEntries(Object.entries(commonWords).slice(0, 20));
+          const cElem = document.getElementById("common-view");
+          html = '<h3 class="text-secondary fw-bold">Common Words</h3>';
+          for (var value in cfirstTwe){
+            // console.log(value);
+            html += `<li class="list-group-item">${value} : ${commonWords[value]} <span style="float:right;">See in <a class="text-end text-primary text-decoration-none" href="https://trends.google.com/trends/explore?date=now%201-d&geo=US&q=${value.trim()}&hl=en" target="_blank">Google Trends</a></span></li>`;
+          } 
+          cElem.innerHTML = html;
+
+          dualLineChart("Body Text Word Count and readability",body["wordCount"],body["readability"],"Word Count","Readability")
+
+        }
+      });
+    }
+    
 
     if (message.type === "crawlRead") {
       console.log("Crawl Read");
