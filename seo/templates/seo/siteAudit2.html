@@ -52,6 +52,26 @@
                     
                 </div>
             </div>
+
+            <div class="col-md-10 mt-3">
+                <div id="Robots-overview">
+                    <ul class="list-group list-group-numbered" id="robots-test"></ul>
+                </div>
+                
+            </div>
+
+            <div class="col-md-12 mt-3">
+                <div id="sitemap-overview"></div>
+                <div class="row">
+                    <div class="col-md-6 col-sm-12" style="max-height: 320px; overflow-y: scroll;">
+                        <ul class="list-group list-group-numbered" id="sitemap-crawl"></ul>
+                    </div>
+                    <div class="col-md-6 col-sm-12" style="max-height: 320px; overflow-y: scroll;">
+                        <ul class="list-group list-group-numbered" id="crawl-sitemap"></ul>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-md-10 mt-3">
                 <canvas id="lineChart" class="mt-2"></canvas>
               </div>
@@ -62,16 +82,16 @@
                 <ul class="list-group list-group-numbered" id="common-view"></ul>
             </div>
             <div class="col-md-12 mt-2" id="metaAnalysis" style="max-height: 320px; overflow-y: scroll;">
-                <div class="row justify-content-between">
-                    <div class="col-md-6" id="meta-overview"></div>
-                    <div class="col-md-6">
-                        <ul class="list-group list-group-numbered" id="meta-missing"></ul>
-                    </div>
+                <div class="row mt-2 justify-content-between">
+                    <div class="col-md-6" id="meta-overview" style="max-height: 320px; overflow-y: scroll;"></div>
+                    
+                    <div class="col-md-6" id="titleAnalysis" style="max-height: 320px; overflow-y: scroll;">
+                
+                    </div>    
                 </div>
             </div>
-            <div class="col-md-10 mt-2" id="titleAnalysis" style="max-height: 320px; overflow-y: scroll;">
                 
-            </div>
+            
             <div class="col-md-10 mt-2" id="canonicalAnalysis" style="max-height: 320px; overflow-y: scroll;">
                 
             </div>
@@ -79,7 +99,7 @@
                 <ul class="list-group list-group-numbered" id="broken-links"></ul>
             </div>
             <div class="col-md-10 mt-2" id="headings" style="max-height: 320px; overflow-y: scroll;">
-                {% if processing %}
+                <!-- {% if processing %}
                 <h3 class="h3 text-secondar mt-2 mb-2">Heading Structure</h3>
                 <table class="table table-bordered">
                     <thead>
@@ -94,7 +114,7 @@
 
                 </table>
                 {% else %}
-                {% endif %}
+                {% endif %} -->
             </div>
 
 

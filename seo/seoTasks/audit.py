@@ -87,7 +87,7 @@ def robotsAnalysis(group_id, robots_url, url_dict):
                 "count": len(blocked_pages),
                 "totalTested": len(test_df),
             }
-        },
+        }
     }
 
 
@@ -101,6 +101,7 @@ def sitemapAnalysis(group_id, robots_url, url_dict):
         sitemap_df = sitemap_to_df(robots_url)
         missing_in_sitemap = set(pages["url"]) - set(sitemap_df["loc"])
         missing_in_crawl = set(sitemap_df["loc"]) - set(pages["url"])
+        
 
     except ValueError:
         try:
@@ -116,6 +117,8 @@ def sitemapAnalysis(group_id, robots_url, url_dict):
                 },
             )
             return {"status": "failed", "result": {"message": e}}
+        
+    overview = sitemap_df["loc"].describe().to_dict()
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id,
@@ -138,7 +141,8 @@ def sitemapAnalysis(group_id, robots_url, url_dict):
                     "urls": list(missing_in_crawl),
                     "count": len(missing_in_crawl),
                 },
-            }
+            },
+            "overview": overview
         },
     }
 
