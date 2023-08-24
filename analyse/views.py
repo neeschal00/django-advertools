@@ -2,9 +2,9 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.contrib import messages
-from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse
 from advertools import (
     url_to_df,
     emoji_search,
@@ -148,9 +148,7 @@ def overviewText(request):
 
             messages.success(request, "text Overview generated")
 
-            # df = pd.DataFrame.from_dict(df,orient='index')
-            # df = df.transpose()
-            # jsonD = df.to_json
+           
             return render(
                 request,
                 "analyse/textan.html",
@@ -171,10 +169,9 @@ def overviewText(request):
 def getDataset(request):
     if request.method == "POST":
         form = DatasetExtract(request.POST, request.FILES)
-        # print(form)
+        
         if form.is_valid():
-            # print(form.cleaned_data)
-            # form.save()
+            
             data, created = DatasetFile.objects.get_or_create(**form.cleaned_data)
             # print(data)
             if created:
@@ -184,9 +181,7 @@ def getDataset(request):
                     request,
                     f"The dataset {data.file_title}:{data.file_field} already exits.",
                 )
-            # print(df)
-            # df = pd.DataFrame.from_dict(df,orient='index')
-            # df = df.transpose()
+            
             return redirect("datasetT")
         else:
             print(form.cleaned_data)
@@ -215,9 +210,9 @@ def dataSetAnalysis(request):
             df = pd.read_csv(dataset_val.file_field.path)
             # print(df)
             df.dropna(subset=[column_name], inplace=True)
-            # listCol = df[df[column_name].notna()]
+
             listCol = df[column_name].to_list()
-            # print(listCol)
+            
 
             urls = extract_urls(listCol)
             mentions = extract_mentions(listCol)
@@ -248,7 +243,7 @@ def dataSetAnalysis(request):
                 },
             )
         except Exception as e:
-            print(e)
+            
             messages.warning(request, e)
             return render(
                 request,

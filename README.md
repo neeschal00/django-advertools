@@ -234,6 +234,26 @@ similarly lookup on the status of the service
 
 ```
 
+Supervisorctl for celerey:
+
+**Celery Configuration is set below in the conf file**
+```
+sudo nano /etc/supervisor/conf.d/celery.conf
+```
+
+```
+[program:celery]
+command=/home/tactical/django-advertools/venv/bin/celery -A django_advertools worker -l info
+directory=/home/tactical/django-advertools
+user=tactical
+autostart=true
+autorestart=true
+stderr_logfile=/var/log/celery/celery.err.log
+stdout_logfile=/var/log/celery/celery.out.log
+```
+
+
+
 
 3 **Configure the systemd application to run using nginx**:
 Once the above gunicorn and daphne server is ran the below usage of asgi and wsgi in nginx is configured based on req. protocols and headers

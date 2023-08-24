@@ -21,7 +21,7 @@ from advertools import (
     extract_questions,
     extract_urls,
     stopwords,
-    url_to_df
+    url_to_df,
 )
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -31,18 +31,19 @@ from seo.utils import (
     extract_keywords,
     text_readability,
     get_word_count,
-    syllable_count
+    syllable_count,
 )
 
 channel_layer = get_channel_layer()
 
 logger = logging.getLogger(__name__)
 
+
 @shared_task
 def generateReport(group_id, df, minimal=False, title="Profile Report"):
     task_id = generateReport.request.id
     print(f"Socket ID received in socket is {group_id}")
-    logger.info("Socket Id"+group_id+"task id in generateReport " + task_id)
+    logger.info("Socket Id" + group_id + "task id in generateReport " + task_id)
     load_df = pd.read_json(df)
 
     try:
@@ -52,7 +53,7 @@ def generateReport(group_id, df, minimal=False, title="Profile Report"):
             profile = ProfileReport(load_df, minimal=False, title=title)
     except Exception as e:
         print(e)
-        logger.info("Socket Id"+group_id+" "+e+" for task " + task_id)
+        logger.info("Socket Id" + group_id + " " + e + " for task " + task_id)
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id, {"type": "report_failed"}
         )
@@ -60,7 +61,9 @@ def generateReport(group_id, df, minimal=False, title="Profile Report"):
 
     try:
         profile.to_file(os.path.join("templates", "report.html"))
-        logger.info("Socket Id"+group_id+" Profile report generated for task " + task_id)
+        logger.info(
+            "Socket Id" + group_id + " Profile report generated for task " + task_id
+        )
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id,
             {
@@ -72,7 +75,7 @@ def generateReport(group_id, df, minimal=False, title="Profile Report"):
 
     except Exception as e:
         print(e)
-        logger.info("Socket Id"+group_id+" "+e+" for task " + task_id)
+        logger.info("Socket Id" + group_id + " " + e + " for task " + task_id)
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id, {"type": "report_failed"}
         )
@@ -86,14 +89,13 @@ def add(a, b):
 
 @shared_task
 def serpCrawlHeaders(group_id, links: list):
-    
     links = list(links)
-    
+
     try:
         if os.path.exists("output/serp_crawl_headers_output.jl"):
             os.remove("output/serp_crawl_headers_output.jl")
     except PermissionError:
-        logger.info("Socket Id"+group_id+" The output file is being used ")
+        logger.info("Socket Id" + group_id + " The output file is being used ")
         return False
 
     crawl_headers(
@@ -104,11 +106,9 @@ def serpCrawlHeaders(group_id, links: list):
     # serpReadDf.delay(group_id, "headers")
     df = pd.read_json("output/serp_crawl_headers_output.jl", lines=True)
 
-    logger.info("Socket Id"+group_id+" Crawl Headers complete")
+    logger.info("Socket Id" + group_id + " Crawl Headers complete")
 
     analyzeCrawlLogs.delay(group_id, "headers")
-
-   
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "headers crawled"}
@@ -137,20 +137,21 @@ def serpCrawlFull(group_id, links: list):
         output_file="output/serp_crawl_output.jl",
         custom_settings={"LOG_FILE": "logs/crawlLogs/fullCrawl.log"},
     )
-    logger.info("Socket Id"+group_id+" Crawl Full complete")
+    logger.info("Socket Id" + group_id + " Crawl Full complete")
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "full crawled"}
     )
     df = pd.read_json("output/serp_crawl_output.jl", lines=True)
     task_idr = analyzeCrawlLogs.delay(group_id, "full")
-    
-    logger.info("Socket Id"+group_id+" Read crawl output for task "+ task_id)
+
+    logger.info("Socket Id" + group_id + " Read crawl output for task " + task_id)
     listCol = df[df["body_text"].notna()]
     listCol = listCol["body_text"].to_list()
-    analyzeContent.delay(group_id,listCol,"Body Content Analysis")
+    analyzeContent.delay(group_id, listCol, "Body Content Analysis")
 
     async_to_sync(channel_layer.group_send)(
-        "group_" + group_id, {"type": "crawlRead", "task_id": task_id,"task_name":"serpCrawl"}
+        "group_" + group_id,
+        {"type": "crawlRead", "task_id": task_id, "task_name": "serpCrawl"},
     )
     return {
         "status": "completed",
@@ -170,7 +171,7 @@ def serpReadDf(group_id, type: str):
 
     data = df.to_json(orient="records")
     # print(type(data))
-    logger.info("Socket Id"+group_id+" Read cawl output")
+    logger.info("Socket Id" + group_id + " Read cawl output")
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "data_converted", "result": data}
     )
@@ -187,8 +188,8 @@ def analyzeCrawlLogs(group_id, type):
         logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/headerCrawl.log")
     else:
         logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/fullCrawl.log")
-    
-    logger.info("Socket Id"+group_id+" Crawl Logs load complete")
+
+    logger.info("Socket Id" + group_id + " Crawl Logs load complete")
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "Crawl logs loaded"}
     )
@@ -200,7 +201,7 @@ def analyzeCrawlLogs(group_id, type):
         classes="table table-primary table-striped text-center", justify="center"
     )
 
-    logger.info("Socket Id"+group_id+" Analysis of crawl logs complete")
+    logger.info("Socket Id" + group_id + " Analysis of crawl logs complete")
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id,
         {"type": "analysisComplete", "task_id": task_id, "task_name": "crawlLogs"},
@@ -218,7 +219,7 @@ def analyzeCrawlLogs(group_id, type):
 
 
 @shared_task
-def analyzeContent(group_id, content: list,title="Overview Analysis"):
+def analyzeContent(group_id, content: list, title="Overview Analysis"):
     task_id = analyzeContent.request.id
     print("Analyze Content")
     # print(task_id)
@@ -238,77 +239,77 @@ def analyzeContent(group_id, content: list,title="Overview Analysis"):
             listCol, min_reps=3
         )  # minimum repertition of words 3
 
-        logger.info("Socket Id"+group_id+" Content analysis complete")
+        logger.info("Socket Id" + group_id + " Content analysis complete")
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id,
-            {"type": "analysisComplete", "task_id": task_id, "task_name": "contentAnalysis"},
+            {
+                "type": "analysisComplete",
+                "task_id": task_id,
+                "task_name": "contentAnalysis",
+            },
         )
         return {
-            "status":"completed",
-            "result":{
-                "title":title,
+            "status": "completed",
+            "result": {
+                "title": title,
                 "urls": urls,
                 "mentions": mentions,
                 "questions": questions,
                 "numbers": numbers,
                 "hashtags": hashtags,
                 "intense_words": intense_words,
-            }
+            },
         }
     except Exception as e:
-        logger.info("Socket Id"+group_id + " analysis failed: "+str(e))
-        return {
-            "status":"failed",
-            "result": {
-                "message": e
-            }
-        }
+        logger.info("Socket Id" + group_id + " analysis failed: " + str(e))
+        return {"status": "failed", "result": {"message": e}}
+
 
 @shared_task
-def get_keywords(group_id,body_text):
-
+def get_keywords(group_id, body_text):
     task_id = get_keywords.request.id
     body_text = body_text.lower()
-    pattern = r'[^a-zA-Z0-9@\s]'
-    body_text = re.sub(pattern,"",body_text)
-    numPattern = r'\d+'
-    body_text = re.sub(numPattern,"",body_text)
-    body_text = re.sub(r'\b\w\b', '', body_text)
-    whiteSpacePattern = r'\s+'
-    body_text = re.sub(whiteSpacePattern," ",body_text)
+    pattern = r"[^a-zA-Z0-9@\s]"
+    body_text = re.sub(pattern, "", body_text)
+    numPattern = r"\d+"
+    body_text = re.sub(numPattern, "", body_text)
+    body_text = re.sub(r"\b\w\b", "", body_text)
+    whiteSpacePattern = r"\s+"
+    body_text = re.sub(whiteSpacePattern, " ", body_text)
     for text in stopwords["english"]:
-        body_text = body_text.replace(" "+text.lower()+" "," ")
+        body_text = body_text.replace(" " + text.lower() + " ", " ")
     keywords = body_text.split()
     keywords = dict(Counter(keywords))
-    keywords = sorted(keywords.items(),key=lambda x: x[1])[::-1]
+    keywords = sorted(keywords.items(), key=lambda x: x[1])[::-1]
 
-    logger.info("Socket Id"+group_id+" Keywords Retrieved")
+    logger.info("Socket Id" + group_id + " Keywords Retrieved")
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "getKeywords", "task_id": task_id}
     )
-    return {
-        "status": "success",
-        "keywords": keywords
-    }
-
+    return {"status": "success", "keywords": keywords}
 
 
 @shared_task
-def titleAnalysis(group_id,title = None):
+def titleAnalysis(group_id, title=None):
     task_id = titleAnalysis.request.id
-    
+
     if title:
         lengthT = len(title)
-        keywords = re.sub(r'[^a-zA-Z0-9@\s]','',title.lower())
+        keywords = re.sub(r"[^a-zA-Z0-9@\s]", "", title.lower())
         # keywords = re.sub(r'\b\w\b', '', keywords)
-        whiteSpacePattern = r'\s+'
-        keywords = re.sub(whiteSpacePattern," ",keywords)
+        whiteSpacePattern = r"\s+"
+        keywords = re.sub(whiteSpacePattern, " ", keywords)
         for text in stopwords["english"]:
-            keywords = keywords.replace(" "+text.lower()+" "," ")
+            keywords = keywords.replace(" " + text.lower() + " ", " ")
         keywords = keywords.split()
-        logger.info("Socket Id"+group_id+" Title analysis complete")
+        logger.info("Socket Id" + group_id + " Title analysis complete")
         async_to_sync(channel_layer.group_send)(
-            "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"titleAnalysis"}
+            "group_" + group_id,
+            {
+                "type": "analysisComplete",
+                "task_id": task_id,
+                "task_name": "titleAnalysis",
+            },
         )
 
         if lengthT > 50 and lengthT < 70:
@@ -319,8 +320,8 @@ def titleAnalysis(group_id,title = None):
                     "length": lengthT,
                     "keywords": keywords,
                     "appropriate": True,
-                    "description": f"The title is set and the length being {lengthT} is appropriate for title length which must be approx. 50-70 chars long."
-                }
+                    "description": f"The title is set and the length being {lengthT} is appropriate for title length which must be approx. 50-70 chars long.",
+                },
             }
         else:
             return {
@@ -330,73 +331,84 @@ def titleAnalysis(group_id,title = None):
                     "length": lengthT,
                     "keywords": keywords,
                     "appropriate": False,
-                    "description": f"The title is set and the length being {lengthT} is not appropriate for title length which must be approx. 50-70 chars long."
-                }
+                    "description": f"The title is set and the length being {lengthT} is not appropriate for title length which must be approx. 50-70 chars long.",
+                },
             }
     else:
-        logger.info("Socket Id"+group_id+" Content analysis complete")
+        logger.info("Socket Id" + group_id + " Content analysis complete")
         async_to_sync(channel_layer.group_send)(
-            "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"titleAnalysis"}
+            "group_" + group_id,
+            {
+                "type": "analysisComplete",
+                "task_id": task_id,
+                "task_name": "titleAnalysis",
+            },
         )
         return {
+            "status": "failed",
+            "result": {
+                "title": title,
+                "length": None,
+                "appropriate": False,
+                "description": f"The title is not set and title length which must be approx. 50-70 chars long.",
+            },
+        }
 
-                "status": "failed",
-                "result":{
-                    "title": title,
-                    "length": None,
-                    "appropriate": False,
-                    "description": f"The title is not set and title length which must be approx. 50-70 chars long."
-                }
-            }
 
 @shared_task
-def metaDescripton(group_id,description):
+def metaDescripton(group_id, description):
     task_id = metaDescripton.request.id
-    
+
     if description:
-        keywords = re.sub(r'[^a-zA-Z0-9@\s]','',description.lower())
+        keywords = re.sub(r"[^a-zA-Z0-9@\s]", "", description.lower())
         # keywords = re.sub(r'\b\w\b', '', keywords)
-        whiteSpacePattern = r'\s+'
-        keywords = re.sub(whiteSpacePattern," ",keywords)
+        whiteSpacePattern = r"\s+"
+        keywords = re.sub(whiteSpacePattern, " ", keywords)
         for text in stopwords["english"]:
-            keywords = keywords.replace(" "+text.lower()+" "," ")
+            keywords = keywords.replace(" " + text.lower() + " ", " ")
         keywords = keywords.split()
         lengthT = len(description)
         async_to_sync(channel_layer.group_send)(
-            "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":"metaDescripton"}
+            "group_" + group_id,
+            {
+                "type": "analysisComplete",
+                "task_id": task_id,
+                "task_name": "metaDescripton",
+            },
         )
         if lengthT > 150 and lengthT < 170:
             return {
                 "status": "success",
-                "result":{
+                "result": {
                     "description_meta": description,
                     "length": lengthT,
-                    "keywords":keywords,
+                    "keywords": keywords,
                     "appropriate": True,
-                    "description": f"The description is set and the length being {lengthT} is appropriate for description length which must be approx. 150-170 chars long."
-                }
+                    "description": f"The description is set and the length being {lengthT} is appropriate for description length which must be approx. 150-170 chars long.",
+                },
             }
         else:
             return {
                 "status": "success",
-                "result":{
+                "result": {
                     "description_meta": description,
                     "length": lengthT,
                     "keywords": keywords,
                     "appropriate": False,
-                    "description": f"The description is set and the length being {lengthT} is not appropriate for description length which must be approx. 150-170 chars long."
-                }
+                    "description": f"The description is set and the length being {lengthT} is not appropriate for description length which must be approx. 150-170 chars long.",
+                },
             }
     else:
         return {
-                "status": "failed",
-                "result": {
-                    "description_meta": description,
-                    "length": None,
-                    "appropriate": False,
-                    "description": f"The description is not set and description length which must be approx. 150-170 chars long."
-                }
-            }
+            "status": "failed",
+            "result": {
+                "description_meta": description,
+                "length": None,
+                "appropriate": False,
+                "description": f"The description is not set and description length which must be approx. 150-170 chars long.",
+            },
+        }
+
 
 @shared_task
 def readLogFile(group_id):
@@ -409,23 +421,18 @@ def readLogFile(group_id):
     print(checkRobots)
     robotsFound = "Robots.txt wasn't found"
     if checkRobots.endswith("robots.txt") and (str(status) == "200"):
-        robotsFound = "Robots.txt was found "+ checkRobots
+        robotsFound = "Robots.txt was found " + checkRobots
         robotsDf = robotstxt_to_df(checkRobots)
 
     async_to_sync(channel_layer.group_send)(
-            "group_" + group_id, {"type": "analysisComplete", "task_id": task_id,"task_name":""}
-        )
-    return {
-        "status":"success",
-        "result":{
-            "robots": robotsFound
-        }
-    }
+        "group_" + group_id,
+        {"type": "analysisComplete", "task_id": task_id, "task_name": ""},
+    )
+    return {"status": "success", "result": {"robots": robotsFound}}
 
 
 @shared_task
-def runCrawler(group_id,url):
-
+def runCrawler(group_id, url):
     task_id = runCrawler.request.id
 
     custom_settings = {
@@ -438,34 +445,33 @@ def runCrawler(group_id,url):
     except PermissionError:
         return False
     crawlDf = crawl(
-            url,
-            output_file="output/seo_crawler.jl",
-            follow_links=False,
-            custom_settings=custom_settings,
-        )
-    
+        url,
+        output_file="output/seo_crawler.jl",
+        follow_links=False,
+        custom_settings=custom_settings,
+    )
+
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "Crawling Completed"}
     )
-    logger.info("Socket Id"+group_id+" SEO crawl one complete")
-    crawlDf = pd.read_json("output/seo_crawler.jl",lines=True)
-    content_size = str(int(crawlDf["size"][0])/1000)
+    logger.info("Socket Id" + group_id + " SEO crawl one complete")
+    crawlDf = pd.read_json("output/seo_crawler.jl", lines=True)
+    content_size = str(int(crawlDf["size"][0]) / 1000)
     latency = crawlDf["download_latency"][0]
     body_text = crawlDf["body_text"][0]
     crawled_dt = crawlDf["crawl_time"][0]
     content_type = crawlDf["resp_headers_content-type"][0]
     server = crawlDf["resp_headers_server"][0]
 
-
-    get_keywords.delay(group_id,body_text)
+    get_keywords.delay(group_id, body_text)
 
     readLogFile.delay(group_id)
 
-    titleAnalysis.delay(group_id,crawlDf["title"][0])
+    titleAnalysis.delay(group_id, crawlDf["title"][0])
     desc = crawlDf["meta_desc"][0] if crawlDf["meta_desc"][0] else ""
-    metaDescripton.delay(group_id,desc)
+    metaDescripton.delay(group_id, desc)
 
-    hTitles = ["h1","h2","h3","h4","h6"]
+    hTitles = ["h1", "h2", "h3", "h4", "h6"]
 
     headings = {}
 
@@ -474,28 +480,29 @@ def runCrawler(group_id,url):
             headings[title] = crawlDf[title].iloc[0].split("@@")
 
     async_to_sync(channel_layer.group_send)(
-        "group_" + group_id, {"type": "crawlRead", "task_id": task_id,"task_name":"seoCrawler"}
+        "group_" + group_id,
+        {"type": "crawlRead", "task_id": task_id, "task_name": "seoCrawler"},
     )
 
     return {
-        "status":"success",
-        "result":{
+        "status": "success",
+        "result": {
             "content_size": content_size,
             "latency": latency,
             "headings": headings,
             "crawledOn": crawled_dt,
-            "contentType": content_type
-        }
+            "contentType": content_type,
+        },
     }
 
 
 @shared_task
-def robotsTxtAn(group_id,robots_url,url_list):
+def robotsTxtAn(group_id, robots_url, url_list):
     print(group_id)
     print("RRobots entered")
     robots_df = robotstxt_to_df(robots_url)
-    test_df = robotstxt_test(robots_df, user_agents=['Googlebot'],urls=url_list)
-    blocked_pages = test_df[test_df['can_fetch'] == False]
+    test_df = robotstxt_test(robots_df, user_agents=["Googlebot"], urls=url_list)
+    blocked_pages = test_df[test_df["can_fetch"] == False]
 
     if "directive" in robots_df:
         unique_counts = robots_df["directive"].value_counts()
@@ -512,33 +519,32 @@ def robotsTxtAn(group_id,robots_url,url_list):
         unique = new_Df.to_dict()
 
     rValue = {
-        "status":"success",
-        "result":{
+        "status": "success",
+        "result": {
             "robotsDf": robots_df.to_dict(),
             "testResult": test_df.to_dict(),
             "blocked_pages": blocked_pages.to_dict(),
-            "diective":{
+            "diective": {
                 "uniqueCounts": dict(unique_counts),
-                "uniqueCalculations": unique
-            }
-        }
+                "uniqueCalculations": unique,
+            },
+        },
     }
 
     return rValue
 
+
 @shared_task
-def sitemapAna(group_id,sitemap_url,url_list):
+def sitemapAna(group_id, sitemap_url, url_list):
     print(group_id)
     print("siteap entered")
     sitemap_df = sitemap_to_df(sitemap_url)
-    missing_pages = set(url_list) - set(sitemap_df['loc'])
+    missing_pages = set(url_list) - set(sitemap_df["loc"])
     overview = sitemap_df["loc"].describe()
 
     check_http = sitemap_df[["loc"]].copy()
 
-    check_http["https"] = list(
-        map(lambda x: x.startswith("https"), check_http["loc"])
-    )
+    check_http["https"] = list(map(lambda x: x.startswith("https"), check_http["loc"]))
 
     unique_counts = check_http["https"].value_counts()
 
@@ -554,30 +560,29 @@ def sitemapAna(group_id,sitemap_url,url_list):
     unique = new_Df.to_json()
 
     rValue = {
-        "status":"success",
-        "result":{
+        "status": "success",
+        "result": {
             "sitemapDf": sitemap_df.to_dict(),
             "missingPages": missing_pages,
             "overview": overview.to_dict(),
-            "diective":{
+            "diective": {
                 "uniqueCounts": dict(unique_counts),
-                "uniqueCalculations": unique
-            }
-        }
+                "uniqueCalculations": unique,
+            },
+        },
     }
     print(rValue)
     return rValue
 
 
 @shared_task
-def siteAud(group_id,url):
-
+def siteAud(group_id, url):
     task_id = siteAud.request.id
 
     custom_settings = {
         "USER_AGENT": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3",
         "LOG_FILE": "logs/crawlLogs/output_file.log",
-        "CLOSESPIDER_PAGECOUNT": 1000
+        "CLOSESPIDER_PAGECOUNT": 1000,
     }
     try:
         if os.path.exists("logs/crawlLogs/output_file.log"):
@@ -587,18 +592,17 @@ def siteAud(group_id,url):
     except PermissionError:
         return False
     crawlDf = crawl(
-            url,
-            output_file="output/seo_crawler.jl",
-            follow_links=True,
-            custom_settings=custom_settings,
-        )
-    
+        url,
+        output_file="output/seo_crawler.jl",
+        follow_links=True,
+        custom_settings=custom_settings,
+    )
+
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id, {"type": "task_completed", "result": "Crawling Completed"}
     )
-    logger.info("Socket Id"+group_id+" SEO crawl one complete")
-    pages = pd.read_json("output/seo_crawler.jl",lines=True)
-
+    logger.info("Socket Id" + group_id + " SEO crawl one complete")
+    pages = pd.read_json("output/seo_crawler.jl", lines=True)
 
     url_list = crawlDf["url"]
     # print(url_list)
@@ -607,54 +611,51 @@ def siteAud(group_id,url):
     url_df = url_to_df(urls=url_list)
     # print(url_df)
 
-    robots_url = url_df["scheme"][0]+"://"+url_df["netloc"][0]+"/robots.txt"
+    robots_url = url_df["scheme"][0] + "://" + url_df["netloc"][0] + "/robots.txt"
     print(robots_url)
-    robotsTxtAn.delay(group_id,robots_url,url_list)
-
+    robotsTxtAn.delay(group_id, robots_url, url_list)
 
     # Review sitemap
-    sitemap_url = url_df["scheme"][0]+"://"+url_df["netloc"][0]+"/sitemap.xml"
+    sitemap_url = url_df["scheme"][0] + "://" + url_df["netloc"][0] + "/sitemap.xml"
     print(sitemap_url)
-    sitemapAna.delay(group_id,sitemap_url,url_list)
-    
+    sitemapAna.delay(group_id, sitemap_url, url_list)
+
     ## Creation of Columns based based on functionalities
 
     ### Word Count and text readability of the body text found in html generated content
-    pages['word_count'] = pages['body_text'].apply(get_word_count)
-    pages['readability'] = pages['body_text'].apply(text_readability)
+    pages["word_count"] = pages["body_text"].apply(get_word_count)
+    pages["readability"] = pages["body_text"].apply(text_readability)
 
-    ### Create a seperate column with list of keywords and list of stopwords 
-    pages['keywords'] = pages['body_text'].apply(extract_keywords)
-    keywords = pages['keywords'].sum()
+    ### Create a seperate column with list of keywords and list of stopwords
+    pages["keywords"] = pages["body_text"].apply(extract_keywords)
+    keywords = pages["keywords"].sum()
     keywords = dict(Counter(keywords))
-    
-    pages['common_words'] = pages["body_text"].apply(extract_stopwords)
-    common_words = pages['common_words'].sum()
-    common_words = dict(Counter(common_words))
 
+    pages["common_words"] = pages["body_text"].apply(extract_stopwords)
+    common_words = pages["common_words"].sum()
+    common_words = dict(Counter(common_words))
 
     # Get character counts of SEO desc , title
     pages["title"] = pages["title"].fillna(" ")
-    pages['title_length'] = pages['title'].apply(len)
-
+    pages["title_length"] = pages["title"].apply(len)
 
     pages["meta_desc"] = pages["meta_desc"].fillna(" ")
-    pages['desc_length'] = pages['meta_desc'].apply(len)
+    pages["desc_length"] = pages["meta_desc"].apply(len)
     meta_desc = pages["meta_desc"].describe()
     desc_length = pages["desc_length"].describe()
 
-    #check if canonical is equal to canonical link
-    pages['canonical'] = pages['canonical'].fillna(" ")
-    pages['canonical_link'] = pages['url'] == pages['canonical']
+    # check if canonical is equal to canonical link
+    pages["canonical"] = pages["canonical"].fillna(" ")
+    pages["canonical_link"] = pages["url"] == pages["canonical"]
 
     async_to_sync(channel_layer.group_send)(
-        "group_" + group_id, {"type": "crawlRead", "task_id": task_id,"task_name":"seoCrawler"}
+        "group_" + group_id,
+        {"type": "crawlRead", "task_id": task_id, "task_name": "seoCrawler"},
     )
 
     return {
-        "status":"success",
-        "result":{
-            
+        "status": "success",
+        "result": {
             "audit": {
                 "body": {
                     "wordCount": pages["word_count"],
@@ -662,11 +663,9 @@ def siteAud(group_id,url):
                     "keywords": keywords,
                     "commonWords": common_words,
                 },
-                "head":{
-                    # "meta_desc": 
-                }
+                "head": {
+                    # "meta_desc":
+                },
             }
-        }
+        },
     }
-
-

@@ -28,6 +28,9 @@ jobs:
           cd ~/django-advertools
           git pull origin main
           git status
+          source ~/django-advertools/venv/bin/activate
+          python manage.py collectstatic --no-input
           sudo systemctl restart daphne
           sudo systemctl restart gunicorn
           sudo supervisorctl restart celery
+

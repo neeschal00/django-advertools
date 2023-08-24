@@ -1,0 +1,300 @@
+    w.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/process.py", line 124, in start
+    self._popen = self._Popen(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/context.py", line 333, in _Popen
+    return Popen(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 24, in __init__
+    self._launch(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 72, in _launch
+    self.pid = os.fork()
+OSError: [Errno 12] Cannot allocate memory
+2023-08-22 14:21:07,666 CRITICAL celery.worker Unrecoverable error: OSError(12, 'Cannot allocate memory')
+Traceback (most recent call last):
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/worker/worker.py", line 203, in start
+    self.blueprint.start(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 365, in start
+    return self.obj.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/base.py", line 129, in start
+    self.on_start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/prefork.py", line 109, in on_start
+    P = self._pool = Pool(processes=self.limit,
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 463, in __init__
+    super().__init__(processes, *args, **kwargs)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1046, in __init__
+    self._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 480, in _create_worker_process
+    return super()._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1158, in _create_worker_process
+    w.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/process.py", line 124, in start
+    self._popen = self._Popen(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/context.py", line 333, in _Popen
+    return Popen(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 24, in __init__
+    self._launch(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 72, in _launch
+    self.pid = os.fork()
+OSError: [Errno 12] Cannot allocate memory
+2023-08-22 14:21:14,511 CRITICAL celery.worker Unrecoverable error: OSError(12, 'Cannot allocate memory')
+Traceback (most recent call last):
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/worker/worker.py", line 203, in start
+    self.blueprint.start(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 365, in start
+    return self.obj.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/base.py", line 129, in start
+    self.on_start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/prefork.py", line 109, in on_start
+    P = self._pool = Pool(processes=self.limit,
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 463, in __init__
+    super().__init__(processes, *args, **kwargs)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1046, in __init__
+    self._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 480, in _create_worker_process
+    return super()._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1158, in _create_worker_process
+    w.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/process.py", line 124, in start
+    self._popen = self._Popen(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/context.py", line 333, in _Popen
+    return Popen(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 24, in __init__
+    self._launch(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 72, in _launch
+    self.pid = os.fork()
+OSError: [Errno 12] Cannot allocate memory
+2023-08-22 14:21:21,199 CRITICAL celery.worker Unrecoverable error: OSError(12, 'Cannot allocate memory')
+Traceback (most recent call last):
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/worker/worker.py", line 203, in start
+    self.blueprint.start(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 365, in start
+    return self.obj.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/base.py", line 129, in start
+    self.on_start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/prefork.py", line 109, in on_start
+    P = self._pool = Pool(processes=self.limit,
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 463, in __init__
+    super().__init__(processes, *args, **kwargs)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1046, in __init__
+    self._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 480, in _create_worker_process
+    return super()._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1158, in _create_worker_process
+    w.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/process.py", line 124, in start
+    self._popen = self._Popen(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/context.py", line 333, in _Popen
+    return Popen(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 24, in __init__
+    self._launch(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 72, in _launch
+    self.pid = os.fork()
+OSError: [Errno 12] Cannot allocate memory
+2023-08-22 14:21:27,833 CRITICAL celery.worker Unrecoverable error: OSError(12, 'Cannot allocate memory')
+Traceback (most recent call last):
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/worker/worker.py", line 203, in start
+    self.blueprint.start(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 365, in start
+    return self.obj.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/base.py", line 129, in start
+    self.on_start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/prefork.py", line 109, in on_start
+    P = self._pool = Pool(processes=self.limit,
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 463, in __init__
+    super().__init__(processes, *args, **kwargs)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1046, in __init__
+    self._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 480, in _create_worker_process
+    return super()._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1158, in _create_worker_process
+    w.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/process.py", line 124, in start
+    self._popen = self._Popen(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/context.py", line 333, in _Popen
+    return Popen(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 24, in __init__
+    self._launch(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 72, in _launch
+    self.pid = os.fork()
+OSError: [Errno 12] Cannot allocate memory
+2023-08-22 14:21:34,569 CRITICAL celery.worker Unrecoverable error: OSError(12, 'Cannot allocate memory')
+Traceback (most recent call last):
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/worker/worker.py", line 203, in start
+    self.blueprint.start(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 365, in start
+    return self.obj.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/base.py", line 129, in start
+    self.on_start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/prefork.py", line 109, in on_start
+    P = self._pool = Pool(processes=self.limit,
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 463, in __init__
+    super().__init__(processes, *args, **kwargs)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1046, in __init__
+    self._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 480, in _create_worker_process
+    return super()._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1158, in _create_worker_process
+    w.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/process.py", line 124, in start
+    self._popen = self._Popen(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/context.py", line 333, in _Popen
+    return Popen(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 24, in __init__
+    self._launch(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 72, in _launch
+    self.pid = os.fork()
+OSError: [Errno 12] Cannot allocate memory
+2023-08-22 14:21:41,191 CRITICAL celery.worker Unrecoverable error: OSError(12, 'Cannot allocate memory')
+Traceback (most recent call last):
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/worker/worker.py", line 203, in start
+    self.blueprint.start(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 365, in start
+    return self.obj.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/base.py", line 129, in start
+    self.on_start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/prefork.py", line 109, in on_start
+    P = self._pool = Pool(processes=self.limit,
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 463, in __init__
+    super().__init__(processes, *args, **kwargs)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1046, in __init__
+    self._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 480, in _create_worker_process
+    return super()._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1158, in _create_worker_process
+    w.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/process.py", line 124, in start
+    self._popen = self._Popen(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/context.py", line 333, in _Popen
+    return Popen(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 24, in __init__
+    self._launch(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 72, in _launch
+    self.pid = os.fork()
+OSError: [Errno 12] Cannot allocate memory
+2023-08-22 14:21:47,881 CRITICAL celery.worker Unrecoverable error: OSError(12, 'Cannot allocate memory')
+Traceback (most recent call last):
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/worker/worker.py", line 203, in start
+    self.blueprint.start(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 365, in start
+    return self.obj.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/base.py", line 129, in start
+    self.on_start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/prefork.py", line 109, in on_start
+    P = self._pool = Pool(processes=self.limit,
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 463, in __init__
+    super().__init__(processes, *args, **kwargs)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1046, in __init__
+    self._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 480, in _create_worker_process
+    return super()._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1158, in _create_worker_process
+    w.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/process.py", line 124, in start
+    self._popen = self._Popen(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/context.py", line 333, in _Popen
+    return Popen(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 24, in __init__
+    self._launch(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 72, in _launch
+    self.pid = os.fork()
+OSError: [Errno 12] Cannot allocate memory
+2023-08-22 14:21:54,634 CRITICAL celery.worker Unrecoverable error: OSError(12, 'Cannot allocate memory')
+Traceback (most recent call last):
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/worker/worker.py", line 203, in start
+    self.blueprint.start(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 365, in start
+    return self.obj.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/base.py", line 129, in start
+    self.on_start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/prefork.py", line 109, in on_start
+    P = self._pool = Pool(processes=self.limit,
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 463, in __init__
+    super().__init__(processes, *args, **kwargs)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1046, in __init__
+    self._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 480, in _create_worker_process
+    return super()._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1158, in _create_worker_process
+    w.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/process.py", line 124, in start
+    self._popen = self._Popen(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/context.py", line 333, in _Popen
+    return Popen(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 24, in __init__
+    self._launch(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 72, in _launch
+    self.pid = os.fork()
+OSError: [Errno 12] Cannot allocate memory
+2023-08-22 14:22:01,598 CRITICAL celery.worker Unrecoverable error: OSError(12, 'Cannot allocate memory')
+Traceback (most recent call last):
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/worker/worker.py", line 203, in start
+    self.blueprint.start(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 365, in start
+    return self.obj.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/base.py", line 129, in start
+    self.on_start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/prefork.py", line 109, in on_start
+    P = self._pool = Pool(processes=self.limit,
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 463, in __init__
+    super().__init__(processes, *args, **kwargs)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1046, in __init__
+    self._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 480, in _create_worker_process
+    return super()._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1158, in _create_worker_process
+    w.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/process.py", line 124, in start
+    self._popen = self._Popen(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/context.py", line 333, in _Popen
+    return Popen(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 24, in __init__
+    self._launch(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 72, in _launch
+    self.pid = os.fork()
+OSError: [Errno 12] Cannot allocate memory
+2023-08-22 14:22:08,596 CRITICAL celery.worker Unrecoverable error: OSError(12, 'Cannot allocate memory')
+Traceback (most recent call last):
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/worker/worker.py", line 203, in start
+    self.blueprint.start(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/bootsteps.py", line 365, in start
+    return self.obj.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/base.py", line 129, in start
+    self.on_start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/prefork.py", line 109, in on_start
+    P = self._pool = Pool(processes=self.limit,
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 463, in __init__
+    super().__init__(processes, *args, **kwargs)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1046, in __init__
+    self._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/celery/concurrency/asynpool.py", line 480, in _create_worker_process
+    return super()._create_worker_process(i)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/pool.py", line 1158, in _create_worker_process
+    w.start()
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/process.py", line 124, in start
+    self._popen = self._Popen(self)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/context.py", line 333, in _Popen
+    return Popen(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 24, in __init__
+    self._launch(process_obj)
+  File "/home/tactical/django-advertools/venv/lib/python3.9/site-packages/billiard/popen_fork.py", line 72, in _launch
+    self.pid = os.fork()
+OSError: [Errno 12] Cannot allocate memory

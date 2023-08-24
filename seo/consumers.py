@@ -26,12 +26,29 @@ class TaskCompletionConsumer(AsyncWebsocketConsumer):
         await self.send(
             text_data=json.dumps({"type": "task_completed", "result": result})
         )
-
-    async def task_started(self, event):
-        start = event["start"]
+    
+    async def task_failed(self, event):
+        result = event["result"]
 
         # Send task completion notification to the client
-        await self.send(text_data=json.dumps({"type": "task_started", "start": start}))
+        await self.send(
+            text_data=json.dumps({"type": "task_failed", "result": result})
+        )
+
+    async def crawl_failed(self, event):
+        result = event["result"]
+
+        # Send task completion notification to the client
+        await self.send(
+            text_data=json.dumps({"type": "crawl_failed", "result": result})
+        )
+    
+
+    async def task_started(self, event):
+        result = event["result"]
+
+        # Send task completion notification to the client
+        await self.send(text_data=json.dumps({"type": "task_started", "result": result}))
 
     async def data_converted(self, event):
         result = event["result"]

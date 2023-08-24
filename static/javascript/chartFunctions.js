@@ -1,3 +1,48 @@
+
+export function createLineChart(elementId, title, data, label, labels=null){
+  var ctx = document.getElementById(elementId).getContext("2d");
+
+  if (!labels){
+    labels = Array.from({ length: data.length }, (_, i) => i + 1);
+  }
+  let bgColor = generateRandomColors(1)[0];
+  var chartData = {
+    labels: labels,
+    datasets: [
+      {
+        label: label,
+        backgroundColor: bgColor,
+        data: data,
+      }
+    ],
+  };
+
+  var chartOptions = {
+    responsive: true,
+    
+    plugins: {
+      title: {
+        display: true,
+        text: title,
+        font: {
+          size: 18,
+        },
+      },
+    },
+  };
+
+  var myChart = new Chart(ctx, {
+    type: "line",
+    data: chartData,
+    options: chartOptions,
+  });
+}
+
+
+
+
+
+
 export function dualLineChart(title, data1, data2, label1, label2) {
   var ctx = document.getElementById("lineChart").getContext("2d");
 

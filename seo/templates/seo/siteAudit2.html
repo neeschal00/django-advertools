@@ -15,7 +15,7 @@
                 <form method="post" onsubmit="openLoader()">
                     {% csrf_token %}
                     <fieldset class="form-group">
-                        <legend class="border-bottom mb-4 main-t">SEO Analyzer</legend>
+                        <legend class="border-bottom mb-4 main-t">Site Audit</legend>
                         {{ form|crispy }}
                     </fieldset>
                     <div class="form-group">
@@ -74,13 +74,14 @@
 
             <div class="col-md-10 mt-3">
                 <canvas id="lineChart" class="mt-2"></canvas>
-              </div>
+            </div>
+            <div class="col-md-10 mt-3">
+                <canvas id="lineChart1" class="mt-2"></canvas>
+            </div>
             <div class="col-md-10 col-sm-12 mt-2 mb-2" style="max-height: 320px; overflow-y: scroll;">
                 <ul class="list-group list-group-numbered" id="keywords-view"></ul>
             </div>
-            <div class="col-md-10 col-sm-12 mt-2 mb-2" style="max-height: 320px; overflow-y: scroll;">
-                <ul class="list-group list-group-numbered" id="common-view"></ul>
-            </div>
+            
             <div class="col-md-12 mt-2" id="metaAnalysis" style="max-height: 320px; overflow-y: scroll;">
                 <div class="row mt-2 justify-content-between">
                     <div class="col-md-6" id="meta-overview" style="max-height: 320px; overflow-y: scroll;"></div>
