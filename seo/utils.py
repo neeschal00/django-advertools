@@ -7,6 +7,8 @@ from advertools import stopwords
 
 
 import nltk
+from nltk.tokenize import word_tokenize
+# from nltk.corpus import stopwords
 
 
 def delete_existing_files():
@@ -35,6 +37,9 @@ def extract_words(text):
     words = re.findall(r"\b\w+\b", text)
     return words
 
+# def get_word_count(text):
+#     words = word_tokenize(text.lower())
+#     return len(words)
 
 def get_word_count(text):
     words = re.findall(r"\b\w+\b", text)
@@ -54,7 +59,16 @@ def extract_keywords(body_text):
     keywords = body_text.split()
     # keywords = dict(Counter(keywords))
     # keywords = sorted(keywords.items(),key=lambda x: x[1])[::-1]
+
+    # Convert the text to lowercase and tokenize
+    # words = word_tokenize(body_text.lower())
+    
+    # Remove stopwords
+    # filtered_words = [word for word in words if word not in stopwords.words("english")]
+    
+
     return keywords
+    # return filtered_words
 
 
 def text_readability(text):

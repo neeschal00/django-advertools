@@ -1,7 +1,16 @@
 // Replace <task_id> with the actual value
 
-import { createToast, getCookie } from "./utils.js"
-import { analysisCrawlLogs, analysisContent, analysisTitle, analysisMetaDescription, analysisAudit, analysisBodyText, analysisSiteMap, analysisRobotsTxt } from "./processJson.js";
+import { createToast, getCookie } from "./utils.js";
+import {
+  analysisCrawlLogs,
+  analysisContent,
+  analysisTitle,
+  analysisMetaDescription,
+  analysisAudit,
+  analysisBodyText,
+  analysisSiteMap,
+  analysisRobotsTxt,
+} from "./processJson.js";
 
 function fetchDataAndProcess(url, successCallback, errorCallback) {
   fetch(url)
@@ -10,21 +19,24 @@ function fetchDataAndProcess(url, successCallback, errorCallback) {
     .catch(errorCallback);
 }
 
-
 var random_id = getCookie("socket_id");
-console.log("Socket Id is from sock.js "+ random_id);
+console.log("Socket Id is from sock.js " + random_id);
 
-var isSecure = window.location.protocol === 'https:';
-console.log("Is secutr "+ isSecure);
+var isSecure = window.location.protocol === "https:";
+console.log("Is secutr " + isSecure);
 if (random_id) {
   // Create the WebSocket connection
-  
+
   // Create the WebSocket connection
-  var socketProtocol = (window.location.protocol === "https:") ? "wss:" : "ws:";
-  var socketURL = socketProtocol + "//" + window.location.host + "/ws/group/" + random_id + "/";
-  var socket = new WebSocket(
-    socketURL
-  );
+  var socketProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  var socketURL =
+    socketProtocol +
+    "//" +
+    window.location.host +
+    "/ws/group/" +
+    random_id +
+    "/";
+  var socket = new WebSocket(socketURL);
   let toast = document.getElementById("liveToast");
   // Event handler for successful connection
   socket.onopen = function (event) {
@@ -36,43 +48,60 @@ if (random_id) {
     var message = JSON.parse(event.data);
     console.log(message);
     if (message.task_id) {
-      console.log("Task id: "+message.task_id);
+      console.log("Task id: " + message.task_id);
     }
     // console.log("Received message:", message);
 
-    if (message.type === "analysisComplete" && message.task_name === "crawlLogs") {
+    if (
+      message.type === "analysisComplete" &&
+      message.task_name === "crawlLogs"
+    ) {
       console.log("Crawl logs Analysis complete");
-      
+
       var url = "/api/analysis/" + message.task_id + "/";
       console.log(url);
-      fetchDataAndProcess(url, analysisCrawlLogs, (error) => console.error("Error:", error));
+      fetchDataAndProcess(url, analysisCrawlLogs, (error) =>
+        console.error("Error:", error)
+      );
     }
 
-
-    if (message.type === "analysisComplete" && message.task_name === "contentAnalysis") {
+    if (
+      message.type === "analysisComplete" &&
+      message.task_name === "contentAnalysis"
+    ) {
       console.log("Analysis complete");
-      
+
       var url = "/api/analysis/" + message.task_id + "/";
       // console.log(url);
-      fetchDataAndProcess(url, analysisContent,(error) => console.error("Error:", error));
-      
+      fetchDataAndProcess(url, analysisContent, (error) =>
+        console.error("Error:", error)
+      );
     }
 
-    if (message.type === "analysisComplete" && message.task_name === "titleAnalysis") {
+    if (
+      message.type === "analysisComplete" &&
+      message.task_name === "titleAnalysis"
+    ) {
       console.log("Analysis complete");
       // console.log(message.task_id);
       var url = "/api/analysis/" + message.task_id + "/";
       // console.log(url);
-      fetchDataAndProcess(url, analysisTitle, (error) => console.error("Error:", error))
+      fetchDataAndProcess(url, analysisTitle, (error) =>
+        console.error("Error:", error)
+      );
     }
 
-
-    if (message.type === "analysisComplete" && message.task_name === "metaDescripton") {
+    if (
+      message.type === "analysisComplete" &&
+      message.task_name === "metaDescripton"
+    ) {
       console.log("Analysis complete");
       // console.log(message.task_id);
       var url = "/api/analysis/" + message.task_id + "/";
       // console.log(url);
-      fetchDataAndProcess(url, analysisMetaDescription, (error) => console.error("Error:", error));
+      fetchDataAndProcess(url, analysisMetaDescription, (error) =>
+        console.error("Error:", error)
+      );
     }
 
     if (message.type === "analysisComplete" && message.task_name === "audit") {
@@ -80,33 +109,53 @@ if (random_id) {
       document.getElementById("loadingModal").style.display = "none";
       var url = "/api/analysis/" + message.task_id + "/";
 
-      fetchDataAndProcess(url, analysisAudit,(error)=> console.log("Error:", error));
+      setTimeout(() => {
+        fetchDataAndProcess(url, analysisAudit, (error) =>
+          console.log("Error:", error)
+        );
+      }, 3000);
     }
 
-    if (message.type === "analysisComplete" && message.task_name === "bodyTextAnalysis") {
+    if (
+      message.type === "analysisComplete" &&
+      message.task_name === "bodyTextAnalysis"
+    ) {
       console.log("Body Text Analysis complete");
-      document.getElementById("loadingModal").style.display = "none";
-      var url = "/api/analysis/" + message.task_id + "/";
 
-      fetchDataAndProcess(url, analysisBodyText,(error)=> console.log("Error:", error));
+      document.getElementById("loadingChart").style.display = "none";
+      var url = "/api/analysis/" + message.task_id + "/";
+      setTimeout(() => {
+        fetchDataAndProcess(url, analysisBodyText, (error) =>
+          console.log("Error:", error)
+        );
+      }, 3000);
     }
-    
-    if (message.type === "analysisComplete" && message.task_name === "SitemapAnalysis") {
+
+    if (
+      message.type === "analysisComplete" &&
+      message.task_name === "SitemapAnalysis"
+    ) {
       console.log("Sitemap txt analysis");
       // console.log(message.task_id);
       var url = "/api/result/" + message.task_id + "/";
       console.log(url);
 
-      fetchDataAndProcess(url,analysisSiteMap,(error)=> console.log("Error:", error));
-      
+      fetchDataAndProcess(url, analysisSiteMap, (error) =>
+        console.log("Error:", error)
+      );
     }
 
-    if (message.type === "analysisComplete" && message.task_name === "RobotsTextAnalysis") {
+    if (
+      message.type === "analysisComplete" &&
+      message.task_name === "RobotsTextAnalysis"
+    ) {
       console.log("Crawl Read");
       // console.log(message.task_id);
       var url = "/api/result/" + message.task_id + "/";
       console.log(url);
-      fetchDataAndProcess(url, analysisRobotsTxt,(error)=> console.log("Error:", error));
+      fetchDataAndProcess(url, analysisRobotsTxt, (error) =>
+        console.log("Error:", error)
+      );
     }
 
     if (message.type === "crawlRead") {
@@ -117,13 +166,12 @@ if (random_id) {
       fetch(url)
         .then((response) => response.json())
         .then((data) => {
-
-          if (message.task_name == "serpCrawl"){
+          if (message.task_name == "serpCrawl") {
             const element = document.getElementById("testResp");
             element.innerHTML = data.result.crawlDf;
             applyDataTablesFormatting(element);
           }
-          if(message.task_name == "seoCrawler"){
+          if (message.task_name == "seoCrawler") {
             console.log(data);
             const tableElem = document.getElementById("tbody");
 
@@ -131,15 +179,15 @@ if (random_id) {
             const headingKeys = Object.keys(headingData);
 
             htmlCont = "";
-            headingKeys.forEach(function(heading, index) {
+            headingKeys.forEach(function (heading, index) {
               let names = headingData[heading];
-              names.forEach(function(headingName,index){
+              names.forEach(function (headingName, index) {
                 htmlCont += `
                 <tr>
                   <th scope="row">${heading}</th>
                   <td>${headingName}</td>
                 </tr>
-                `
+                `;
               });
             });
 
@@ -161,12 +209,8 @@ if (random_id) {
                       </div>
                     </div>
                 </div>
-            `
-
-
-
+            `;
           }
-          
         })
 
         .catch((error) => {
@@ -174,7 +218,7 @@ if (random_id) {
         });
     }
     if (message.type === "getKeywords") {
-      console.log(message.result)
+      console.log(message.result);
       console.log("Analysis complete");
 
       var url = "/api/keywords/" + message.task_id + "/";
@@ -183,8 +227,8 @@ if (random_id) {
         .then((response) => response.json())
         .then((data) => {
           console.log(data.status);
-          
-          if(data.status === "success"){
+
+          if (data.status === "success") {
             const result = data.keywords;
             // console.log(result);
             const firstTwe = result.slice(0, 20);
@@ -194,10 +238,14 @@ if (random_id) {
             // console.log(sortedData);
             const element = document.getElementById("keywords-view");
             html = '<h3 class="text-secondary fw-bold">Keywords</h3>';
-            for (var value in firstTwe){
+            for (var value in firstTwe) {
               // console.log(value);
-              html += `<li class="list-group-item">${result[value][0]} : ${result[value][1]} <span style="float:right;">See in <a class="text-end text-primary text-decoration-none" href="https://trends.google.com/trends/explore?date=now%201-d&geo=US&q=${result[value][0].trim()}&hl=en" target="_blank">Google Trends</a></span></li>`;
-            } 
+              html += `<li class="list-group-item">${result[value][0]} : ${
+                result[value][1]
+              } <span style="float:right;">See in <a class="text-end text-primary text-decoration-none" href="https://trends.google.com/trends/explore?date=now%201-d&geo=US&q=${result[
+                value
+              ][0].trim()}&hl=en" target="_blank">Google Trends</a></span></li>`;
+            }
             element.innerHTML = html;
             document.getElementById("loadingModal").style.display = "none";
             document.querySelector('button[type="submit"]').disabled = false;
@@ -213,38 +261,40 @@ if (random_id) {
     // }
 
     if (message.type === "task_completed") {
-      createToast("","Task Complete",message.result)
+      createToast("", "Task Complete", message.result);
     }
 
     if (message.type === "task_started") {
-      console.log("Crawling Started")
-      createToast("","Task started",message.result);
+      console.log("Crawling Started");
+      createToast("", "Task started", message.result);
     }
 
     if (message.type === "data_converted") {
-      console.log("Report Generated")
-      createToast("","Profiling Report Completed",message.result)
+      console.log("Report Generated");
+      createToast("", "Profiling Report Completed", message.result);
     }
 
     if (message.type === "report_failed") {
-      createToast("error","Profiling Report Failed",message.result)
+      createToast("error", "Profiling Report Failed", message.result);
       var profileBtn = document.getElementById("profile-report");
       profileBtn.disabled = True;
     }
 
     if (message.type === "crawl_failed") {
-      createToast("error","Crawling The site Failed",message.result);
+      createToast("error", "Crawling The site Failed", message.result);
     }
 
     if (message.type === "task_failed") {
-      createToast("error","Task Failed",message.result);
-    }
-    
-    if (message.type === "analysisFailed" && message.task_name==="bodyTextAnalysis") {
-      createToast("error","bodyTextAnalysis Failed",message.result);
+      createToast("error", "Task Failed", message.result);
     }
 
-    
+    if (
+      message.type === "analysisFailed" &&
+      message.task_name === "bodyTextAnalysis"
+    ) {
+      createToast("error", "bodyTextAnalysis Failed", message.result);
+    }
+
     // Handle the received message as needed
   };
 

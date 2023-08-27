@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "django_celery_results",
     "django.contrib.staticfiles",
 ]
 
@@ -243,7 +244,8 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
-
+CELERY_CACHE_BACKEND = 'django-cache'
+CELERY_RESULT_EXTENDED = True
 
 # set the celery timezone
 CELERY_TIMEZONE = "UTC"

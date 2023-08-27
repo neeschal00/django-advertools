@@ -2,12 +2,15 @@ from celery import shared_task
 from celery.exceptions import Retry
 import logging
 import os
-from ydata_profiling import ProfileReport
+
+# import time
 from django.core.cache import cache
 from collections import Counter
+from memory_profiler import profile
 
 import pandas as pd
 import re
+import tracemalloc
 from advertools import (
     crawl_headers,
     crawl,
@@ -43,11 +46,12 @@ logger = logging.getLogger(__name__)
 @shared_task
 def robotsAnalysis(group_id, robots_url, url_dict):
     task_id = robotsAnalysis.request.id
-    logger.info("Robots Analysis started")
+    tracemalloc.start()
+    logger.info("Robots Analysis started with memory "+ str())
     print(task_id)
     pages = pd.DataFrame({"url": url_dict})
     try:
-        robots_df = robotstxt_to_df(robots_url)
+        # robots_df = robotstxt_to_df(robots_url)
         test_df = robotstxt_test(
             robots_url,
             user_agents=[
@@ -88,11 +92,12 @@ def robotsAnalysis(group_id, robots_url, url_dict):
                 "count": len(blocked_pages),
                 "totalTested": len(test_df),
             }
-        }
+        },
     }
 
 
 @shared_task
+
 def sitemapAnalysis(group_id, robots_url, url_dict):
     task_id = sitemapAnalysis.request.id
     pages = pd.DataFrame({"url": url_dict})
@@ -102,12 +107,14 @@ def sitemapAnalysis(group_id, robots_url, url_dict):
         sitemap_df = sitemap_to_df(robots_url)
         missing_in_sitemap = set(pages["url"]) - set(sitemap_df["loc"])
         missing_in_crawl = set(sitemap_df["loc"]) - set(pages["url"])
-        
 
     except ValueError:
         try:
             sitemap_df = sitemap_df(robots_url.replace("robots.txt", "sitemap.xml"))
+            missing_in_sitemap = set(pages["url"]) - set(sitemap_df["loc"])
+            missing_in_crawl = set(sitemap_df["loc"]) - set(pages["url"])
         except Exception as e:
+            print(e)
             async_to_sync(channel_layer.group_send)(
                 "group_" + group_id,
                 {
@@ -118,7 +125,7 @@ def sitemapAnalysis(group_id, robots_url, url_dict):
                 },
             )
             return {"status": "failed", "result": {"message": e}}
-        
+
     overview = sitemap_df["loc"].describe().to_dict()
 
     async_to_sync(channel_layer.group_send)(
@@ -143,7 +150,7 @@ def sitemapAnalysis(group_id, robots_url, url_dict):
                     "count": len(missing_in_crawl),
                 },
             },
-            "overview": overview
+            "overview": overview,
         },
     }
 
@@ -153,8 +160,10 @@ def urlAnalysis(group_id, url_dict):
     task_id = urlAnalysis.request.id
 
 
+"""
 # @shared_task(bind=True, retry_kwargs={'max_retries': 3, 'countdown': 6})
 @shared_task
+@profile
 def bodyTextAnalysis(group_id, body_text):
     task_id = bodyTextAnalysis.request.id
 
@@ -166,7 +175,7 @@ def bodyTextAnalysis(group_id, body_text):
         # print(task_id)
 
         # fill na with string
-        pages["body_text"] = pages["body_text"].fillna(" ")
+        pages["body_text"].fillna(" ",inplace=True)
 
         ### Word Count and text readability of the body text found in html generated content
         pages["word_count"] = pages["body_text"].apply(get_word_count)
@@ -190,8 +199,12 @@ def bodyTextAnalysis(group_id, body_text):
                 "result": str(e)
             }
         )
+        return {
+            "status": "error",
+            "result": "Analysis failed"
+        }
 
-
+    # time.sleep(1.2)
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id,
         {
@@ -215,6 +228,81 @@ def bodyTextAnalysis(group_id, body_text):
     
     # except MemoryError as e:
     #     raise Retry(exc=e)
+"""
+
+
+@shared_task
+def bodyTextAnalysis(group_id, body_text):
+    task_id = bodyTextAnalysis.request.id
+    print(type(body_text))
+    try:
+        chunk_size = 100  # Adjust the chunk size based on your needs
+        num_chunks = len(body_text) // chunk_size + 1
+        chunks = [
+            body_text[i * chunk_size : (i + 1) * chunk_size]
+            for i in range(num_chunks)
+        ]
+
+        all_keywords = []
+        all_word_count = []
+        all_readability = []
+
+        for chunk in chunks:
+            chunk_pages = pd.DataFrame({"body_text": chunk})
+            chunk_pages["body_text"].fillna(" ",inplace=True)
+
+            chunk_pages["word_count"] = chunk_pages["body_text"].apply(get_word_count)
+            chunk_pages["readability"] = chunk_pages["body_text"].apply(text_readability)
+            chunk_pages["keywords"] = chunk_pages["body_text"].apply(extract_keywords)
+
+            # chunk_pages.to_json("name" + str(index) + ".json")
+            chunk_keywords = chunk_pages["keywords"].sum()
+            
+            all_keywords.extend(chunk_keywords)
+            all_word_count.extend(chunk_pages["word_count"])
+            all_readability.extend(chunk_pages["readability"])
+
+        keywords = dict(Counter(all_keywords).most_common())
+        # print(keywords)
+        # print(all_readability)
+        # print(all_word_count)
+
+    except Exception as e:
+        print(e)
+
+        async_to_sync(channel_layer.group_send)(
+            "group_" + group_id,
+            {
+                "type": "analysisFailed",
+                "task_id": task_id,
+                "task_name": "bodyTextAnalysis",
+                "result": str(e),
+            },
+        )
+        return {
+            "status": "error",
+            "result": "Analysis failed",
+        }
+
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id,
+        {
+            "type": "analysisComplete",
+            "task_id": task_id,
+            "task_name": "bodyTextAnalysis",
+        },
+    )
+
+    return {
+        "status": "success",
+        "result": {
+            "body": {
+                "wordCount": all_word_count,
+                "readability": all_readability,
+                "keywords": keywords,
+            },
+        },
+    }
 
 
 @shared_task
@@ -233,9 +321,9 @@ def audit(group_id, url):
             os.remove("output/seo_crawler.jl")
     except PermissionError:
         return False
-    
+
     try:
-        print("Crawling")
+        # print("Crawling")
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id, {"type": "task_started", "result": "Crawling started"}
         )
@@ -246,7 +334,6 @@ def audit(group_id, url):
             custom_settings=custom_settings,
         )
     except Exception as e:
-        
         async_to_sync(channel_layer.group_send)(
             "group_" + group_id, {"type": "crawl_failed", "result": str(e)}
         )
@@ -256,18 +343,36 @@ def audit(group_id, url):
         "group_" + group_id, {"type": "task_completed", "result": "Crawling Completed"}
     )
 
-
     logger.info("Socket Id" + group_id + " SEO crawl one complete for task " + task_id)
-    pages = pd.read_json("output/seo_crawler.jl", lines=True)
+    columns_to_select =  [
+        "url",
+        "body_text",
+        "download_latency",
+        "size",
+        "status",
+        "title",
+        "meta_desc",
+        "canonical",
+    ]
+    pages = pd.read_json(
+        "output/seo_crawler.jl",
+        dtype={
+            "status":"int32",
+            # "url": pd.SparseDtype("string", fill_value=""),
+            # "body_text": pd.SparseDtype("string", fill_value=""),
+            # "title": pd.SparseDtype("string", fill_value=""),
+            # "meta_desc": pd.SparseDtype("string", fill_value=""),
+            # "canonical": pd.SparseDtype("string", fill_value="")
+        },
+        lines=True,
+    )[columns_to_select]
 
     url_list = pages["url"]
-    
 
     url_df = url_to_df(url_list)
     # print(url_df)
 
     robots_url = url_df["scheme"][0] + "://" + url_df["netloc"][0] + "/robots.txt"
-    
 
     url_dict = url_list.to_dict()
     # url_dict = {"url": url_dict}
@@ -277,20 +382,22 @@ def audit(group_id, url):
     sitemapAnalysis.delay(group_id, robots_url, url_dict)
 
     ## Creation of Columns based based on functionalities
+
+    # if len(url_list) > 900:
+
+    #  async_to_sync(channel_layer.group_send)(
+    #     "group_" + group_id,
+    #     {"type": "analysisFailed", "task_id": task_id, "task_name": "audit","result":"Too many urls to process fo body"},
+    # )
+
+    # else:
+
+    body_text = pages["body_text"]
+    # body_text = body_text.to_dict()
+    body_text = body_text.to_list()
     
-    if len(url_list) > 900:
-
-         async_to_sync(channel_layer.group_send)(
-            "group_" + group_id,
-            {"type": "analysisFailed", "task_id": task_id, "task_name": "audit","result":"Too many urls to process fo body"},
-        )
-
-    else:
-
-        body_text = pages["body_text"]
-        body_text = body_text.to_dict()
-        # body_text = {"body_text": body_text}
-        bodyTextAnalysis.delay(group_id, body_text)
+    # body_text = {"body_text": body_text}
+    bodyTextAnalysis.delay(group_id, body_text)
 
     latency = pages["download_latency"].describe().to_dict()
     # print(latency)
@@ -300,46 +407,39 @@ def audit(group_id, url):
 
     try:
         # Get character counts of SEO desc , title
-        pages["title"] = pages["title"].fillna(" ")
+        pages["title"].fillna(" ",inplace=True)
         pages["title_length"] = pages["title"].apply(len)
 
         missing_title = pages[(pages["title"].isna())]["url"].to_list()
         title_length = pages["title_length"].describe().to_dict()
 
         title_json = {
-                        "length_overview": title_length,
-                        "missing": {"urls": missing_title, "count": len(missing_title)},
-                    }
-    except Exception as e:
-        title_json = {
-            "Error": str(e)
+            "length_overview": title_length,
+            "missing": {"urls": missing_title, "count": len(missing_title)},
         }
-
-    
+    except Exception as e:
+        title_json = {"Error": str(e)}
 
     try:
-        pages["meta_desc"] = pages["meta_desc"].fillna(" ")
+        pages["meta_desc"].fillna(" ",inplace=True)
         pages["desc_length"] = pages["meta_desc"].apply(len)
 
         missing_meta_desc = pages[(pages["meta_desc"].isna())]["url"].to_list()
         desc_length = pages["desc_length"].describe().to_dict()
 
         meta_json = {
-                        "length_overview": desc_length,
-                        "missing": {
-                            "urls": missing_meta_desc,
-                            "count": len(missing_meta_desc),
-                        },
-                    }
-    except Exception as e:
-        meta_json = {
-            "Error": str(e)
+            "length_overview": desc_length,
+            "missing": {
+                "urls": missing_meta_desc,
+                "count": len(missing_meta_desc),
+            },
         }
-
+    except Exception as e:
+        meta_json = {"Error": str(e)}
     
     try:
         # check if canonical is equal to canonical link
-        pages["canonical"] = pages["canonical"].fillna(" ")
+        pages["canonical"].fillna(" ",inplace=True)
         missing_canonical = pages[(pages["canonical"].isna())]["url"].to_list()
         pages["canonical_link"] = pages["url"] == pages["canonical"]
         condition1 = pages["canonical_link"] == False
@@ -351,33 +451,24 @@ def audit(group_id, url):
         filtered_canonical_sim = pages[pages["canonical_link"] == True]
         filtered_canonical_sim = filtered_canonical_sim[["url", "canonical"]]
 
-        
-
         canonicalData = {
-                        "missing": {
-                            "urls": missing_canonical,
-                            "count": len(missing_canonical),
-                        },
-                        "similar": {
-                            "values": filtered_canonical_sim.reset_index(
-                                drop=True
-                            ).to_dict(),
-                            "count": len(filtered_canonical_sim),
-                        },
-                        "different": {
-                            "values": filtered_canonical.reset_index(
-                                drop=True
-                            ).to_dict(),
-                            "count": len(filtered_canonical),
-                        },
-                    }
-    except Exception as e:
-        canonicalData = {
-            "error": str(e)
+            "missing": {
+                "urls": missing_canonical,
+                "count": len(missing_canonical),
+            },
+            "similar": {
+                "values": filtered_canonical_sim.reset_index(drop=True).to_dict(),
+                "count": len(filtered_canonical_sim),
+            },
+            "different": {
+                "values": filtered_canonical.reset_index(drop=True).to_dict(),
+                "count": len(filtered_canonical),
+            },
         }
+    except Exception as e:
+        canonicalData = {"error": str(e)}
 
-
-    
+    del pages
 
     async_to_sync(channel_layer.group_send)(
         "group_" + group_id,
@@ -391,7 +482,7 @@ def audit(group_id, url):
                 "head": {
                     "meta_desc": meta_json,
                     "title": title_json,
-                    "canonical": canonicalData
+                    "canonical": canonicalData,
                 },
                 "links": {
                     "broken_links": broken_links,

@@ -73,7 +73,24 @@
             </div>
 
             <div class="col-md-10 mt-3">
-                <canvas id="lineChart" class="mt-2"></canvas>
+
+                <canvas id="lineChart" class="mt-2">
+                    {% if processing %}
+                        <div id="loadingChart" class="col-md-7 mt-2" style="display: block;">
+                            <div class="mt-2">
+                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                            Loading...
+                            </div>
+                        </div>
+                    {% else %}
+                        <div id="loadingChart" class="col-md-7 mt-2" style="display: none;">
+                            <div class="mt-2">
+                            <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+                            Loading...
+                            </div>
+                        </div>
+                    {% endif %}
+                </canvas>
             </div>
             <div class="col-md-10 mt-3">
                 <canvas id="lineChart1" class="mt-2"></canvas>
