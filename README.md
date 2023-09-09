@@ -176,7 +176,8 @@ sudo certbot --nginx -d advertools.com -d www.advertools.com
 Using systemd service and socket files allows a more robust way of starting and stopping the application server.
 The Gunicorn socket will be created at boot and will listen for connections. When a connection occurs, systemd will automatically start the Gunicorn process to handle the connection.
 
-the below is the gunicorn socket file
+> **_NOTE:_** Check For syntax error in the service/socket file.
+the below is the gunicorn socket file "gunicorn.socket"
 ```
 [Unit]
 Description=gunicorn socket
@@ -192,7 +193,7 @@ Next a systemd service file is created for config
 
 ```sudo nano /etc/systemd/system/gunicorn.service```
 
-> **_NOTE:_** Make Sure all the configurations and path match correctly.
+> **_NOTE:_** Make Sure all the configurations and path match correctly and check for the user in the service files
 Configure the path and project directory according to yours for eg. the below is for django advtools:
 ```
 [Unit]
@@ -374,9 +375,10 @@ In my case there was a service already running with daphne sock so had to stop t
 sudo journalctl -u daphne.service
 ```
 
-
+## Import to fix the venv in the file spider.py and header_spider existing in the venv bin 
 **While deploying should always verify and use the path accoridngly**
-Since the Advertools uses the Subprocess library and the project uses VirtualEnv. And based on the observed issues of running the scrapy via subprocess the changes in the library file itself was to be made. for ther function crawl and crawl_headers in **spider.py** and **header_spider.py**
+Since the Advertools uses the Subprocess library and the project uses VirtualEnv. And based on the observed issues of running the scrapy via subprocess the changes in the library file itself was to be made. for ther function crawl and crawl_headers in **/venv/lib/python3.9/site-packages/advertools/spider.py** and **/venv/lib/python3.9/site-packages/advertools/header_spider.py**
+
 
 
 ## Running CI/CD Pipeline:
@@ -430,6 +432,8 @@ HOST = "YOUR SERVER ADDRESS, example: 172.41.91.123"
 USERNAME = "YOUR SERVER USERNAME, example: daniel"
 PORT = "Your server Port, example:22"
 ```
+
+
 
 
 

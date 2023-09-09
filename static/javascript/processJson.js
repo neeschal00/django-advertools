@@ -291,3 +291,31 @@ export function analysisRobotsTxt(data) {
     document.getElementById("robots-test").innerHTML = robotsElem;
   }
 }
+
+
+
+// internal links analysis 
+export function analysisInternalLinks(data) {
+  console.log(data.status);
+
+  if (data.status === "success") {
+    const result = data.result;
+    // console.log(result);
+
+    createLineChart("lineChartInternal",
+      "Total Internal Links available in each urls",
+      result["overview"]["countPerUrl"],
+      "Internal Links Count",
+    );
+
+    const topTen = result["top10"];
+
+    createLineChart("lineChartInternalTop",
+      "Top 10 Mostly Repeated Internal Links",
+      Object.values(topTen),
+      "Repeated Times overall",
+      Object.keys(topTen),
+    );
+  }
+}
+

@@ -23,14 +23,16 @@ from .forms import (
     Crawl,
     SERPCrawl,
     SeoAnalyzeForm,
+    IndustrySEO,
 )
 import os
+import validators
 
 # from decouple import config
 from collections import Counter
 from .utils import *
 from .seoTasks.audit import audit
-
+from .seoTasks.industry import industry_research
 # from advertools import SERP_GOOG_VALID_VALS
 # from ydata_profiling import ProfileReport
 from django.contrib import messages
@@ -804,3 +806,20 @@ def siteAuditv2(request):
             )
     else:
         return render(request, "seo/siteAudit2.html", {"form": form})
+
+
+def industrySEO(request):
+    form = IndustrySEO()
+    if request.method == "POST":
+        form = IndustrySEO(request.POST)
+        if form.is_valid():
+            url_list = form.cleaned_data["urls"].split("\n")
+            group_id = request.COOKIES.get("socket_id", None)
+            url_list = [url for url in url_list if validators.url(url)]
+            # print(url_list)
+            industry_research.delay(group_id, url_list)
+            return render(
+                request, "seo/industrySeoresearch.html", {"form": form, "processing": True}
+            )
+    else:
+        return render(request, "seo/industrySeoresearch.html", {"form": form})

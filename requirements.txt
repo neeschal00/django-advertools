@@ -1,5 +1,6 @@
 a2wsgi==1.7.0
 advertools==0.13.2
+adviz==0.0.13
 amqp==5.1.1
 asgiref==3.6.0
 asttokens==2.2.1
@@ -37,6 +38,7 @@ dill==0.3.6
 Django==4.2
 django-appconf==1.0.5
 django-celery-beat==2.5.0
+django-celery-results==2.5.1
 django-cors-headers==3.14.0
 django-crispy-forms==2.0
 django-filter==23.1
@@ -73,6 +75,7 @@ lxml==4.9.2
 MarkupSafe==2.1.2
 matplotlib==3.7.1
 matplotlib-inline==0.1.6
+memory-profiler==0.61.0
 msgpack==1.0.5
 multimethod==1.9.1
 mypy-extensions==1.0.0
@@ -112,6 +115,7 @@ python-decouple==3.8
 python-dotenv==1.0.0
 pytz==2023.3
 PyWavelets==1.4.1
+pywin32==306
 PyYAML==6.0
 pyzmq==25.0.2
 queuelib==1.6.2

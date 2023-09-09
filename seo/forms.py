@@ -172,3 +172,15 @@ class SeoAnalyzeForm(forms.Form):
             attrs={"class": "form-control", "placeholder": "Enter the URL to analyze"}
         )
     )
+
+
+class IndustrySEO(forms.Form):
+    urls = forms.CharField(
+        widget=forms.Textarea(
+            attrs={
+                "rows": 5,
+                "cols": 40,
+                "placeholder": "Enter urls in new lines like  \nhttps://advertools.readthedocs.io/en/master/advertools.spider.html\nhttps://www.amazon.com\nhttps://twitter.com",
+            }
+        )
+    )

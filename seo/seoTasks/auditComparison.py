@@ -1,3 +1,4 @@
+
 from celery import shared_task
 from celery.exceptions import Retry
 import logging
@@ -15,6 +16,7 @@ from advertools import (
     crawl,
     robotstxt_test,
     sitemap_to_df,
+    crawllogs_to_df,
     url_to_df,
 )
 from asgiref.sync import async_to_sync
@@ -183,112 +185,24 @@ def internalLinksAnalysis(group_id,url_links):
         }
     }
 
-"""
-# @shared_task(bind=True, retry_kwargs={'max_retries': 3, 'countdown': 6})
-@shared_task
-@profile
-def bodyTextAnalysis(group_id, body_text):
-    task_id = bodyTextAnalysis.request.id
-
-    # try:
-    try:
-        pages = pd.DataFrame({"body_text": body_text})
-        # print(pages)
-        logger.info("Entered Body text analysis portion")
-        # print(task_id)
-
-        # fill na with string
-        pages["body_text"].fillna(" ",inplace=True)
-
-        ### Word Count and text readability of the body text found in html generated content
-        pages["word_count"] = pages["body_text"].apply(get_word_count)
-        pages["readability"] = pages["body_text"].apply(text_readability)
-
-        ### Create a seperate column with list of keywords and list of stopwords
-        pages["keywords"] = pages["body_text"].apply(extract_keywords)
-
-        keywords = pages["keywords"].sum()
-        keywords = dict(Counter(keywords).most_common())
-
-    except Exception as e:
-        print(e)
-
-        async_to_sync(channel_layer.group_send)(
-            "group_" + group_id,
-            {
-                "type": "analysisFailed",
-                "task_id": task_id,
-                "task_name": "bodyTextAnalysis",
-                "result": str(e)
-            }
-        )
-        return {
-            "status": "error",
-            "result": "Analysis failed"
-        }
-
-    # time.sleep(1.2)
-    async_to_sync(channel_layer.group_send)(
-        "group_" + group_id,
-        {
-            "type": "analysisComplete",
-            "task_id": task_id,
-            "task_name": "bodyTextAnalysis",
-        },
-    )
-
-    return {
-        "status": "success",
-        "result": {
-            "body": {
-                "wordCount": pages["word_count"].to_list(),
-                "readability": pages["readability"].to_list(),
-                "keywords": keywords,
-                # "commonWords": common_words,
-            }
-        },
-    }
-    
-    # except MemoryError as e:
-    #     raise Retry(exc=e)
-"""
-
 
 @shared_task
 def bodyTextAnalysis(group_id, body_text):
     task_id = bodyTextAnalysis.request.id
     print(type(body_text))
     try:
-        chunk_size = 100  # Adjust the chunk size based on your needs
-        num_chunks = len(body_text) // chunk_size + 1
-        chunks = [
-            body_text[i * chunk_size : (i + 1) * chunk_size]
-            for i in range(num_chunks)
-        ]
+        body_text = pd.read_json(body_text)
 
-        all_keywords = []
-        all_word_count = []
-        all_readability = []
+        body_text["body_text"].fillna(" ",inplace=True)
 
-        for chunk in chunks:
-            chunk_pages = pd.DataFrame({"body_text": chunk})
-            chunk_pages["body_text"].fillna(" ",inplace=True)
+        body_text["word_count"] = body_text["body_text"].apply(get_word_count)
+        body_text["readability"] = body_text["body_text"].apply(text_readability)
+        body_text["keywords"] = body_text["body_text"].apply(extract_keywords)
+        body_text["commonKeywords"] = body_text["keywords"].apply(lambda x: dict(Counter.most_common(x)))
+        # dict(Counter(all_keywords).most_common())
 
-            chunk_pages["word_count"] = chunk_pages["body_text"].apply(get_word_count)
-            chunk_pages["readability"] = chunk_pages["body_text"].apply(text_readability)
-            chunk_pages["keywords"] = chunk_pages["body_text"].apply(extract_keywords)
 
-            # chunk_pages.to_json("name" + str(index) + ".json")
-            chunk_keywords = chunk_pages["keywords"].sum()
-            
-            all_keywords.extend(chunk_keywords)
-            all_word_count.extend(chunk_pages["word_count"])
-            all_readability.extend(chunk_pages["readability"])
-
-        keywords = dict(Counter(all_keywords).most_common())
-        # print(keywords)
-        # print(all_readability)
-        # print(all_word_count)
+        response = body_text[["word_count","readability","keywords","commonKeywords"]]
 
     except Exception as e:
         # print(e)
@@ -318,12 +232,51 @@ def bodyTextAnalysis(group_id, body_text):
 
     return {
         "status": "success",
+        "result": response
+    }
+
+
+@shared_task
+def logsDataAnalysis(group_id):
+    task_id = logsDataAnalysis.request.id
+
+   
+    logsDf = crawllogs_to_df(logs_file_path="logs/crawlLogs/fullCrawl.log")
+
+    logger.info("Socket Id" + group_id + " Crawl Logs load complete")
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id, {"type": "task_completed", "result": "Crawl logs loaded"}
+    )
+
+
+    logsDf["url"].fillna(" ",inplace=True)
+    robots_df = logsDf.loc[logsDf['url'].str.endswith("robots.txt")]["url"]
+
+    robotsAnalysis.delay(group_id,robots_df)
+
+
+
+    logs_m = logsDf["message"].value_counts().to_json()
+    logs_s = logsDf["status"].value_counts().to_json()
+    logs_mi = logsDf["middleware"].value_counts().to_json()
+
+    logsDf = logsDf.reset_index(drop=True).to_html(
+        classes="table table-primary table-striped text-center", justify="center"
+    )
+
+    logger.info("Socket Id" + group_id + " Analysis of crawl logs complete")
+    async_to_sync(channel_layer.group_send)(
+        "group_" + group_id,
+        {"type": "analysisComplete", "task_id": task_id, "task_name": "crawlLogs"},
+    )
+
+    return {
+        "status": "completed",
         "result": {
-            "body": {
-                "wordCount": all_word_count,
-                "readability": all_readability,
-                "keywords": keywords,
-            },
+            "logs_message": logs_m,
+            "logs_status": logs_s,
+            "logs_mi": logs_mi,
+            "logs_dt": logsDf,
         },
     }
 
@@ -386,25 +339,17 @@ def audit(group_id, url):
         lines=True,
     )[columns_to_select]
 
-    url_list = pages["url"]
-
-    url_df = url_to_df(url_list[0])
-    # print(url_df)
-
-    robots_url = url_df["scheme"][0] + "://" + url_df["netloc"][0] + "/robots.txt"
-
-    url_list = url_list.to_list()
     
-    robotsAnalysis.delay(group_id, robots_url, url_list)
 
-    # sitemapAna.delay(group_id,sitemap_url,url_list)
-    sitemapAnalysis.delay(group_id, robots_url, url_list)
+    
+    logsDataAnalysis.delay(group_id)
 
     pages["links_url"].fillna(" ",inplace=True)
     internal_links = pages["links_url"].to_list()
 
     #internal_links analysis
     internalLinksAnalysis.delay(group_id,internal_links)
+
 
 
     ## Creation of Columns based based on functionalities
@@ -418,9 +363,9 @@ def audit(group_id, url):
 
     # else:
 
-    body_text = pages["body_text"]
+    body_text = pages[["body_text","url"]]
     # body_text = body_text.to_dict()
-    body_text = body_text.to_list()
+    body_text = body_text.to_json()
     
     # body_text = {"body_text": body_text}
     bodyTextAnalysis.delay(group_id, body_text)
@@ -520,3 +465,10 @@ def audit(group_id, url):
             }
         },
     }
+
+
+
+
+
+
+

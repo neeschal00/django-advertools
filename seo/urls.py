@@ -11,4 +11,5 @@ urlpatterns = [
     path("Analyze/", views.seoAnalysis, name="seo-analyze"),
     path("site-audit/", views.siteAudit, name="site-audit"),
     path("site-audit2/", views.siteAuditv2, name="site-audit2"),
+    path("industry/research", views.industrySEO, name="industry-seo"),
 ]
